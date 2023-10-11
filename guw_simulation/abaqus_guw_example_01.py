@@ -40,4 +40,5 @@ fe_model.nodes_per_wavelength = 10
 
 # Generate the associated Abaqus geometry and mesh
 fe_model.setup_in_abaqus()
+# test
 

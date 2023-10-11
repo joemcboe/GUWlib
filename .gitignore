@@ -1,0 +1,10 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+/guw_simulation/.idea/
+/guw_simulation/*
+!\guw_simulation/*.py
+!\guw_simulation/*.lnk
+!\guw_simulation/abaqus_guw/
+
+

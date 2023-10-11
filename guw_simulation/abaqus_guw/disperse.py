@@ -1,7 +1,7 @@
 import csv
 import numpy as np
 
-
+#test
 def get_lamb_wavelength(material, thickness, frequency):
     """
     Returns the wavelength at the requested frequency for a given material/thickness. Reads in a .txt-file exported
