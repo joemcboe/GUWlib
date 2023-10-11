@@ -1,5 +1,6 @@
 # Default ignored files
 /shelf/
+/.idea
 /workspace.xml
 /guw_simulation/.idea/
 /guw_simulation/*
