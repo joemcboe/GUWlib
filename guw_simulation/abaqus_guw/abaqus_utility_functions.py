@@ -30,8 +30,8 @@ import displayGroupOdbToolset as dgo
 import connectorBehavior
 
 import numpy as np
-
 import datetime
+from .output import *
 
 PART_NAME = 'plate'
 MODEL_NAME = 'Model-1'
@@ -126,7 +126,7 @@ def add_circular_hole_to_plate(plate, circle_pos_x, circle_pos_y, circle_radius,
         try:
             p.PartitionCellByDatumPlane(datumPlane=p.datums[id_cut_plane[i]], cells=p.cells)
         except:
-            print('No partition created for ' + cut_plane_positions[i] + ' datum plane (hole at (%f, %f)).' % (
+            log_warning('No partition created for ' + cut_plane_positions[i] + ' datum plane (hole at (%f, %f)).' % (
                 circle_pos_x, circle_pos_y))
 
     # add guidelines
@@ -173,7 +173,7 @@ def add_vertex_to_plate(pos_x, pos_y):
         try:
             p.PartitionCellByDatumPlane(datumPlane=p.datums[id_cut_plane[i]], cells=p.cells)
         except:
-            print('No partition created for excitation.')
+            log_warning('No partition created for excitation.')
 
 
 def add_concentrated_force(pos_x, pos_y, pos_z, amplitude, excitation_id):
@@ -278,7 +278,8 @@ def create_step_dynamic_explicit(time_period, max_increment):
                                                 previous='Initial',
                                                 description='Generation and propagation of Lamb waves',
                                                 timePeriod=time_period,
-                                                maxIncrement=max_increment, improvedDtMethod=ON)
+                                                maxIncrement=max_increment)
+                                                #improvedDtMethod=ON)
     session.viewports['Viewport: 1'].assemblyDisplay.setValues(step=STEP_NAME)
     mdb.models[MODEL_NAME].fieldOutputRequests['F-Output-1'].setValues(variables=(
         'S', 'SVAVG', 'PE', 'PEVAVG', 'PEEQ', 'PEEQVAVG', 'LE', 'U', 'V', 'A',
@@ -301,4 +302,4 @@ def save_viewport_to_png(center_x, center_y):
         filename='abaqus_screenshot_' + str(datetime.datetime.now()),
         format=PNG,
         canvasObjects=(session.viewports['Viewport: 1'],))
-    print('Saved screenshot.')
+    log_info('Saved screenshot.')

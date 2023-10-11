@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from .abaqus_utility_functions import *
-from abaqus_guw.disperse import *
+from .disperse import *
+from .output import *
+
 
 class FEModel:
     """
@@ -18,16 +20,18 @@ class FEModel:
          generate_mesh: meshes the created parts in Abaqus
     """
 
-    def __init__(self, plate=None, excitation=None, propagation_distance=0.2, nodes_per_wavelength=6):
+    def __init__(self, plate=None, excitation=None, propagation_distance=0.2, nodes_per_wavelength=6, elements_in_thickness_direction = 4):
         self.excitation = excitation  # maybe change so that  multiple excitations are possible, similar to defect array
         self.plate = plate
         self.propagation_distance = propagation_distance
         self.nodes_per_wavelength = nodes_per_wavelength
+        self.elements_in_thickness_direction = elements_in_thickness_direction
 
     def setup_in_abaqus(self):
+
         # geometry
         create_plate(plate=self.plate)
-        print("Created plate geometry.")
+        log_info("Created plate geometry.")
         for defect in self.plate.defects:
             if defect["type"] == "hole":
                 add_circular_hole_to_plate(plate=self.plate,
@@ -37,7 +41,7 @@ class FEModel:
                                            guideline_option=defect["guideline_option"])
             if defect["type"] == "crack":
                 pass
-        print("Added " + str(len(self.plate.defects)) + " defect(s).")
+        log_info("Added " + str(len(self.plate.defects)) + " defect(s).")
 
         # add vertices to add excitations
         pos_x, pos_y, pos_z = self.excitation.coordinates
@@ -48,7 +52,7 @@ class FEModel:
 
         # create and assign material
         assign_material(self.plate.material)
-        print("Material (" + self.plate.material + ") created and assigned to plate.")
+        log_info("Material (" + self.plate.material + ") created and assigned to plate.")
 
         # mesh the part
         max_exciting_frequency = self.excitation.signal.get_max_contained_frequency()
@@ -56,15 +60,25 @@ class FEModel:
                                           thickness=self.plate.thickness,
                                           frequency=max_exciting_frequency)
         min_wavelength = min(min(wavelengths[0]), min(wavelengths[1]))
-        print(' - Maximum exciting frequency is {} kHz.'.format(max_exciting_frequency / 1e3))
-        print(' - Minimum occurring wavelength is {} mm.'.format(min_wavelength * 1e3))
-        print(' > Choosing element size of {} m to achieve {} nodes per wavelength.'.format(
-            min_wavelength / (self.nodes_per_wavelength - 1), self.nodes_per_wavelength))
-        mesh_part(element_size=min_wavelength / (self.nodes_per_wavelength - 1))
+
+        element_size_nodes_per_wavelength = min_wavelength / (self.nodes_per_wavelength - 1)
+        element_size_thickness = self.plate.thickness / self.elements_in_thickness_direction
+
+        element_size = min(element_size_thickness, element_size_nodes_per_wavelength)
+
+        str1 = 'Max exciting frequency:   {:.2f} kHz'.format(max_exciting_frequency / 1e3)
+        str2 = 'Min occurring wavelength: {:.2f} mm'.format(min_wavelength * 1e3)
+        str3 = 'For {:.0f} nodes per wavelength:   Max element size {:.2e} m'.format(
+            self.nodes_per_wavelength, element_size_nodes_per_wavelength)
+        str4 = 'For {:.0f} elements per thickness: Max element size: {:.2e} m'.format(
+            self.elements_in_thickness_direction, element_size_thickness)
+        log_info("Element size set to {:.2e} m.\n{}\n{}\n{}\n{}".format(element_size, str1, str2, str3, str4))
+
+        mesh_part(element_size=element_size)
 
         # create assembly and instantiate the plate
         create_assembly_instantiate_plate()
-        print("Plate instantiated in new assembly.")
+        log_info("Plate instantiated in new assembly")
 
         # add dynamic explicit step
         max_time_increment_condition_1 = (0.5 / ((self.nodes_per_wavelength - 1) * max_exciting_frequency))
@@ -77,9 +91,14 @@ class FEModel:
         min_phase_velocity = min_wavelength * self.excitation.signal.carrier_frequency
         simulation_duration = self.propagation_distance / min_phase_velocity
         create_step_dynamic_explicit(time_period=simulation_duration, max_increment=max_time_increment)
-        print(' - Set total simulation duration to {} ms '.format(simulation_duration * 1e3) +
-              'and max. time increment to {}e-6 s to fulfill CFL condition.'.format(max_time_increment * 1e6))
-        print('   (At least {} steps needed.)'.format(int(simulation_duration / max_time_increment)))
+        info_str = ("Abaqus/Explicit time increment\n" +
+                    "total sim duration: {:.2f}e-3 s\n".format(simulation_duration * 1e3) +
+                    "max time increment: {:.2f}e-6 s\n".format(max_time_increment * 1e6) +
+                    "min steps needed:   {:d} steps".format(int(simulation_duration / max_time_increment)))
+        log_info(info_str)
+        # print(' - Set total simulation duration to {} ms '.format(simulation_duration * 1e3) +
+        #       'and max. time increment to {}e-6 s to fulfill CFL condition.'.format(max_time_increment * 1e6))
+        # print('   (At least {} steps needed.)'.format(int(simulation_duration / max_time_increment)))
 
         # add point force with tabular amplitude data
         pos_x, pos_y, pos_z = self.excitation.coordinates

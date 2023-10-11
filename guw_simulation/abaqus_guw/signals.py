@@ -1,5 +1,4 @@
 import math
-import matplotlib.pyplot as plt
 import numpy as np
 
 PI = math.pi
@@ -69,16 +68,16 @@ class Burst:
 
         return highest_contained_frequency
 
-    def plot(self):
-        """
-        Plots the signal.
-        """
-        dt = self.dt
-        length = self.get_duration()
-        t_values = np.linspace(dt - length * 2, dt + length * 3, num=1000)
-        y_values = [self.get_value_at(t=t) for t in t_values]
-        plt.plot(t_values, y_values, linestyle='-')
-        plt.xlabel('t')
-        plt.ylabel('y')
-        plt.grid(True)
-        plt.show()
+    # def plot(self):
+    #     """
+    #     Plots the signal.
+    #     """
+    #     dt = self.dt
+    #     length = self.get_duration()
+    #     t_values = np.linspace(dt - length * 2, dt + length * 3, num=1000)
+    #     y_values = [self.get_value_at(t=t) for t in t_values]
+    #     plt.plot(t_values, y_values, linestyle='-')
+    #     plt.xlabel('t')
+    #     plt.ylabel('y')
+    #     plt.grid(True)
+    #     plt.show()

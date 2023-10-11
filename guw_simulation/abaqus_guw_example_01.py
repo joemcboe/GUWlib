@@ -18,27 +18,25 @@ from abaqus_guw.excitation import PointForceExcitation
 from abaqus_guw.signals import Burst
 
 # Create an instance of isotropic plate
+THICKNESS = 3e-3
 plate = IsotropicPlate(material='aluminum',
-                       thickness=1e-3,
+                       thickness=THICKNESS,
                        shape=((0, 0), (0.2, 0), (0.2, 0.2), (0.1, 0.18), (0.0, 0.2), (0, 0)))
 
 # Add defects
 plate.add_hole(position=(0.14, 0.04), radius=2e-3, guideline_option='asterisk')
 
 # Create a burst input signal to excite Lamb waves
-burst = Burst(carrier_frequency=100e3, n_cycles=3, dt=0, window='hanning')
-point_force_excitation = PointForceExcitation(coordinates=(0.0, 0.0, 1e-3),
+burst = Burst(carrier_frequency=300e3, n_cycles=3, dt=0, window='hanning')
+point_force_excitation = PointForceExcitation(coordinates=(0.0, 0.0, THICKNESS),
                                               amplitude=(0, 0, -1),
                                               signal=burst)
-point_force_excitation.signal.plot()
-# print("Added burst with " + str(burst.carrier_frequency / 1e3) + " kHz carrier frequency and " + str(burst.n_cycles) +
-#       " cycles. Max. contained frequency is " + str(burst.get_max_contained_frequency() / 1e3) + " kHz.")
+# point_force_excitation.signal.plot()
 
 # Create an instance of FE model and link plate and excitation
 fe_model = FEModel(plate=plate, excitation=point_force_excitation)
 fe_model.nodes_per_wavelength = 10
+fe_model.elements_in_thickness_direction = 4
 
 # Generate the associated Abaqus geometry and mesh
 fe_model.setup_in_abaqus()
-# test
-# test 2

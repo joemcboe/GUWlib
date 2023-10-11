@@ -1,7 +1,8 @@
 import csv
 import numpy as np
+from .output import *
 
-#test
+
 def get_lamb_wavelength(material, thickness, frequency):
     """
     Returns the wavelength at the requested frequency for a given material/thickness. Reads in a .txt-file exported
@@ -47,8 +48,21 @@ def get_lamb_wavelength(material, thickness, frequency):
         for table in wavelength_data:
             table = table[~np.any(np.isnan(table), axis=1)]
             lambda_query = linear_interpolation(table[:, 0], table[:, 1], fd)
-            wavelength_interpolated.append(lambda_query * 1e-3)
+            wavelength_interpolated.append(lambda_query * thickness)
         wavelength.append(wavelength_interpolated)
+
+    info_str = "At f = {:.2f} kHz for t = {:.2f} mm:\n".format(frequency * 1e-3, thickness * 1e3)
+    i_mode = 0
+    modes = ["S", "A"]
+    for lst in wavelength:
+        j_mode = 0
+        for lam in lst:
+            if not np.isnan(lam):
+                info_str = info_str + ("Lambda = {:.2f} mm ({}{:d})\n".format(lam * 1e3, modes[i_mode], j_mode))
+            j_mode = j_mode + 1
+        i_mode = i_mode + 1
+    log_info(info_str)
+
     return wavelength
 
 
