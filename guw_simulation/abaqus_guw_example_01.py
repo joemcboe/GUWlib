@@ -24,7 +24,9 @@ plate = IsotropicPlate(material='aluminum',
                        shape=((0, 0), (0.2, 0), (0.2, 0.2), (0.1, 0.18), (0.0, 0.2), (0, 0)))
 
 # Add defects
-plate.add_hole(position=(0.14, 0.04), radius=2e-3, guideline_option='asterisk')
+plate.add_hole(position=(0.10, 0.10), radius=2e-3, guideline_option='asterisk')
+# plate.add_hole(position=(0.14, 0.11-1e-3), radius=2e-3, guideline_option='asterisk')
+
 
 # Create a burst input signal to excite Lamb waves
 burst = Burst(carrier_frequency=300e3, n_cycles=3, dt=0, window='hanning')

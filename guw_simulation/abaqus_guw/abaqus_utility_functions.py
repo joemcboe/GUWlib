@@ -59,8 +59,8 @@ def create_plate(plate):
                                                                offset=plate.thickness).id
 
     # define datum axis and store abaqus id
-    plate.datum_axis_abaqus_id = p.DatumAxisByTwoPoint(point1=(1, 0, plate.thickness),
-                                                       point2=(1, 1, plate.thickness)).id
+    plate.datum_axis_abaqus_id = p.DatumAxisByTwoPoint(point1=(0, 0, plate.thickness),
+                                                       point2=(0, 1, plate.thickness)).id
     session.viewports['Viewport: 1'].setValues(displayedObject=p)
 
 
@@ -103,6 +103,47 @@ def add_circular_hole_to_plate(plate, circle_pos_x, circle_pos_y, circle_radius,
                  sketch=s,
                  flipExtrudeDirection=OFF)
     del mdb.models[MODEL_NAME].sketches['__profile__']
+    partition_circular_plate_region(plate, circle_pos_x, circle_pos_y, circle_radius, guideline_option,
+                                    meshing_algorithm)
+
+
+def add_circular_piezo_to_plate(plate, piezo_pos_x, piezo_pos_y, piezo_radius, piezo_thickness, guideline_option='plus',
+                                meshing_algorithm="medial_axis"):
+    # add sketch of circle and extrude
+    p = mdb.models[MODEL_NAME].parts[PART_NAME]
+    sketch_plane_id = plate.datum_plane_abaqus_id
+    sketch_up_edge_id = plate.datum_axis_abaqus_id
+    t = p.MakeSketchTransform(sketchPlane=p.datums[sketch_plane_id],
+                              sketchUpEdge=p.datums[sketch_up_edge_id],
+                              sketchPlaneSide=SIDE1,
+                              sketchOrientation=RIGHT,
+                              origin=(0.0, 0.0, 0.0))
+    s = mdb.models[MODEL_NAME].ConstrainedSketch(name='__profile__',
+                                                 sheetSize=3.25,
+                                                 gridSpacing=0.08,
+                                                 transform=t)
+    p.projectReferencesOntoSketch(sketch=s, filter=COPLANAR_EDGES)
+    s.CircleByCenterPerimeter(center=(piezo_pos_x, piezo_pos_y),
+                              point1=(piezo_pos_x + piezo_radius, piezo_pos_y))
+    p.SolidExtrude(sketchPlane=p.datums[sketch_plane_id],
+                   sketchUpEdge=p.datums[sketch_up_edge_id],
+                   sketchPlaneSide=SIDE1,
+                   sketchOrientation=RIGHT,
+                   sketch=s,
+                   depth=piezo_thickness,
+                   flipExtrudeDirection=OFF)
+    del mdb.models[MODEL_NAME].sketches['__profile__']
+    partition_circular_plate_region(plate, piezo_pos_x, piezo_pos_y, piezo_radius, guideline_option,
+                                    meshing_algorithm)
+
+
+def partition_circular_plate_region(plate, circle_pos_x, circle_pos_y, circle_radius, guideline_option='none',
+                                    meshing_algorithm="medial_axis"):
+
+    # get part and datum objects
+    p = mdb.models[MODEL_NAME].parts[PART_NAME]
+    sketch_plane_id = plate.datum_plane_abaqus_id
+    sketch_up_edge_id = plate.datum_axis_abaqus_id
 
     # helper coordinates
     bounding_box_scale = 2.5
@@ -126,8 +167,8 @@ def add_circular_hole_to_plate(plate, circle_pos_x, circle_pos_y, circle_radius,
         try:
             p.PartitionCellByDatumPlane(datumPlane=p.datums[id_cut_plane[i]], cells=p.cells)
         except:
-            log_warning('No partition created for ' + cut_plane_positions[i] + ' datum plane (hole at (%f, %f)).' % (
-                circle_pos_x, circle_pos_y))
+            log_warning('No partition created for ' + cut_plane_positions[i] + 'datum plane (circular region at (%f, '
+                                                                               '%f)).' % (circle_pos_x, circle_pos_y))
 
     # add guidelines
     if guideline_option == 'none':
@@ -136,7 +177,7 @@ def add_circular_hole_to_plate(plate, circle_pos_x, circle_pos_y, circle_radius,
         t = p.MakeSketchTransform(sketchPlane=p.datums[sketch_plane_id],
                                   sketchUpEdge=p.datums[sketch_up_edge_id],
                                   sketchPlaneSide=SIDE1,
-                                  origin=(0.0, 0.0, plate.thickness))
+                                  origin=(0.0, 0.0, 0))
         s1 = mdb.models[MODEL_NAME].ConstrainedSketch(name='__profile__',
                                                       sheetSize=1.84,
                                                       gridSpacing=0.04,
@@ -162,6 +203,7 @@ def add_circular_hole_to_plate(plate, circle_pos_x, circle_pos_y, circle_radius,
         p.setMeshControls(regions=picked_cell, algorithm=MEDIAL_AXIS)
     elif meshing_algorithm == "advancing_front":
         p.setMeshControls(regions=picked_cell, algorithm=ADVANCING_FRONT)
+
 
 
 def add_vertex_to_plate(pos_x, pos_y):
@@ -279,7 +321,7 @@ def create_step_dynamic_explicit(time_period, max_increment):
                                                 description='Generation and propagation of Lamb waves',
                                                 timePeriod=time_period,
                                                 maxIncrement=max_increment)
-                                                #improvedDtMethod=ON)
+    # improvedDtMethod=ON)
     session.viewports['Viewport: 1'].assemblyDisplay.setValues(step=STEP_NAME)
     mdb.models[MODEL_NAME].fieldOutputRequests['F-Output-1'].setValues(variables=(
         'S', 'SVAVG', 'PE', 'PEVAVG', 'PEEQ', 'PEEQVAVG', 'LE', 'U', 'V', 'A',
