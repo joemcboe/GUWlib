@@ -121,6 +121,11 @@ class FEModel:
         log_info(info_str)
 
         # LOAD MODULE --------------------------------------------------------------------------------------------------
+        for piezo in self.phased_array:
+            if piezo.signal is not None:
+                add_piezo_load(piezo, max_time_increment)
+                #add_amplitude(signal=piezo.signal, excitation_id=piezo.id, max_time_increment=max_time_increment)
+
         # # add point force with tabular amplitude data
         # pos_x, pos_y, pos_z = self.excitation.coordinates
         # add_amplitude(signal=self.excitation.signal, excitation_id=1, max_time_increment=max_time_increment)
