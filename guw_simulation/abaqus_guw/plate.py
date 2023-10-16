@@ -17,9 +17,9 @@ class IsotropicPlate:
         """
         self.material = material
         self.thickness = thickness
-        self.defects = []
         self.datum_plane_abaqus_id = None
         self.datum_axis_abaqus_id = None
+        self.set_name = None
 
         input_is_rectangle = length is not None and width is not None
         input_is_shape = shape is not None and is_valid_coordinate_list(shape)
@@ -33,10 +33,6 @@ class IsotropicPlate:
         else:
             raise ValueError("Invalid input. Provide either 'shape' as a valid coordinate list or 'length' and "
                              "'width' (but not both).")
-
-    def add_hole(self, position, radius, guideline_option='none'):
-        hole = {"type": "hole", "position": position, "radius": radius, "guideline_option": guideline_option}
-        self.defects.append(hole)
 
 
 def is_valid_coordinate_list(variable):

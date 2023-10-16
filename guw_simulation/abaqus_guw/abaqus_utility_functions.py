@@ -38,12 +38,13 @@ PART_NAME = 'plate'
 MODEL_NAME = 'Model-1'
 INSTANCE_NAME = PART_NAME
 STEP_NAME = 'lamb_excitation'
+
+# these are all sets and should maybe be named as such ...
 PLATE_CELL_NAME = 'plate'
 PLATE_TOP_FACE_NAME = 'plate-top-surface'
-
-
-# DATUM_PLANE_NAME = 'plate-surface'
-# DATUM_AXIS_NAME = 'plate-right-edge'
+PLATE_SET_NAME = 'plate-material'
+PIEZO_CELL_NAME = 'piezo'
+PIEZO_BOUNDBOX_CELL_NAME = 'piezo_bounding_box'
 
 
 def create_plate(plate):
@@ -67,7 +68,9 @@ def create_plate(plate):
     session.viewports['Viewport: 1'].setValues(displayedObject=p)
 
     # store plate cell in set
-    p.Set(cells=p.cells[0:1], name=PLATE_CELL_NAME)
+    plate.set_name = PLATE_SET_NAME
+    p.Set(cells=p.cells[0:1], name=PLATE_CELL_NAME)     # contains the plate without the bounding boxes
+    p.Set(cells=p.cells[0:1], name=PLATE_SET_NAME)      # contains the whole plate (for material assignment)
     p.Set(faces=p.faces.getByBoundingBox(zMin=plate.thickness / 2), name=PLATE_TOP_FACE_NAME)
 
 
@@ -81,8 +84,9 @@ def create_piezo_element(plate, piezo_element):
 
     # constants
     boundbox_scale = 1.5
-    boundbox_cell_name = 'bounding_box_piezo_{}'.format(piezo_id)
-    piezo_cell_name = 'piezo_{}'.format(piezo_id)
+    boundbox_cell_name = '{}_{}'.format(PIEZO_BOUNDBOX_CELL_NAME, piezo_id)
+    piezo_cell_name = '{}_{}'.format(PIEZO_CELL_NAME, piezo_id)
+    piezo_element.set_name = piezo_cell_name
 
     # create solid extrusion
     p = mdb.models[MODEL_NAME].parts[PART_NAME]
@@ -152,6 +156,10 @@ def create_piezo_element(plate, piezo_element):
     p.SetByBoolean(operation=DIFFERENCE,
                    sets=[p.sets[PLATE_CELL_NAME], p.sets[boundbox_cell_name]],
                    name=PLATE_CELL_NAME)
+    p.SetByBoolean(operation=UNION,
+                   sets=[p.sets[PLATE_SET_NAME]]
+
+ #       cells=p.sets[PLATE_CELL_NAME].cells, name=PLATE_CELL_NAME)
 
     # generate guidelines for better mesh quality
     a = 1.3
@@ -200,179 +208,6 @@ def create_piezo_element(plate, piezo_element):
         sketchPlaneSide=SIDE1,
         sketch=s)
 
-    # apply meshing algorithm
-    p.setMeshControls(regions=p.sets[boundbox_cell_name].cells, algorithm=MEDIAL_AXIS)
-    p.setMeshControls(regions=p.sets[piezo_cell_name].cells, algorithm=ADVANCING_FRONT)
-
-
-# def add_circular_hole_to_plate(plate, circle_pos_x, circle_pos_y, circle_radius, guideline_option='none',
-#                                meshing_algorithm="medial_axis"):
-#     """
-#     function to add a circular hole to a plate object
-#
-#     Args:
-#         plate (plate):              plate object to add the hole to
-#         circle_pos_x (float):       x-coordinate of the circular hole (center)
-#         circle_pos_y (float):       y-coordinate of the circular hole (center)
-#         circle_radius (float):      radius of the hole
-#         guideline_option (string):  option to add partitions for a cleaner mesh,
-#                                     available: 'none', 'plus', 'star', 'asterisk'
-#         meshing_algorithm (string): set Abaqus meshing algorithm for the hole region
-#                                     available: 'medial_axis' or 'advancing_front'
-#
-#     """
-#     # add sketch of circle and cut through all
-#     p = mdb.models[MODEL_NAME].parts[PART_NAME]
-#     sketch_plane_id = plate.datum_plane_abaqus_id
-#     sketch_up_edge_id = plate.datum_axis_abaqus_id
-#     t = p.MakeSketchTransform(sketchPlane=p.datums[sketch_plane_id],
-#                               sketchUpEdge=p.datums[sketch_up_edge_id],
-#                               sketchPlaneSide=SIDE1,
-#                               sketchOrientation=RIGHT,
-#                               origin=(0.0, 0.0, 0.0))
-#     s = mdb.models[MODEL_NAME].ConstrainedSketch(name='__profile__',
-#                                                  sheetSize=3.25,
-#                                                  gridSpacing=0.08,
-#                                                  transform=t)
-#     p.projectReferencesOntoSketch(sketch=s, filter=COPLANAR_EDGES)
-#     s.CircleByCenterPerimeter(center=(circle_pos_x, circle_pos_y),
-#                               point1=(circle_pos_x + circle_radius, circle_pos_y))
-#     p.CutExtrude(sketchPlane=p.datums[sketch_plane_id],
-#                  sketchUpEdge=p.datums[sketch_up_edge_id],
-#                  sketchPlaneSide=SIDE1,
-#                  sketchOrientation=RIGHT,
-#                  sketch=s,
-#                  flipExtrudeDirection=OFF)
-#     del mdb.models[MODEL_NAME].sketches['__profile__']
-#     partition_circular_plate_region(plate, circle_pos_x, circle_pos_y, circle_radius, guideline_option,
-#                                     meshing_algorithm)
-#
-#
-# def add_circular_piezo_to_plate(plate, piezo_pos_x, piezo_pos_y, piezo_radius, piezo_thickness, guideline_option='plus',
-#                                 meshing_algorithm="medial_axis"):
-#     # add sketch of circle and extrude
-#     p = mdb.models[MODEL_NAME].parts[PART_NAME]
-#     sketch_plane_id = plate.datum_plane_abaqus_id
-#     sketch_up_edge_id = plate.datum_axis_abaqus_id
-#     t = p.MakeSketchTransform(sketchPlane=p.datums[sketch_plane_id],
-#                               sketchUpEdge=p.datums[sketch_up_edge_id],
-#                               sketchPlaneSide=SIDE1,
-#                               sketchOrientation=RIGHT,
-#                               origin=(0.0, 0.0, 0.0))
-#     s = mdb.models[MODEL_NAME].ConstrainedSketch(name='__profile__',
-#                                                  sheetSize=3.25,
-#                                                  gridSpacing=0.08,
-#                                                  transform=t)
-#     p.projectReferencesOntoSketch(sketch=s, filter=COPLANAR_EDGES)
-#     s.CircleByCenterPerimeter(center=(piezo_pos_x, piezo_pos_y),
-#                               point1=(piezo_pos_x + piezo_radius, piezo_pos_y))
-#     p.SolidExtrude(sketchPlane=p.datums[sketch_plane_id],
-#                    sketchUpEdge=p.datums[sketch_up_edge_id],
-#                    sketchPlaneSide=SIDE1,
-#                    sketchOrientation=RIGHT,
-#                    sketch=s,
-#                    depth=piezo_thickness,
-#                    flipExtrudeDirection=OFF)
-#     del mdb.models[MODEL_NAME].sketches['__profile__']
-#     partition_circular_plate_region(plate, piezo_pos_x, piezo_pos_y, piezo_radius, guideline_option,
-#                                     meshing_algorithm)
-#
-#
-# def partition_circular_plate_region(plate, circle_pos_x, circle_pos_y, circle_radius, guideline_option='none',
-#                                     meshing_algorithm="medial_axis"):
-#
-#     # get part and datum objects
-#     p = mdb.models[MODEL_NAME].parts[PART_NAME]
-#     sketch_plane_id = plate.datum_plane_abaqus_id
-#     sketch_up_edge_id = plate.datum_axis_abaqus_id
-#
-#     # helper coordinates
-#     bounding_box_scale = 2.5
-#     x_left = circle_pos_x - bounding_box_scale * circle_radius
-#     x_right = circle_pos_x + bounding_box_scale * circle_radius
-#     y_lower = circle_pos_y - bounding_box_scale * circle_radius
-#     y_upper = circle_pos_y + bounding_box_scale * circle_radius
-#     x_click = circle_pos_x - 0.5 * bounding_box_scale * circle_radius
-#     y_click = circle_pos_y + 0.5 * bounding_box_scale * circle_radius
-#
-#     # helper datum planes
-#     id_cut_plane = [float("nan")] * 4
-#     id_cut_plane[0] = p.DatumPlaneByPrincipalPlane(principalPlane=YZPLANE, offset=x_left).id
-#     id_cut_plane[1] = p.DatumPlaneByPrincipalPlane(principalPlane=YZPLANE, offset=x_right).id
-#     id_cut_plane[2] = p.DatumPlaneByPrincipalPlane(principalPlane=XZPLANE, offset=y_lower).id
-#     id_cut_plane[3] = p.DatumPlaneByPrincipalPlane(principalPlane=XZPLANE, offset=y_upper).id
-#
-#     # partitioning
-#     cut_plane_positions = ['left vertical', 'right vertical', 'lower horizontal', 'upper horizontal']
-#     for i in range(4):
-#         try:
-#             p.PartitionCellByDatumPlane(datumPlane=p.datums[id_cut_plane[i]], cells=p.cells)
-#         except:
-#             log_warning('No partition created for ' + cut_plane_positions[i] + 'datum plane (circular region at (%f, '
-#                                                                                '%f)).' % (circle_pos_x, circle_pos_y))
-#
-#     # add guidelines
-#     if guideline_option == 'none':
-#         pass
-#     else:
-#         t = p.MakeSketchTransform(sketchPlane=p.datums[sketch_plane_id],
-#                                   sketchUpEdge=p.datums[sketch_up_edge_id],
-#                                   sketchPlaneSide=SIDE1,
-#                                   origin=(0.0, 0.0, 0))
-#         s1 = mdb.models[MODEL_NAME].ConstrainedSketch(name='__profile__',
-#                                                       sheetSize=1.84,
-#                                                       gridSpacing=0.04,
-#                                                       transform=t)
-#         p.projectReferencesOntoSketch(sketch=s1, filter=COPLANAR_EDGES)
-#
-#         if guideline_option == 'plus' or guideline_option == 'asterisk':
-#             s1.Line(point1=(x_left, circle_pos_y), point2=(x_right, circle_pos_y))
-#             s1.Line(point1=(circle_pos_x, y_lower), point2=(circle_pos_x, y_upper))
-#         if guideline_option == 'star' or guideline_option == 'asterisk':
-#             s1.Line(point1=(x_left, y_upper), point2=(x_right, y_lower))
-#             s1.Line(point1=(x_left, y_lower), point2=(x_right, y_upper))
-#
-#         picked_faces = p.faces.findAt(((x_click, y_click, plate.thickness),))
-#         p.PartitionFaceBySketch(sketchUpEdge=p.datums[sketch_up_edge_id],
-#                                 faces=picked_faces,
-#                                 sketch=s1)
-#         del mdb.models[MODEL_NAME].sketches['__profile__']
-#
-#     # set meshing algorithm for regions
-#     picked_cell = p.cells.findAt(((x_click, y_click, plate.thickness),))
-#     if meshing_algorithm == "medial_axis":
-#         p.setMeshControls(regions=picked_cell, algorithm=MEDIAL_AXIS)
-#     elif meshing_algorithm == "advancing_front":
-#         p.setMeshControls(regions=picked_cell, algorithm=ADVANCING_FRONT)
-
-
-def add_vertex_to_plate(pos_x, pos_y):
-    id_cut_plane = [float("nan")] * 2
-    p = mdb.models[MODEL_NAME].parts[PART_NAME]
-    id_cut_plane[0] = p.DatumPlaneByPrincipalPlane(principalPlane=YZPLANE, offset=pos_x).id
-    id_cut_plane[1] = p.DatumPlaneByPrincipalPlane(principalPlane=XZPLANE, offset=pos_y).id
-    for i in range(2):
-        try:
-            p.PartitionCellByDatumPlane(datumPlane=p.datums[id_cut_plane[i]], cells=p.cells)
-        except:
-            log_warning('No partition created for excitation.')
-
-
-def add_concentrated_force(pos_x, pos_y, pos_z, amplitude, excitation_id):
-    set_name = "set-concentrated-force-{}".format(excitation_id)
-    a = mdb.models[MODEL_NAME].rootAssembly
-    v1 = a.instances[INSTANCE_NAME].vertices
-    verts1 = v1.findAt(coordinates=((pos_x, pos_y, pos_z),))
-    region = a.Set(vertices=verts1, name=set_name)
-    mdb.models[MODEL_NAME].ConcentratedForce(name='point-load-{}'.format(excitation_id),
-                                             createStepName=STEP_NAME,
-                                             region=region,
-                                             cf3=amplitude,
-                                             amplitude='amp-{}'.format(excitation_id),
-                                             distributionType=UNIFORM,
-                                             field='',
-                                             localCsys=None)
-
 
 def add_amplitude(signal, excitation_id, max_time_increment):
     # generate time data
@@ -396,7 +231,7 @@ def create_material(material):
         raise ValueError('Unknown material {}.'.format(material))
 
 
-def assign_material(material, set_name):
+def assign_material(set_name, material):
     # create new homogenous section
     section_name = set_name + '_section_homogenous_' + material
     mdb.models[MODEL_NAME].HomogeneousSolidSection(
@@ -406,8 +241,8 @@ def assign_material(material, set_name):
 
     # create new set containing all cells and assign section to set
     p = mdb.models[MODEL_NAME].parts[PART_NAME]
-    region = p.Set(cells=p.cells, name=set_name)
-    p.SectionAssignment(region=region,
+    # region = p.Set(cells=p.cells, name=set_name)
+    p.SectionAssignment(region=p.sets[set_name],
                         sectionName=section_name,
                         offset=0.0,
                         offsetType=MIDDLE_SURFACE,
@@ -415,18 +250,24 @@ def assign_material(material, set_name):
                         thicknessAssignment=FROM_SECTION)
 
 
-def mesh_part(element_size=0.01):
-
-    # set meshing algorithm for plate cell
+def mesh_part(element_size, phased_array):
+    # set meshing algorithm for plate
     p = mdb.models[MODEL_NAME].parts[PART_NAME]
     p.setMeshControls(regions=p.sets[PLATE_CELL_NAME].cells, algorithm=MEDIAL_AXIS)
+
+    # set meshing algorithm for piezo elements
+    for i in range(len(phased_array)):
+        boundbox_cell_name = '{}_{}'.format(PIEZO_BOUNDBOX_CELL_NAME, i)
+        piezo_cell_name = '{}_{}'.format(PIEZO_CELL_NAME, i)
+        p.setMeshControls(regions=p.sets[boundbox_cell_name].cells, algorithm=MEDIAL_AXIS)
+        p.setMeshControls(regions=p.sets[piezo_cell_name].cells, algorithm=ADVANCING_FRONT)
 
     # seed and mesh part with desired element size
     p.seedPart(size=element_size, deviationFactor=0.1, minSizeFactor=0.1)
     p.generateMesh()
 
 
-def create_assembly_instantiate_plate():
+def create_assembly_instantiate_part():
     p = mdb.models[MODEL_NAME].parts[PART_NAME]
     a = mdb.models[MODEL_NAME].rootAssembly
     a.DatumCsysByDefault(CARTESIAN)
@@ -455,19 +296,40 @@ def make_datums_invisible():
         datumCoordSystems=OFF)
 
 
+def beautify_set_colors(phased_array):
+    color_data = {}
+    for i in range(len(phased_array)):
+        key_1 = '{}_{}'.format(PIEZO_BOUNDBOX_CELL_NAME, i)
+        key_2 = '{}_{}'.format(PIEZO_CELL_NAME, i)
+        value_1 = (True, '#CCCCCC', 'Default', '#CCCCCC')
+        value_2 = (True, '#FFDE7F', 'Default', '#FFDE7F')
+        color_data[key_1] = value_1
+        color_data[key_2] = value_2
+
+    color_data[PLATE_CELL_NAME] = (True, '#CCCCCC', 'Default', '#CCCCCC')
+    color_data[PLATE_TOP_FACE_NAME] = (True, '#CCCCCC', 'Default', '#CCCCCC')
+
+    cmap = session.viewports['Viewport: 1'].colorMappings['Set']
+    cmap.updateOverrides(overrides=color_data)
+    session.viewports['Viewport: 1'].enableMultipleColors()  #
+    session.viewports['Viewport: 1'].setColor(initialColor='#BDBDBD')  #
+    session.viewports['Viewport: 1'].setColor(colorMapping=cmap)
+    session.viewports['Viewport: 1'].disableMultipleColors()  #
+
+
 def create_step_dynamic_explicit(time_period, max_increment):
     mdb.models[MODEL_NAME].ExplicitDynamicsStep(name=STEP_NAME,
                                                 previous='Initial',
-                                                description='Generation and propagation of Lamb waves',
+                                                description='Lamb wave propagation (time domain)',
                                                 timePeriod=time_period,
                                                 maxIncrement=max_increment)
-    # improvedDtMethod=ON)
     session.viewports['Viewport: 1'].assemblyDisplay.setValues(step=STEP_NAME)
     mdb.models[MODEL_NAME].fieldOutputRequests['F-Output-1'].setValues(variables=(
         'S', 'SVAVG', 'PE', 'PEVAVG', 'PEEQ', 'PEEQVAVG', 'LE', 'U', 'V', 'A',
         'EVF'), timeInterval=EVERY_TIME_INCREMENT)
 
 
+# deprecated functions -------------------------------------------------------------------------------------------------
 def save_viewport_to_png(center_x, center_y):
     # function to save a screenshot of the Abaqus viewport to a png file
     # center_x: x-coordinate of the center of the viewport
@@ -485,3 +347,31 @@ def save_viewport_to_png(center_x, center_y):
         format=PNG,
         canvasObjects=(session.viewports['Viewport: 1'],))
     log_info('Saved screenshot.')
+
+
+def add_vertex_to_plate(pos_x, pos_y):
+    id_cut_plane = [float("nan")] * 2
+    p = mdb.models[MODEL_NAME].parts[PART_NAME]
+    id_cut_plane[0] = p.DatumPlaneByPrincipalPlane(principalPlane=YZPLANE, offset=pos_x).id
+    id_cut_plane[1] = p.DatumPlaneByPrincipalPlane(principalPlane=XZPLANE, offset=pos_y).id
+    for i in range(2):
+        try:
+            p.PartitionCellByDatumPlane(datumPlane=p.datums[id_cut_plane[i]], cells=p.cells)
+        except:
+            log_warning('No partition created for excitation.')
+
+
+def add_concentrated_force(pos_x, pos_y, pos_z, amplitude, excitation_id):
+    set_name = "set-concentrated-force-{}".format(excitation_id)
+    a = mdb.models[MODEL_NAME].rootAssembly
+    v1 = a.instances[INSTANCE_NAME].vertices
+    verts1 = v1.findAt(coordinates=((pos_x, pos_y, pos_z),))
+    region = a.Set(vertices=verts1, name=set_name)
+    mdb.models[MODEL_NAME].ConcentratedForce(name='point-load-{}'.format(excitation_id),
+                                             createStepName=STEP_NAME,
+                                             region=region,
+                                             cf3=amplitude,
+                                             amplitude='amp-{}'.format(excitation_id),
+                                             distributionType=UNIFORM,
+                                             field='',
+                                             localCsys=None)

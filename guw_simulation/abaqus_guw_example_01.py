@@ -12,40 +12,45 @@ Author: j.froboese(at)tu-braunschweig.de
 Created on: September 20, 2023
 """
 
-from abaqus_guw.plate import IsotropicPlate
 from abaqus_guw.fe_model import FEModel
-from abaqus_guw.excitation import PointForceExcitation
-from abaqus_guw.signals import Burst
+from abaqus_guw.plate import *
+from abaqus_guw.piezo_element import PiezoElement
+from abaqus_guw.signals import *
+from abaqus_guw.defect import *
+
+
+# parameters
+PHASED_ARRAY_RADIUS = 0.05
+PHASED_ARRAY_N_ELEMENTS = 9
+PLATE_THICKNESS = 3e-3
 
 # Create an instance of isotropic plate
-THICKNESS = 3e-3
-# plate = IsotropicPlate(material='aluminum',
-#                        thickness=THICKNESS,
-#                        shape=((0, 0), (0.2, 0), (0.2, 0.2), (0.1, 0.18), (0.0, 0.2), (0, 0)))
-
 plate = IsotropicPlate(material='aluminum',
-                       thickness=THICKNESS,
+                       thickness=PLATE_THICKNESS,
                        length=0.2,
                        width=0.2)
 
 # Add defects
-plate.add_hole(position=(0.10, 0.10), radius=2e-3, guideline_option='asterisk')
-# plate.add_hole(position=(0.14, 0.11-1e-3), radius=2e-3, guideline_option='asterisk')
+defects = [Hole(position_x=6e-3, position_y=20e-3, radius=2e-3)]
 
-phi = np.linspace(0, 2 * np.pi, 10)
-pos_x = 0.05 * np.cos(phi) + 0.1
-pos_y = 0.05 * np.sin(phi) + 0.1
+# Add piezo elements and arrange in circular phased array
+phased_array = []
+phi = np.linspace(0, 2 * np.pi, PHASED_ARRAY_N_ELEMENTS+1)
+pos_x = PHASED_ARRAY_RADIUS * np.cos(phi) + 0.1
+pos_y = PHASED_ARRAY_RADIUS * np.sin(phi) + 0.1
+for i in range(len(phi) - 6):
+    phased_array.append(PiezoElement(diameter=16e-3,
+                                     thickness=0.2e-3,
+                                     position_x=pos_x[i],
+                                     position_y=pos_y[i],
+                                     material='aluminum'))
 
-
-# Create a burst input signal to excite Lamb waves
+# Create a burst input signal
 burst = Burst(carrier_frequency=300e3, n_cycles=3, dt=0, window='hanning')
-# point_force_excitation = PointForceExcitation(coordinates=(0.0, 0.0, THICKNESS),
-#                                               amplitude=(0, 0, -1),
-#                                               signal=burst)
-# point_force_excitation.signal.plot()
+phased_array[0].signal = burst
 
-# Create an instance of FE model and link plate and excitation
-fe_model = FEModel(plate=plate, excitation=point_force_excitation)
+# Create an instance of FE model and link plate and piezo array
+fe_model = FEModel(plate=plate, phased_array=phased_array, defects=defects)
 fe_model.nodes_per_wavelength = 10
 fe_model.elements_in_thickness_direction = 4
 

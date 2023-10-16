@@ -23,6 +23,10 @@ plate = IsotropicPlate(material='aluminum',
                        length=0.2,
                        width=0.2)
 
+# plate = IsotropicPlate(material='aluminum',
+#                        thickness=THICKNESS,
+#                        shape=((0, 0), (0.2, 0), (0.2, 0.2), (0.1, 0.18), (0.0, 0.2), (0, 0)))
+
 # Add defects
 plate.add_hole(position=(0.05, 0.07), radius=3e-3, guideline_option='plus')
 plate.add_hole(position=(0.10, 0.07), radius=3e-3, guideline_option='star')
