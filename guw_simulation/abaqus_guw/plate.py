@@ -28,8 +28,10 @@ class IsotropicPlate:
         if input_is_valid:
             if input_is_shape:
                 self.shape = shape
+                self.description = "Plate thickness: {} mm.".format(thickness*1e3)
             if input_is_rectangle:
                 self.shape = ((0, 0), (length, 0), (length, width), (0, width), (0, 0))
+                self.description = "Plate size is {} x {} x {} mm.".format(length*1e3, width*1e3, thickness*1e3)
         else:
             raise ValueError("Invalid input. Provide either 'shape' as a valid coordinate list or 'length' and "
                              "'width' (but not both).")

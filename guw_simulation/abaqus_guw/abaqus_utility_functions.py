@@ -6,6 +6,7 @@ and to perform meshing in Abaqus/CAE using its python interpreter (Abaqus Script
 Author: j.froboese(at)tu-braunschweig.de
 Created on: September 20, 2023
 """
+from math import sqrt
 
 # Do not delete the following import lines
 from abaqus import *
@@ -31,6 +32,8 @@ import connectorBehavior
 
 import numpy as np
 import datetime
+
+from .materials import get_material_properties
 from .output import *
 import time
 
@@ -44,7 +47,7 @@ PLATE_CELL_NAME = 'plate'
 PLATE_TOP_FACE_NAME = 'plate-top-surface'
 PLATE_SET_NAME = 'plate-material'
 PIEZO_CELL_NAME = 'piezo'
-PIEZO_BOUNDBOX_CELL_NAME = 'piezo_bounding_box'
+PIEZO_BOUNDBOX_CELL_NAME = 'bounding_box'
 
 
 def create_plate(plate):
@@ -69,8 +72,8 @@ def create_plate(plate):
 
     # store plate cell in set
     plate.set_name = PLATE_SET_NAME
-    p.Set(cells=p.cells[0:1], name=PLATE_CELL_NAME)     # contains the plate without the bounding boxes
-    p.Set(cells=p.cells[0:1], name=PLATE_SET_NAME)      # contains the whole plate (for material assignment)
+    p.Set(cells=p.cells, name=PLATE_CELL_NAME)  # contains the plate without the bounding boxes
+    p.Set(cells=p.cells, faces=p.faces, name=PLATE_SET_NAME)  # contains the whole plate (for material assignment)
     p.Set(faces=p.faces.getByBoundingBox(zMin=plate.thickness / 2), name=PLATE_TOP_FACE_NAME)
 
 
@@ -84,8 +87,10 @@ def create_piezo_element(plate, piezo_element):
 
     # constants
     boundbox_scale = 1.5
-    boundbox_cell_name = '{}_{}'.format(PIEZO_BOUNDBOX_CELL_NAME, piezo_id)
+    boundbox_cell_name = '{}_{}_{}'.format(PIEZO_CELL_NAME, piezo_id, PIEZO_BOUNDBOX_CELL_NAME)
     piezo_cell_name = '{}_{}'.format(PIEZO_CELL_NAME, piezo_id)
+    piezo_wall_face_set_name = '{}_{}_wall'.format(PIEZO_CELL_NAME, piezo_id)
+    piezo_element.wall_face_set_name = piezo_wall_face_set_name
     piezo_element.set_name = piezo_cell_name
 
     # create solid extrusion
@@ -116,7 +121,8 @@ def create_piezo_element(plate, piezo_element):
     # partition the part into two cells (piezo-element and plate)
     plate_cell = p.sets[PLATE_CELL_NAME].cells[0:1]
     p.PartitionCellByDatumPlane(cells=plate_cell, datumPlane=p.datums[sketch_plane_id])
-    p.Set(cells=p.sets[PLATE_CELL_NAME].cells.getByBoundingBox(zMin=plate.thickness), name=piezo_cell_name)
+    p.Set(cells=p.sets[PLATE_CELL_NAME].cells.getByBoundingBox(zMin=plate.thickness),
+          faces=p.sets[PLATE_CELL_NAME].faces.getByBoundingBox(zMin=plate.thickness), name=piezo_cell_name)
     p.Set(cells=p.sets[PLATE_CELL_NAME].cells.getByBoundingBox(zMax=plate.thickness), name=PLATE_CELL_NAME)
 
     # partition the plate to get a rectangular bounding box around the piezo element
@@ -143,23 +149,22 @@ def create_piezo_element(plate, piezo_element):
                                  line=p.datums[line_id],
                                  edges=[p.edges[i] for i in e[0:4]],
                                  sense=REVERSE)
-    p.Set(faces=p.sets[PLATE_TOP_FACE_NAME].faces[0:1], name=PLATE_TOP_FACE_NAME)
 
+    # update sets for plate top surface, bounding box, plate, and plate cell
+    p.Set(faces=p.sets[PLATE_TOP_FACE_NAME].faces[0:1], name=PLATE_TOP_FACE_NAME)
     boundbox_cell = p.sets[PLATE_CELL_NAME].cells.getByBoundingBox(zMin=0,
                                                                    zMax=plate.thickness,
                                                                    xMin=lower_left_coord[0],
                                                                    yMin=lower_left_coord[1],
                                                                    xMax=upper_right_coord[0],
                                                                    yMax=upper_right_coord[1])
-
     p.Set(cells=boundbox_cell, name=boundbox_cell_name)
     p.SetByBoolean(operation=DIFFERENCE,
                    sets=[p.sets[PLATE_CELL_NAME], p.sets[boundbox_cell_name]],
                    name=PLATE_CELL_NAME)
-    p.SetByBoolean(operation=UNION,
-                   sets=[p.sets[PLATE_SET_NAME]]
-
- #       cells=p.sets[PLATE_CELL_NAME].cells, name=PLATE_CELL_NAME)
+    p.SetByBoolean(operation=DIFFERENCE,
+                   sets=[p.sets[PLATE_SET_NAME], p.sets[piezo_cell_name]],
+                   name=PLATE_SET_NAME)
 
     # generate guidelines for better mesh quality
     a = 1.3
@@ -195,6 +200,7 @@ def create_piezo_element(plate, piezo_element):
 
     p.projectReferencesOntoSketch(sketch=s, filter=COPLANAR_EDGES)
 
+    # notiz an mich selbst: warum nicht cell -> faces -> getbyboundingbox? weil cell - faces leer ist
     face_array = p.faces.findAt(
         ((piezo_pos_x + piezo_radius * (1 + boundbox_scale) / 2, piezo_pos_y, plate.thickness),),
         ((piezo_pos_x + piezo_radius, piezo_pos_y, plate.thickness + 0.5 * piezo_thickness),),
@@ -208,27 +214,77 @@ def create_piezo_element(plate, piezo_element):
         sketchPlaneSide=SIDE1,
         sketch=s)
 
+    # save the wall faces of the piezo element to a set named
+    face_ids = p.sets[piezo_cell_name].cells[0].getFaces()
+    vertical_face_ids = [face_id for face_id in face_ids if p.faces[face_id].getNormal()[2] == 0]
+    vertical_faces = [p.faces[i:i + 1] for i in vertical_face_ids]
+    p.Set(faces=vertical_faces, name=piezo_wall_face_set_name)
+    # face_array = p.faces.getByBoundingCylinder(center1=(piezo_pos_x, piezo_pos_y, plate.thickness),
+    #                                            center2=(piezo_pos_x, piezo_pos_y, plate.thickness + piezo_thickness),
+    #                                            radius=piezo_radius)
+    # p.Set(faces=face_array, name=piezo_wall_face_set_name)
+
 
 def add_amplitude(signal, excitation_id, max_time_increment):
     # generate time data
     time_data_table = []
-    for t in np.arange(start=signal.dt, stop=signal.dt + signal.get_duration(), step=max_time_increment / 2):
+    for t in np.arange(start=signal.dt, stop=signal.dt + signal.get_duration() * 1.01, step=max_time_increment / 2):
         time_data_table.append((t, signal.get_value_at(t=t)))
 
     # create in Abaqus
-    mdb.models[MODEL_NAME].TabularAmplitude(name='amp-{}'.format(excitation_id),
+    mdb.models[MODEL_NAME].TabularAmplitude(name='amp-piezo-{}'.format(excitation_id),
                                             timeSpan=STEP,
                                             smooth=SOLVER_DEFAULT,
                                             data=tuple(time_data_table))
 
 
-def create_material(material):
-    mdb.models[MODEL_NAME].Material(name=material)
-    if material == 'aluminum':
-        mdb.models[MODEL_NAME].materials[material].Density(table=((2700.0,),))
-        mdb.models[MODEL_NAME].materials[material].Elastic(table=((70000000000.0, 0.33),))
-    else:
-        raise ValueError('Unknown material {}.'.format(material))
+def add_piezo_load(piezo, max_time_increment):
+    # generate time data
+    time_data_table = []
+    for t in np.arange(start=piezo.signal.dt, stop=piezo.signal.dt + piezo.signal.get_duration() * 1.01,
+                       step=max_time_increment / 2):
+        time_data_table.append((t, piezo.signal.get_value_at(t=t)))
+
+    # create amplitude in Abaqus
+    amplitude_name = 'amp-piezo-{}'.format(piezo.id)
+    mdb.models[MODEL_NAME].TabularAmplitude(name=amplitude_name,
+                                            timeSpan=STEP,
+                                            smooth=SOLVER_DEFAULT,
+                                            data=tuple(time_data_table))
+
+    # create piezo area load in Abaqus
+    # a = mdb.models['Model-1'].rootAssembly
+    # s1 = a.instances['plate'].faces
+    #
+    # a = mdb.models[MODEL_NAME].rootAssembly
+    # v1 = a.instances[INSTANCE_NAME]
+    #
+    # side1Faces1 = s1.getSequenceFromMask(mask=('[#243fc00 ]', ), )
+    # region = a.Surface(side1Faces=side1Faces1, name='Surf-1')
+
+    load_name = 'load-piezo-{}'.format(piezo.id)
+    surface_name = 'surface-piezo-{}'.format(piezo.id)
+
+    assembly = mdb.models[MODEL_NAME].rootAssembly
+    instance = assembly.instances[PART_NAME]
+    region = assembly.Surface(side1Faces=instance.sets[piezo.wall_face_set_name].faces, name=surface_name)
+    mdb.models[MODEL_NAME].Pressure(name=load_name,
+                                    createStepName=STEP_NAME,
+                                    region=region,
+                                    distributionType=UNIFORM,
+                                    field='', magnitude=1.0,
+                                    amplitude=amplitude_name)
+
+
+def create_material(material_name):
+    try:
+        material_properties = get_material_properties(material_name)
+        mdb.models[MODEL_NAME].Material(name=material_name)
+        mdb.models[MODEL_NAME].materials[material_name].Density(table=((material_properties["density"],),))
+        mdb.models[MODEL_NAME].materials[material_name].Elastic(table=((material_properties["youngs_modulus"],
+                                                                        material_properties["poissons_ratio"]),))
+    except ValueError as e:
+        log_error(e)
 
 
 def assign_material(set_name, material):
@@ -257,7 +313,7 @@ def mesh_part(element_size, phased_array):
 
     # set meshing algorithm for piezo elements
     for i in range(len(phased_array)):
-        boundbox_cell_name = '{}_{}'.format(PIEZO_BOUNDBOX_CELL_NAME, i)
+        boundbox_cell_name = '{}_{}_{}'.format(PIEZO_CELL_NAME, i, PIEZO_BOUNDBOX_CELL_NAME)
         piezo_cell_name = '{}_{}'.format(PIEZO_CELL_NAME, i)
         p.setMeshControls(regions=p.sets[boundbox_cell_name].cells, algorithm=MEDIAL_AXIS)
         p.setMeshControls(regions=p.sets[piezo_cell_name].cells, algorithm=ADVANCING_FRONT)
@@ -265,6 +321,10 @@ def mesh_part(element_size, phased_array):
     # seed and mesh part with desired element size
     p.seedPart(size=element_size, deviationFactor=0.1, minSizeFactor=0.1)
     p.generateMesh()
+
+    meshStats = p.getMeshStats()
+    log_info("The FE model has {} nodes.".format(meshStats.numNodes))
+    return meshStats.numNodes
 
 
 def create_assembly_instantiate_part():
@@ -322,11 +382,13 @@ def create_step_dynamic_explicit(time_period, max_increment):
                                                 previous='Initial',
                                                 description='Lamb wave propagation (time domain)',
                                                 timePeriod=time_period,
-                                                maxIncrement=max_increment)
+                                                maxIncrement=max_increment,
+                                                nlgeom=OFF)
     session.viewports['Viewport: 1'].assemblyDisplay.setValues(step=STEP_NAME)
+    # mdb.models[MODEL_NAME].fieldOutputRequests['F-Output-1'].setValues(variables=(
+    #     'S', 'E', 'U'), timeInterval=max_increment)
     mdb.models[MODEL_NAME].fieldOutputRequests['F-Output-1'].setValues(variables=(
-        'S', 'SVAVG', 'PE', 'PEVAVG', 'PEEQ', 'PEEQVAVG', 'LE', 'U', 'V', 'A',
-        'EVF'), timeInterval=EVERY_TIME_INCREMENT)
+        'S', 'E', 'U'), numIntervals=10)
 
 
 # deprecated functions -------------------------------------------------------------------------------------------------
@@ -375,3 +437,14 @@ def add_concentrated_force(pos_x, pos_y, pos_z, amplitude, excitation_id):
                                              distributionType=UNIFORM,
                                              field='',
                                              localCsys=None)
+
+
+def write_input_file(job_name):
+    mdb.Job(name=job_name, model=MODEL_NAME, description='', type=ANALYSIS,
+            atTime=None, waitMinutes=0, waitHours=0, queue=None, memory=90,
+            memoryUnits=PERCENTAGE, explicitPrecision=SINGLE,
+            nodalOutputPrecision=SINGLE, echoPrint=OFF, modelPrint=OFF,
+            contactPrint=OFF, historyPrint=OFF, userSubroutine='', scratch='',
+            resultsFormat=ODB, parallelizationMethodExplicit=DOMAIN, numDomains=4,
+            activateLoadBalancing=False, multiprocessingMode=DEFAULT, numCpus=4)
+    mdb.jobs[job_name].writeInput(consistencyChecking=OFF)
