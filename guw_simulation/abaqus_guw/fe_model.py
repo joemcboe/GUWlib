@@ -25,7 +25,7 @@ class FEModel:
     """
 
     def __init__(self, plate, defects=None, phased_array=None, propagation_distance=0.2, nodes_per_wavelength=10,
-                 elements_in_thickness_direction=4, max_frequency=None):
+                 elements_in_thickness_direction=4, max_frequency=None, sim_name='guw-sim-01'):
 
         if defects is None:
             defects = []
@@ -37,13 +37,14 @@ class FEModel:
         self.nodes_per_wavelength = nodes_per_wavelength
         self.elements_in_thickness_direction = elements_in_thickness_direction
         self.max_frequency = max_frequency
+        self.sim_name = sim_name
 
     def setup_in_abaqus(self):
 
         # PART MODULE --------------------------------------------------------------------------------------------------
         # plate geometry
         create_plate(plate=self.plate)
-        log_info("Created plate geometry.")
+        log_info("Created plate geometry: {}".format(self.plate.description))
 
         # defects geometry
         for defect in self.defects:
@@ -57,6 +58,8 @@ class FEModel:
             piezo = self.phased_array[i]
             piezo.id = i
             create_piezo_element(plate=self.plate, piezo_element=piezo)
+            if piezo.signal is not None:
+                log_info("Piezo element {} signal: kHz {}-cycle Burst".format(i, piezo.signal.carrier_frequency*1e-3, piezo.signal.n_cycles))
 
         log_info("Added " + str(len(self.phased_array)) + " piezo elements.")
 
@@ -95,7 +98,7 @@ class FEModel:
             self.elements_in_thickness_direction, element_size_thickness)
         log_info("Element size set to {:.2e} m.\n{}\n{}\n{}\n{}".format(element_size, str1, str2, str3, str4))
 
-        mesh_part(element_size=element_size, phased_array=self.phased_array)
+        num_nodes = mesh_part(element_size=element_size, phased_array=self.phased_array)
 
         # ASSEMBLY MODULE ----------------------------------------------------------------------------------------------
         # create assembly and instantiate the plate
@@ -115,8 +118,8 @@ class FEModel:
         simulation_duration = self.propagation_distance / min_phase_velocity
         create_step_dynamic_explicit(time_period=simulation_duration, max_increment=max_time_increment)
         info_str = ("Abaqus/Explicit time increment\n" +
-                    "total sim duration: {:.2f}e-3 s\n".format(simulation_duration * 1e3) +
-                    "max time increment: {:.2f}e-6 s\n".format(max_time_increment * 1e6) +
+                    "total sim duration: {:.5e} s\n".format(simulation_duration) +
+                    "max time increment: {:.2e} s\n".format(max_time_increment) +
                     "min steps needed:   {:d} steps".format(int(simulation_duration / max_time_increment)))
         log_info(info_str)
 
@@ -124,7 +127,6 @@ class FEModel:
         for piezo in self.phased_array:
             if piezo.signal is not None:
                 add_piezo_load(piezo, max_time_increment)
-                #add_amplitude(signal=piezo.signal, excitation_id=piezo.id, max_time_increment=max_time_increment)
 
         # # add point force with tabular amplitude data
         # pos_x, pos_y, pos_z = self.excitation.coordinates
@@ -136,6 +138,15 @@ class FEModel:
         # beautify_set_colors(self.phased_array)
 
         # JOB MODULE ---------------------------------------------------------------------------------------------------
+
+        # LOGGING ------------------------------------------------------------------------------------------------------
+        print("DATA: {} nodes, {:.5e} s sim duration, {} nodes per thickness"
+              ", {} nodes per wavelength".format(num_nodes, simulation_duration,
+                                                 self.nodes_per_wavelength,
+                                                 self.elements_in_thickness_direction))
+
+    def write_input(self):
+        write_input_file(self.sim_name)
 
     def determine_max_simulation_frequency(self):
 

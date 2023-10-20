@@ -25,6 +25,15 @@ def log_helper(type_of_log, text):
     print("\n\n")
 
 
+def append_text_to_file(text, filename):
+    try:
+        with open(filename, 'a') as file:
+            file.write(text)
+    except FileNotFoundError:
+        with open(filename, 'w') as file:
+            file.write(text)
+
+
 def split_string_with_whitespace(text, line_length):
     lines = []
     current_line = ""

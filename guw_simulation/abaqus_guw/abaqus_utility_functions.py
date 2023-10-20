@@ -241,7 +241,8 @@ def add_amplitude(signal, excitation_id, max_time_increment):
 def add_piezo_load(piezo, max_time_increment):
     # generate time data
     time_data_table = []
-    for t in np.arange(start=piezo.signal.dt, stop=piezo.signal.dt + piezo.signal.get_duration() * 1.01, step=max_time_increment / 2):
+    for t in np.arange(start=piezo.signal.dt, stop=piezo.signal.dt + piezo.signal.get_duration() * 1.01,
+                       step=max_time_increment / 2):
         time_data_table.append((t, piezo.signal.get_value_at(t=t)))
 
     # create amplitude in Abaqus
@@ -323,6 +324,7 @@ def mesh_part(element_size, phased_array):
 
     meshStats = p.getMeshStats()
     log_info("The FE model has {} nodes.".format(meshStats.numNodes))
+    return meshStats.numNodes
 
 
 def create_assembly_instantiate_part():
@@ -383,9 +385,10 @@ def create_step_dynamic_explicit(time_period, max_increment):
                                                 maxIncrement=max_increment,
                                                 nlgeom=OFF)
     session.viewports['Viewport: 1'].assemblyDisplay.setValues(step=STEP_NAME)
+    # mdb.models[MODEL_NAME].fieldOutputRequests['F-Output-1'].setValues(variables=(
+    #     'S', 'E', 'U'), timeInterval=max_increment)
     mdb.models[MODEL_NAME].fieldOutputRequests['F-Output-1'].setValues(variables=(
-        'S', 'SVAVG', 'PE', 'PEVAVG', 'PEEQ', 'PEEQVAVG', 'LE', 'U', 'V', 'A',
-        'EVF'), timeInterval=EVERY_TIME_INCREMENT)
+        'S', 'E', 'U'), numIntervals=10)
 
 
 # deprecated functions -------------------------------------------------------------------------------------------------
@@ -434,3 +437,14 @@ def add_concentrated_force(pos_x, pos_y, pos_z, amplitude, excitation_id):
                                              distributionType=UNIFORM,
                                              field='',
                                              localCsys=None)
+
+
+def write_input_file(job_name):
+    mdb.Job(name=job_name, model=MODEL_NAME, description='', type=ANALYSIS,
+            atTime=None, waitMinutes=0, waitHours=0, queue=None, memory=90,
+            memoryUnits=PERCENTAGE, explicitPrecision=SINGLE,
+            nodalOutputPrecision=SINGLE, echoPrint=OFF, modelPrint=OFF,
+            contactPrint=OFF, historyPrint=OFF, userSubroutine='', scratch='',
+            resultsFormat=ODB, parallelizationMethodExplicit=DOMAIN, numDomains=4,
+            activateLoadBalancing=False, multiprocessingMode=DEFAULT, numCpus=4)
+    mdb.jobs[job_name].writeInput(consistencyChecking=OFF)
