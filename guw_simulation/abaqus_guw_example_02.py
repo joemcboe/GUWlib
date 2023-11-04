@@ -52,6 +52,7 @@ phased_array = [PiezoElement(diameter=piezo_radius*2,
 fe_model = FEModel(plate=plate, phased_array=phased_array, defects=defects, max_frequency=200e3)
 fe_model.nodes_per_wavelength = 8
 fe_model.elements_in_thickness_direction = 4
+fe_model.model_approach = 'point_force'
 
 # generate in abaqus
-fe_model.setup_in_abaqus(mode='frequency_domain')
+fe_model.setup_in_abaqus()

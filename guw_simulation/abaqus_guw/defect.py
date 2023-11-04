@@ -5,6 +5,9 @@ class Hole:
         self.position_y = position_y
         self.guideline_option = guideline_option
 
+        # private properties
+        self.id = None
+
 
 class Crack:
     def __init__(self):

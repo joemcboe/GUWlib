@@ -7,6 +7,7 @@ class PiezoElement:
         self.material = material
         self.signal = signal
 
+        # private properties
         self.id = None
         self.wall_face_set_name = None
         self.set_name = None

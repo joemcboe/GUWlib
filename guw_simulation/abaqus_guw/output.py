@@ -1,4 +1,4 @@
-LINE_LENGTH = 80
+LINE_LENGTH = 100
 
 
 def log_info(text):
