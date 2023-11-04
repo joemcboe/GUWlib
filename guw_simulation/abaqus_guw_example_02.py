@@ -22,7 +22,7 @@ from abaqus_guw.defect import *
 PHASED_ARRAY_RADIUS = 0.05
 PHASED_ARRAY_N_ELEMENTS = 9
 PLATE_THICKNESS = 3e-3
-PLATE_WIDTH = 0.5
+PLATE_WIDTH = 0.2
 
 # create an instance of isotropic plate
 plate = IsotropicPlate(material='aluminum',
@@ -33,37 +33,25 @@ plate = IsotropicPlate(material='aluminum',
 # add defects
 defects = [Hole(position_x=6e-3, position_y=20e-3, radius=2e-3)]
 
-# add piezo elements and arrange in circular phased array
-phased_array = []
-phi = np.linspace(0, 2 * np.pi, PHASED_ARRAY_N_ELEMENTS + 1)
-pos_x = PHASED_ARRAY_RADIUS * np.cos(phi) + PLATE_WIDTH / 2
-pos_y = PHASED_ARRAY_RADIUS * np.sin(phi) + PLATE_WIDTH / 2
-for i in range(len(phi) - 1):
-    phased_array.append(PiezoElement(diameter=16e-3,
-                                     thickness=0.2e-3,
-                                     position_x=pos_x[i],
-                                     position_y=pos_y[i],
-                                     material='pic255'))
+# add two piezo elements
+piezo_radius = 8e-3
+piezo_thickness = 0.2e-3
+phased_array = [PiezoElement(diameter=piezo_radius*2,
+                             thickness=piezo_thickness,
+                             position_x=PLATE_WIDTH*0.33,
+                             position_y=PLATE_WIDTH*0.5,
+                             material='pic255'),
+                PiezoElement(diameter=piezo_radius * 2,
+                             thickness=piezo_thickness,
+                             position_x=PLATE_WIDTH * 0.66,
+                             position_y=PLATE_WIDTH * 0.5,
+                             material='pic255')]
 
-# piezo_pos_x = PLATE_WIDTH/2
-# piezo_pos_y = PLATE_WIDTH/2
-# piezo_radius = 9.25e-3
-# piezo_thickness = 0.2e-3
-# phased_array = [PiezoElement(diameter=piezo_radius*2,
-#                              thickness=piezo_thickness,
-#                              position_x=piezo_pos_x,
-#                              position_y=piezo_pos_y,
-#                              material='pic255')]
-
-# create a burst input signal and add to first piezo element
-burst = Burst(carrier_frequency=100e3, n_cycles=3, dt=0, window='hanning')
-phased_array[0].signal = burst
 
 # create FE model from plate, defects and phased array
-fe_model = FEModel(plate=plate, phased_array=phased_array, defects=defects)
+fe_model = FEModel(plate=plate, phased_array=phased_array, defects=defects, max_frequency=200e3)
 fe_model.nodes_per_wavelength = 8
 fe_model.elements_in_thickness_direction = 4
-fe_model.propagation_distance = 0.25
 
 # generate in abaqus
-fe_model.setup_in_abaqus(mode='time_domain')
+fe_model.setup_in_abaqus(mode='frequency_domain')

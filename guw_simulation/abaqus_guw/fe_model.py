@@ -39,7 +39,7 @@ class FEModel:
         self.max_frequency = max_frequency
         self.sim_name = sim_name
 
-    def setup_in_abaqus(self):
+    def setup_in_abaqus(self, mode='time_domain'):
 
         # PART MODULE --------------------------------------------------------------------------------------------------
         # plate geometry
@@ -59,7 +59,8 @@ class FEModel:
             piezo.id = i
             create_piezo_element(plate=self.plate, piezo_element=piezo)
             if piezo.signal is not None:
-                log_info("Piezo element {} signal: kHz {}-cycle Burst".format(i, piezo.signal.carrier_frequency*1e-3, piezo.signal.n_cycles))
+                log_info("Piezo element {} signal: kHz {}-cycle Burst".format(i, piezo.signal.carrier_frequency * 1e-3,
+                                                                              piezo.signal.n_cycles))
 
         log_info("Added " + str(len(self.phased_array)) + " piezo elements.")
 
@@ -100,33 +101,46 @@ class FEModel:
 
         num_nodes = mesh_part(element_size=element_size, phased_array=self.phased_array)
 
+        for piezo in self.phased_array:
+            print_generate_area_vector(set_name=piezo.set_name)
+
         # ASSEMBLY MODULE ----------------------------------------------------------------------------------------------
         # create assembly and instantiate the plate
         create_assembly_instantiate_part()
         log_info("Plate instantiated in new assembly")
 
         # STEP MODULE --------------------------------------------------------------------------------------------------
-        # add dynamic explicit step
-        max_time_increment_condition_1 = (0.5 / ((self.nodes_per_wavelength - 1) * max_exciting_frequency))
-        max_time_increment_condition_2 = 1 / max_exciting_frequency
-        max_time_increment = min(max_time_increment_condition_1, max_time_increment_condition_2)
-        wavelengths = get_lamb_wavelength(material=self.plate.material,
-                                          thickness=self.plate.thickness,
-                                          frequency=max_exciting_frequency)
-        min_wavelength = min(min(wavelengths[0]), min(wavelengths[1]))
-        min_phase_velocity = min_wavelength * max_exciting_frequency
-        simulation_duration = self.propagation_distance / min_phase_velocity
-        create_step_dynamic_explicit(time_period=simulation_duration, max_increment=max_time_increment)
-        info_str = ("Abaqus/Explicit time increment\n" +
-                    "total sim duration: {:.5e} s\n".format(simulation_duration) +
-                    "max time increment: {:.2e} s\n".format(max_time_increment) +
-                    "min steps needed:   {:d} steps".format(int(simulation_duration / max_time_increment)))
-        log_info(info_str)
+
+        if mode == 'time_domain':
+            # add dynamic explicit step
+            max_time_increment_condition_1 = (0.5 / ((self.nodes_per_wavelength - 1) * max_exciting_frequency))
+            max_time_increment_condition_2 = 1 / max_exciting_frequency
+            max_time_increment = min(max_time_increment_condition_1, max_time_increment_condition_2)
+            wavelengths = get_lamb_wavelength(material=self.plate.material,
+                                              thickness=self.plate.thickness,
+                                              frequency=max_exciting_frequency)
+            min_wavelength = min(min(wavelengths[0]), min(wavelengths[1]))
+            min_phase_velocity = min_wavelength * max_exciting_frequency
+            simulation_duration = self.propagation_distance / min_phase_velocity
+            create_step_dynamic_explicit(time_period=simulation_duration, max_increment=max_time_increment)
+            info_str = ("Abaqus/Explicit time increment\n" +
+                        "total sim duration: {:.5e} s\n".format(simulation_duration) +
+                        "max time increment: {:.2e} s\n".format(max_time_increment) +
+                        "min steps needed:   {:d} steps".format(int(simulation_duration / max_time_increment)))
+            log_info(info_str)
+
+        if mode == 'frequency_domain':
+            log_error('Frequency domain is not supported yet. No step created.')
+            pass
 
         # LOAD MODULE --------------------------------------------------------------------------------------------------
-        for piezo in self.phased_array:
-            if piezo.signal is not None:
-                add_piezo_load(piezo, max_time_increment)
+        if mode == 'time_domain':
+            for piezo in self.phased_array:
+                if piezo.signal is not None:
+                    add_piezo_load(piezo, max_time_increment)
+
+        if mode == 'frequency_domain':
+            pass
 
         # # add point force with tabular amplitude data
         # pos_x, pos_y, pos_z = self.excitation.coordinates
@@ -140,10 +154,11 @@ class FEModel:
         # JOB MODULE ---------------------------------------------------------------------------------------------------
 
         # LOGGING ------------------------------------------------------------------------------------------------------
-        print("DATA: {} nodes, {:.5e} s sim duration, {} nodes per thickness"
-              ", {} nodes per wavelength".format(num_nodes, simulation_duration,
-                                                 self.nodes_per_wavelength,
-                                                 self.elements_in_thickness_direction))
+        if mode == 'time_domain':
+            print("DATA: {} nodes, {:.5e} s sim duration, {} nodes per thickness"
+                  ", {} nodes per wavelength".format(num_nodes, simulation_duration,
+                                                     self.nodes_per_wavelength,
+                                                     self.elements_in_thickness_direction))
 
     def write_input(self):
         write_input_file(self.sim_name)
@@ -176,14 +191,14 @@ class FEModel:
                          "piezo elements to a value of {:.2f} kHz ".format(max_piezo_frequency * 1e-3))
                 return max_piezo_frequency
 
-            elif max_piezo_frecuency > self.max_frequency:
+            elif max_piezo_frequency > self.max_frequency:
                 log_info("Maximum frequency excited by the piezo elements is {:.2f}, which is higher than the requested"
                          "maximum frequency of {:.2f} kHz.\nSetting the maximum frequency of this simulation to a "
                          "value of {:.2f} kHz.".format(self.max_frequency * 1e-3, max_piezo_frequency * 1e-3,
                                                        max_piezo_frequency * 1e-3, ))
                 return max_piezo_frequency
 
-            elif max_piezo_frecuency < self.max_frequency:
+            elif max_piezo_frequency < self.max_frequency:
                 log_info("\nSetting the maximum frequency of this simulation to the requested value of {:.2f} kHz.\n"
                          "(This might be an unnecessarily high value since the maximum frequency excited by the piezo "
                          "elements is {:.2f}) kHz".format(self.max_frequency * 1e-3, max_piezo_frequency * 1e-3))

@@ -448,3 +448,11 @@ def write_input_file(job_name):
             resultsFormat=ODB, parallelizationMethodExplicit=DOMAIN, numDomains=4,
             activateLoadBalancing=False, multiprocessingMode=DEFAULT, numCpus=4)
     mdb.jobs[job_name].writeInput(consistencyChecking=OFF)
+
+
+def print_generate_area_vector(set_name):
+    print(set_name)
+    p = mdb.models[MODEL_NAME].parts[PART_NAME]
+    for element in p.sets[set_name].cells[0].getElements():
+        for face in element.getElemFaces():
+            pass
