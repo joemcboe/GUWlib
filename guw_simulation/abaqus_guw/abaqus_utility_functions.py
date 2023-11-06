@@ -254,66 +254,6 @@ def _add_bounding_box_to_plate(plate, lower_left_coord, upper_right_coord, bound
                    name=PLATE_CELL_NAME)
 
 
-# STEP / LOAD MODULE HELPER FUNCTIONS ----------------------------------------------------------------------------------
-def create_step_dynamic_explicit(step_name, previous_step_name, time_period, max_increment):
-    # create dynamic, explicit step
-    m = mdb.models[MODEL_NAME]
-    m.ExplicitDynamicsStep(name=step_name,
-                           previous=previous_step_name if previous_step_name is not None else 'Initial',
-                           description='',
-                           timePeriod=time_period,
-                           maxIncrement=max_increment,
-                           nlgeom=OFF)
-
-
-def remove_standard_field_output_request():
-    # delete standard field
-    if 'F-Output-1' in mdb.models[MODEL_NAME].fieldOutputRequests:
-        del mdb.models[MODEL_NAME].fieldOutputRequests['F-Output-1']
-
-
-def add_piezo_signal_history_output_request(phased_array, create_step_name):
-    for i, piezo in enumerate(phased_array):
-        a = mdb.models[MODEL_NAME].rootAssembly
-        region_def = a.instances[INSTANCE_NAME].sets[piezo.set_name]
-        mdb.models[MODEL_NAME].HistoryOutputRequest(name='piezo_{}_out'.format(i),
-                                                    createStepName=create_step_name,
-                                                    variables=('U1', 'U2', 'U3'),
-                                                    frequency=1,
-                                                    region=region_def,
-                                                    sectionPoints=DEFAULT,
-                                                    rebar=EXCLUDE)
-
-
-def add_amplitude(name, signal, max_time_increment):
-    # generate time data
-    if isinstance(signal, DiracImpulse):
-        # impulses are handled differently than other signals to ensure that the impulse is only
-        # nonzero for the very first Abaqus/Explicit increment
-        time_data_table = [(0, signal.magnitude), (max_time_increment * 1e-2, 0)]
-    else:
-        # all other signals besides impulses can be sampled from the signal definition in their method 'get_value_at'
-        time_data_table = []
-        for t in np.arange(start=signal.dt, stop=signal.dt + signal.get_duration() * 1.01, step=max_time_increment / 2):
-            time_data_table.append((t, signal.get_value_at(t=t)))
-
-    # create amplitude in Abaqus
-    mdb.models[MODEL_NAME].TabularAmplitude(name=name,
-                                            timeSpan=STEP,
-                                            smooth=SOLVER_DEFAULT,
-                                            data=tuple(time_data_table))
-
-
-def add_piezo_point_force(load_name, step_name, piezo, signal, max_time_increment):
-    add_amplitude(load_name, signal, max_time_increment)
-    a = mdb.models[MODEL_NAME].rootAssembly
-    region = a.instances[INSTANCE_NAME].sets[piezo.set_name]
-    mdb.models[MODEL_NAME].ConcentratedForce(name=load_name,
-                                             createStepName=step_name, region=region, cf3=1.0,
-                                             amplitude=load_name, distributionType=UNIFORM,
-                                             field='', localCsys=None)
-
-
 # PROPERTY MODULE HELPER FUNCTIONS -------------------------------------------------------------------------------------
 def create_material(material_name):
     try:
@@ -398,6 +338,72 @@ def make_datums_invisible():
         datumCoordSystems=OFF)
 
 
+# STEP / LOAD MODULE HELPER FUNCTIONS ----------------------------------------------------------------------------------
+def create_step_dynamic_explicit(step_name, previous_step_name, time_period, max_increment):
+    # create dynamic, explicit step
+    m = mdb.models[MODEL_NAME]
+    m.ExplicitDynamicsStep(name=step_name,
+                           previous=previous_step_name if previous_step_name is not None else 'Initial',
+                           description='',
+                           timePeriod=time_period,
+                           maxIncrement=max_increment,
+                           nlgeom=OFF)
+
+
+def remove_standard_field_output_request():
+    # delete standard field output request
+    if 'F-Output-1' in mdb.models[MODEL_NAME].fieldOutputRequests:
+        del mdb.models[MODEL_NAME].fieldOutputRequests['F-Output-1']
+
+
+def add_piezo_signal_history_output_request(phased_array, create_step_name):
+    for i, piezo in enumerate(phased_array):
+        a = mdb.models[MODEL_NAME].rootAssembly
+        region_def = a.instances[INSTANCE_NAME].sets[piezo.set_name]
+        mdb.models[MODEL_NAME].HistoryOutputRequest(name='piezo_{}_out'.format(i),
+                                                    createStepName=create_step_name,
+                                                    variables=('U1', 'U2', 'U3'),
+                                                    frequency=1,
+                                                    region=region_def,
+                                                    sectionPoints=DEFAULT,
+                                                    rebar=EXCLUDE)
+
+
+def add_field_output_request(create_step_name):
+    mdb.models[MODEL_NAME].FieldOutputRequest(name='full_field_{}'.format(create_step_name),
+                                              createStepName=create_step_name, variables=('U',),
+                                              ntimeInterval=EVERY_TIME_INCREMENT, position=NODES)
+
+
+def add_amplitude(name, signal, max_time_increment):
+    # generate time data
+    if isinstance(signal, DiracImpulse):
+        # impulses are handled differently than other signals to ensure that the impulse is only
+        # nonzero for the very first Abaqus/Explicit increment
+        time_data_table = [(0, signal.magnitude), (max_time_increment * 1e-2, 0)]
+    else:
+        # all other signals besides impulses can be sampled from the signal definition in their method 'get_value_at'
+        time_data_table = []
+        for t in np.arange(start=signal.dt, stop=signal.dt + signal.get_duration() * 1.01, step=max_time_increment / 2):
+            time_data_table.append((t, signal.get_value_at(t=t)))
+
+    # create amplitude in Abaqus
+    mdb.models[MODEL_NAME].TabularAmplitude(name=name,
+                                            timeSpan=STEP,
+                                            smooth=SOLVER_DEFAULT,
+                                            data=tuple(time_data_table))
+
+
+def add_piezo_point_force(load_name, step_name, piezo, signal, max_time_increment):
+    add_amplitude(load_name, signal, max_time_increment)
+    a = mdb.models[MODEL_NAME].rootAssembly
+    region = a.instances[INSTANCE_NAME].sets[piezo.set_name]
+    mdb.models[MODEL_NAME].ConcentratedForce(name=load_name,
+                                             createStepName=step_name, region=region, cf3=1.0,
+                                             amplitude=load_name, distributionType=UNIFORM,
+                                             field='', localCsys=None)
+
+
 # deprecated functions -------------------------------------------------------------------------------------------------
 def save_viewport_to_png(center_x, center_y):
     # function to save a screenshot of the Abaqus viewport to a png file
@@ -418,34 +424,6 @@ def save_viewport_to_png(center_x, center_y):
     log_info('Saved screenshot.')
 
 
-# def add_vertex_to_plate(pos_x, pos_y):
-#     id_cut_plane = [float("nan")] * 2
-#     p = mdb.models[MODEL_NAME].parts[PART_NAME]
-#     id_cut_plane[0] = p.DatumPlaneByPrincipalPlane(principalPlane=YZPLANE, offset=pos_x).id
-#     id_cut_plane[1] = p.DatumPlaneByPrincipalPlane(principalPlane=XZPLANE, offset=pos_y).id
-#     for i in range(2):
-#         try:
-#             p.PartitionCellByDatumPlane(datumPlane=p.datums[id_cut_plane[i]], cells=p.cells)
-#         except:
-#             log_warning('No partition created for excitation.')
-
-
-# def add_concentrated_force(pos_x, pos_y, pos_z, amplitude, excitation_id):
-#     set_name = "set-concentrated-force-{}".format(excitation_id)
-#     a = mdb.models[MODEL_NAME].rootAssembly
-#     v1 = a.instances[INSTANCE_NAME].vertices
-#     verts1 = v1.findAt(coordinates=((pos_x, pos_y, pos_z),))
-#     region = a.Set(vertices=verts1, name=set_name)
-#     mdb.models[MODEL_NAME].ConcentratedForce(name='point-load-{}'.format(excitation_id),
-#                                              createStepName=STEP_NAME,
-#                                              region=region,
-#                                              cf3=amplitude,
-#                                              amplitude='amp-{}'.format(excitation_id),
-#                                              distributionType=UNIFORM,
-#                                              field='',
-#                                              localCsys=None)
-
-
 def remove_all_steps():
     model = mdb.models[MODEL_NAME]
     for step_name in reversed(model.steps.keys()):
@@ -455,6 +433,7 @@ def remove_all_steps():
 
 def write_input_file(job_name, num_cpus=1):
     if num_cpus == 1:
+        pass
         mdb.Job(name=job_name, model=MODEL_NAME, description='', type=ANALYSIS,
                 atTime=None, waitMinutes=0, waitHours=0, queue=None, memory=90,
                 memoryUnits=PERCENTAGE, explicitPrecision=SINGLE,
@@ -469,7 +448,7 @@ def write_input_file(job_name, num_cpus=1):
                 contactPrint=OFF, historyPrint=OFF, userSubroutine='', scratch='',
                 resultsFormat=ODB, parallelizationMethodExplicit=DOMAIN, numDomains=num_cpus,
                 activateLoadBalancing=False, multiprocessingMode=DEFAULT, numCpus=num_cpus)
-    mdb.jobs[job_name].writeInput(consistencyChecking=OFF)
+    # mdb.jobs[job_name].writeInput(consistencyChecking=OFF)
 
 
 def print_generate_area_vector(set_name):
@@ -676,3 +655,31 @@ def create_piezo_element(plate, piezo_element):
     #                                            center2=(piezo_pos_x, piezo_pos_y, plate.thickness + piezo_thickness),
     #                                            radius=piezo_radius)
     # p.Set(faces=face_array, name=piezo_wall_face_set_name)
+
+
+# def add_vertex_to_plate(pos_x, pos_y):
+#     id_cut_plane = [float("nan")] * 2
+#     p = mdb.models[MODEL_NAME].parts[PART_NAME]
+#     id_cut_plane[0] = p.DatumPlaneByPrincipalPlane(principalPlane=YZPLANE, offset=pos_x).id
+#     id_cut_plane[1] = p.DatumPlaneByPrincipalPlane(principalPlane=XZPLANE, offset=pos_y).id
+#     for i in range(2):
+#         try:
+#             p.PartitionCellByDatumPlane(datumPlane=p.datums[id_cut_plane[i]], cells=p.cells)
+#         except:
+#             log_warning('No partition created for excitation.')
+
+
+# def add_concentrated_force(pos_x, pos_y, pos_z, amplitude, excitation_id):
+#     set_name = "set-concentrated-force-{}".format(excitation_id)
+#     a = mdb.models[MODEL_NAME].rootAssembly
+#     v1 = a.instances[INSTANCE_NAME].vertices
+#     verts1 = v1.findAt(coordinates=((pos_x, pos_y, pos_z),))
+#     region = a.Set(vertices=verts1, name=set_name)
+#     mdb.models[MODEL_NAME].ConcentratedForce(name='point-load-{}'.format(excitation_id),
+#                                              createStepName=STEP_NAME,
+#                                              region=region,
+#                                              cf3=amplitude,
+#                                              amplitude='amp-{}'.format(excitation_id),
+#                                              distributionType=UNIFORM,
+#                                              field='',
+#                                              localCsys=None)

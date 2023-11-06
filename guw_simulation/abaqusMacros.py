@@ -103,3 +103,55 @@ def inpfile():
         resultsFormat=ODB)
 
 
+def fullfield():
+    import section
+    import regionToolset
+    import displayGroupMdbToolset as dgm
+    import part
+    import material
+    import assembly
+    import step
+    import interaction
+    import load
+    import mesh
+    import optimization
+    import job
+    import sketch
+    import visualization
+    import xyPlot
+    import displayGroupOdbToolset as dgo
+    import connectorBehavior
+    a = mdb.models['Model-1'].rootAssembly
+    session.viewports['Viewport: 1'].setValues(displayedObject=a)
+    session.viewports['Viewport: 1'].assemblyDisplay.setValues(
+        step='load_case_7_control_step')
+    session.viewports['Viewport: 1'].assemblyDisplay.setValues(
+        adaptiveMeshConstraints=ON)
+    mdb.models['Model-1'].FieldOutputRequest(name='F-Output-1', 
+        createStepName='load_case_7_control_step', variables=('U', ), 
+        numIntervals=200, timeMarks=ON, position=NODES)
+
+
+def fullfield_2():
+    import section
+    import regionToolset
+    import displayGroupMdbToolset as dgm
+    import part
+    import material
+    import assembly
+    import step
+    import interaction
+    import load
+    import mesh
+    import optimization
+    import job
+    import sketch
+    import visualization
+    import xyPlot
+    import displayGroupOdbToolset as dgo
+    import connectorBehavior
+    mdb.models['Model-1'].FieldOutputRequest(name='F-Output-2', 
+        createStepName='load_case_7_control_step', variables=('U', ), 
+        timeInterval=EVERY_TIME_INCREMENT, position=NODES)
+
+
