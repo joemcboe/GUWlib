@@ -18,7 +18,7 @@ import displayGroupMdbToolset as dgm
 import part
 import material
 import assembly
-import step
+import load_case
 import interaction
 import load
 import mesh
@@ -33,9 +33,9 @@ import connectorBehavior
 import numpy as np
 import datetime
 
-from .materials import get_material_properties
+from .materials import *
 from .output import *
-import time
+from .signals import *
 
 PART_NAME = 'plate'
 MODEL_NAME = 'Model-1'
@@ -48,7 +48,7 @@ PLATE_TOP_FACE_NAME = 'plate-top-surface'
 PLATE_SET_NAME = 'plate-material'
 
 PIEZO_CELL_NAME = 'piezo'
-HOLE_CELL_NAME = 'hole'
+DEFECT_CELL_NAME = 'defect'
 BOUNDBOX_CELL_NAME = 'bounding_box'
 
 
@@ -90,7 +90,7 @@ def create_circular_hole_in_plate(plate, hole):
 
     # constants
     boundbox_scale = 2.5
-    boundbox_cell_name = '{}_{}_{}'.format(HOLE_CELL_NAME, circle_id, BOUNDBOX_CELL_NAME)
+    boundbox_cell_name = '{}_{}_{}'.format(DEFECT_CELL_NAME, circle_id, BOUNDBOX_CELL_NAME)
 
     # add sketch of circle and cut through all
     p = mdb.models[MODEL_NAME].parts[PART_NAME]
@@ -254,32 +254,64 @@ def _add_bounding_box_to_plate(plate, lower_left_coord, upper_right_coord, bound
                    name=PLATE_CELL_NAME)
 
 
-# STEP MODULE HELPER FUNCTIONS -----------------------------------------------------------------------------------------
-def create_step_dynamic_explicit(time_period, max_increment):
-    mdb.models[MODEL_NAME].ExplicitDynamicsStep(name=STEP_NAME,
-                                                previous='Initial',
-                                                description='Lamb wave propagation (time domain)',
-                                                timePeriod=time_period,
-                                                maxIncrement=max_increment,
-                                                nlgeom=OFF)
-    session.viewports['Viewport: 1'].assemblyDisplay.setValues(step=STEP_NAME)
-    # mdb.models[MODEL_NAME].fieldOutputRequests['F-Output-1'].setValues(variables=(
-    #     'S', 'E', 'U'), timeInterval=max_increment)
-    mdb.models[MODEL_NAME].fieldOutputRequests['F-Output-1'].setValues(variables=(
-        'S', 'E', 'U'), numIntervals=10)
+# STEP / LOAD MODULE HELPER FUNCTIONS ----------------------------------------------------------------------------------
+def create_step_dynamic_explicit(step_name, previous_step_name, time_period, max_increment):
+    # create dynamic, explicit step
+    m = mdb.models[MODEL_NAME]
+    m.ExplicitDynamicsStep(name=step_name,
+                           previous=previous_step_name if previous_step_name is not None else 'Initial',
+                           description='',
+                           timePeriod=time_period,
+                           maxIncrement=max_increment,
+                           nlgeom=OFF)
 
 
-def add_amplitude(signal, excitation_id, max_time_increment):
+def remove_standard_field_output_request():
+    # delete standard field
+    if 'F-Output-1' in mdb.models[MODEL_NAME].fieldOutputRequests:
+        del mdb.models[MODEL_NAME].fieldOutputRequests['F-Output-1']
+
+
+def add_piezo_signal_history_output_request(phased_array, create_step_name):
+    for i, piezo in enumerate(phased_array):
+        a = mdb.models[MODEL_NAME].rootAssembly
+        region_def = a.instances[INSTANCE_NAME].sets[piezo.set_name]
+        mdb.models[MODEL_NAME].HistoryOutputRequest(name='piezo_{}_out'.format(i),
+                                                    createStepName=create_step_name,
+                                                    variables=('U1', 'U2', 'U3'),
+                                                    frequency=1,
+                                                    region=region_def,
+                                                    sectionPoints=DEFAULT,
+                                                    rebar=EXCLUDE)
+
+
+def add_amplitude(name, signal, max_time_increment):
     # generate time data
-    time_data_table = []
-    for t in np.arange(start=signal.dt, stop=signal.dt + signal.get_duration() * 1.01, step=max_time_increment / 2):
-        time_data_table.append((t, signal.get_value_at(t=t)))
+    if isinstance(signal, DiracImpulse):
+        # impulses are handled differently than other signals to ensure that the impulse is only
+        # nonzero for the very first Abaqus/Explicit increment
+        time_data_table = [(0, signal.magnitude), (max_time_increment * 1e-2, 0)]
+    else:
+        # all other signals besides impulses can be sampled from the signal definition in their method 'get_value_at'
+        time_data_table = []
+        for t in np.arange(start=signal.dt, stop=signal.dt + signal.get_duration() * 1.01, step=max_time_increment / 2):
+            time_data_table.append((t, signal.get_value_at(t=t)))
 
-    # create in Abaqus
-    mdb.models[MODEL_NAME].TabularAmplitude(name='amp-piezo-{}'.format(excitation_id),
+    # create amplitude in Abaqus
+    mdb.models[MODEL_NAME].TabularAmplitude(name=name,
                                             timeSpan=STEP,
                                             smooth=SOLVER_DEFAULT,
                                             data=tuple(time_data_table))
+
+
+def add_piezo_point_force(load_name, step_name, piezo, signal, max_time_increment):
+    add_amplitude(load_name, signal, max_time_increment)
+    a = mdb.models[MODEL_NAME].rootAssembly
+    region = a.instances[INSTANCE_NAME].sets[piezo.set_name]
+    mdb.models[MODEL_NAME].ConcentratedForce(name=load_name,
+                                             createStepName=step_name, region=region, cf3=1.0,
+                                             amplitude=load_name, distributionType=UNIFORM,
+                                             field='', localCsys=None)
 
 
 # PROPERTY MODULE HELPER FUNCTIONS -------------------------------------------------------------------------------------
@@ -313,7 +345,7 @@ def assign_material(set_name, material):
 
 
 # MESH MODULE HELPER FUNCTIONS -----------------------------------------------------------------------------------------
-def mesh_part(element_size, phased_array):
+def mesh_part_point_force_approach(element_size, phased_array, defects):
     # set meshing algorithm for plate
     p = mdb.models[MODEL_NAME].parts[PART_NAME]
     p.setMeshControls(regions=p.sets[PLATE_CELL_NAME].cells, algorithm=MEDIAL_AXIS)
@@ -321,17 +353,19 @@ def mesh_part(element_size, phased_array):
     # set meshing algorithm for piezo elements
     for i in range(len(phased_array)):
         boundbox_cell_name = '{}_{}_{}'.format(PIEZO_CELL_NAME, i, BOUNDBOX_CELL_NAME)
-        piezo_cell_name = '{}_{}'.format(PIEZO_CELL_NAME, i)
         p.setMeshControls(regions=p.sets[boundbox_cell_name].cells, algorithm=MEDIAL_AXIS)
-        p.setMeshControls(regions=p.sets[piezo_cell_name].cells, algorithm=ADVANCING_FRONT)
+
+    for i in range(len(defects)):
+        boundbox_cell_name = '{}_{}_{}'.format(DEFECT_CELL_NAME, i, BOUNDBOX_CELL_NAME)
+        p.setMeshControls(regions=p.sets[boundbox_cell_name].cells, algorithm=MEDIAL_AXIS)
 
     # seed and mesh part with desired element size
     p.seedPart(size=element_size, deviationFactor=0.1, minSizeFactor=0.1)
     p.generateMesh()
 
-    meshStats = p.getMeshStats()
-    log_info("The FE model has {} nodes.".format(meshStats.numNodes))
-    return meshStats.numNodes
+    mesh_stats = p.getMeshStats()
+    log_info("The FE model has {} nodes.".format(mesh_stats.numNodes))
+    return mesh_stats.numNodes
 
 
 # ASSEMBLY MODULE HELPER FUNCTIONS -------------------------------------------------------------------------------------
@@ -412,14 +446,29 @@ def save_viewport_to_png(center_x, center_y):
 #                                              localCsys=None)
 
 
-def write_input_file(job_name):
-    mdb.Job(name=job_name, model=MODEL_NAME, description='', type=ANALYSIS,
-            atTime=None, waitMinutes=0, waitHours=0, queue=None, memory=90,
-            memoryUnits=PERCENTAGE, explicitPrecision=SINGLE,
-            nodalOutputPrecision=SINGLE, echoPrint=OFF, modelPrint=OFF,
-            contactPrint=OFF, historyPrint=OFF, userSubroutine='', scratch='',
-            resultsFormat=ODB, parallelizationMethodExplicit=DOMAIN, numDomains=4,
-            activateLoadBalancing=False, multiprocessingMode=DEFAULT, numCpus=4)
+def remove_all_steps():
+    model = mdb.models[MODEL_NAME]
+    for step_name in reversed(model.steps.keys()):
+        if step_name != 'Initial':
+            del model.steps[step_name]
+
+
+def write_input_file(job_name, num_cpus=1):
+    if num_cpus == 1:
+        mdb.Job(name=job_name, model=MODEL_NAME, description='', type=ANALYSIS,
+                atTime=None, waitMinutes=0, waitHours=0, queue=None, memory=90,
+                memoryUnits=PERCENTAGE, explicitPrecision=SINGLE,
+                nodalOutputPrecision=SINGLE, echoPrint=OFF, modelPrint=OFF,
+                contactPrint=OFF, historyPrint=OFF, userSubroutine='', scratch='',
+                resultsFormat=ODB)
+    else:
+        mdb.Job(name=job_name, model=MODEL_NAME, description='', type=ANALYSIS,
+                atTime=None, waitMinutes=0, waitHours=0, queue=None, memory=90,
+                memoryUnits=PERCENTAGE, explicitPrecision=SINGLE,
+                nodalOutputPrecision=SINGLE, echoPrint=OFF, modelPrint=OFF,
+                contactPrint=OFF, historyPrint=OFF, userSubroutine='', scratch='',
+                resultsFormat=ODB, parallelizationMethodExplicit=DOMAIN, numDomains=num_cpus,
+                activateLoadBalancing=False, multiprocessingMode=DEFAULT, numCpus=num_cpus)
     mdb.jobs[job_name].writeInput(consistencyChecking=OFF)
 
 

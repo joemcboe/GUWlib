@@ -2,8 +2,8 @@
 from .abaqus_utility_functions import *
 from .disperse import *
 from .output import *
-from abaqus_guw.defect import *
-import numpy as np
+from .signals import *
+from .defect import *
 
 DEFAULT_MAX_FREQUENCY = 50e3
 
@@ -18,12 +18,14 @@ class FEModel:
     TODO: add description
     """
 
-    def __init__(self, plate, defects=None, phased_array=None, steps=None,
+    def __init__(self, plate, defects=None, phased_array=None, load_cases=None,
                  model_approach='point_force',
                  max_frequency=None, nodes_per_wavelength=10, elements_in_thickness_direction=4):
 
         if defects is None:
             defects = []
+        if load_cases is None:
+            load_cases = []
 
         # spatial properties (part, property, mesh, assembly module)
         self.plate = plate
@@ -31,9 +33,9 @@ class FEModel:
         self.phased_array = phased_array
 
         # time and loading properties (step, load, job module)
-        self.steps = steps
+        self.load_cases = load_cases
 
-        # modelling approach
+        # modelling approach ('point_force' vs 'piezoelectric')
         self.model_approach = model_approach
 
         # mesh properties
@@ -52,23 +54,23 @@ class FEModel:
             create_plate(plate=self.plate)
             log_info("Created plate geometry: {}".format(self.plate.description))
 
-            # defects geometry
+            # defects geometry --------------------------------------------------------------------------------
             log_txt = ""
             for i, defect in enumerate(self.defects):
                 if isinstance(defect, Hole):
                     defect.id = i
                     create_circular_hole_in_plate(plate=self.plate, hole=defect)
                     log_txt = "{}\n{:g}-mm circular hole at ({:g},{:g}) mm".format(log_txt,
-                                                                             defect.radius*1e3,
-                                                                             defect.position_x*1e3,
-                                                                             defect.position_y*1e3)
+                                                                                   defect.radius * 2e3,
+                                                                                   defect.position_x * 1e3,
+                                                                                   defect.position_y * 1e3)
                 if isinstance(defect, Crack):
                     pass
                     # TODO
 
             log_info("Added {} defect(s):\n{}".format(len(self.defects), log_txt))
 
-            # piezo geometry
+            # piezo geometry ----------------------------------------------------------------------------------
             for i, piezo in enumerate(self.phased_array):
                 piezo.id = i
                 create_piezo_as_point_load(plate=self.plate, piezo_element=piezo)
@@ -115,14 +117,18 @@ class FEModel:
         log_info("Element size set to {:.2e} m.\n"
                  "(Max exciting frequency:   {:.2f} kHz\n"
                  " For {:.0f} nodes per wavelength:   max element size: {:.2e} m\n"
-                 " For {:.0f} elements per thickness: max element size: {:.2e} m"
+                 " For {:.0f} elements per thickness: max element size: {:.2e} m)"
                  "".format(element_size, max_exciting_frequency * 1e-3, self.nodes_per_wavelength,
                            element_size_nodes_per_wavelength, self.elements_in_thickness_direction,
                            element_size_thickness))
 
         if self.model_approach == 'point_force':
+            num_nodes = mesh_part_point_force_approach(element_size=element_size,
+                                                       phased_array=self.phased_array,
+                                                       defects=self.defects)
+
+        if self.model_approach == 'piezoelectric':
             pass
-            # num_nodes = mesh_part(element_size=element_size, phased_array=self.phased_array)
 
         # ASSEMBLY MODULE ----------------------------------------------------------------------------------------------
         # create assembly and instantiate the plate
@@ -130,62 +136,60 @@ class FEModel:
             create_assembly_instantiate_part()
             log_info("Plate instantiated in new assembly")
 
-        # STEP MODULE --------------------------------------------------------------------------------------------------
-        pass
-        # if mode == 'time_domain':
-        #     # add dynamic explicit step
-        #     max_time_increment_condition_1 = (0.5 / ((self.nodes_per_wavelength - 1) * max_exciting_frequency))
-        #     max_time_increment_condition_2 = 1 / max_exciting_frequency
-        #     max_time_increment = min(max_time_increment_condition_1, max_time_increment_condition_2)
-        #     wavelengths = get_lamb_wavelength(material=self.plate.material,
-        #                                       thickness=self.plate.thickness,
-        #                                       frequency=max_exciting_frequency)
-        #     min_wavelength = min(min(wavelengths[0]), min(wavelengths[1]))
-        #     min_phase_velocity = min_wavelength * max_exciting_frequency
-        #     simulation_duration = self.propagation_distance / min_phase_velocity
-        #     create_step_dynamic_explicit(time_period=simulation_duration, max_increment=max_time_increment)
-        #     info_str = ("Abaqus/Explicit time increment\n" +
-        #                 "total sim duration: {:.5e} s\n".format(simulation_duration) +
-        #                 "max time increment: {:.2e} s\n".format(max_time_increment) +
-        #                 "min steps needed:   {:d} steps".format(int(simulation_duration / max_time_increment)))
-        #     log_info(info_str)
-        #
-        # if mode == 'frequency_domain':
-        #     log_error('Frequency domain is not supported yet. No step created.')
-        #     pass
+        # STEP / LOAD / JOB MODULE -------------------------------------------------------------------------------------
+        max_time_increment_condition_1 = (0.5 / ((self.nodes_per_wavelength - 1) * max_exciting_frequency))
+        max_time_increment_condition_2 = 1 / max_exciting_frequency
+        max_time_increment = min(max_time_increment_condition_1, max_time_increment_condition_2)
+        wavelengths = get_lamb_wavelength(material=self.plate.material,
+                                          thickness=self.plate.thickness,
+                                          frequency=max_exciting_frequency)
+        min_wavelength = min(min(wavelengths[0]), min(wavelengths[1]))
+        min_phase_velocity = min_wavelength * max_exciting_frequency
 
-        # LOAD MODULE --------------------------------------------------------------------------------------------------
+        info_str = ("Time discretization:\n" +
+                    "max time increment: {:.2e} s\n".format(max_time_increment))
+        log_info(info_str)
 
-        # if mode == 'time_domain':
-        #     for piezo in self.phased_array:
-        #         if piezo.signal is not None:
-        #             add_piezo_load(piezo, max_time_increment)
-        #
-        # if mode == 'frequency_domain':
-        #     pass
+        if self.model_approach == 'point_force':
+            for i, step in enumerate(self.load_cases):
+                # get maximum excitation frequency for this step # TODO
+                max_exciting_frequency = max_exciting_frequency
+                step_duration = step.propagation_distance / min_phase_velocity
 
-        # # add point force with tabular amplitude data
-        # pos_x, pos_y, pos_z = self.excitation.coordinates
-        # add_amplitude(signal=self.excitation.signal, excitation_id=1, max_time_increment=max_time_increment)
-        # add_concentrated_force(pos_x=pos_x, pos_y=pos_y, pos_z=pos_z, amplitude=1e2, excitation_id=1)
+                # delete all steps except initial
+                remove_all_steps()
+
+                # create new explicit step
+                step_name = 'load_case_{}_{}'.format(i, step.name)
+                create_step_dynamic_explicit(step_name=step_name,
+                                             time_period=step_duration,
+                                             max_increment=max_time_increment,
+                                             previous_step_name='Initial')
+
+                # create history output request for piezo node sets
+                remove_standard_field_output_request()
+                if step.output_request == 'history':
+                    add_piezo_signal_history_output_request(phased_array=self.phased_array,
+                                                            create_step_name=step_name)
+
+                if step.output_request == 'field':
+                    # TODO
+                    pass
+
+                # create all amplitudes and loads
+                for j, signal in enumerate(step.piezo_signals):
+                    if signal is not None:
+                        add_piezo_point_force(load_name='piezo_{}_{}'.format(j, signal.__class__.__name__),
+                                              step_name=step_name,
+                                              piezo=self.phased_array[j],
+                                              signal=signal,
+                                              max_time_increment=max_time_increment)
+
+                # write input file for this load case
+                write_input_file(job_name=step_name, num_cpus=1)
 
         # DISPLAY OPTIONS ----------------------------------------------------------------------------------------------
         make_datums_invisible()
-        # beautify_set_colors(self.phased_array)
-
-        # JOB MODULE ---------------------------------------------------------------------------------------------------
-
-        # LOGGING ------------------------------------------------------------------------------------------------------
-        print("DATA: {} nodes,".format(num_nodes))
-        # if mode == 'time_domain':
-        #     print("DATA: {} nodes, {:.5e} s sim duration, {} nodes per thickness"
-        #           ", {} nodes per wavelength".format(num_nodes, simulation_duration,
-        #                                              self.nodes_per_wavelength,
-        #                                              self.elements_in_thickness_direction))
-
-    def write_input(self):
-        pass
-        #write_input_file(self.sim_name)
 
     def determine_max_simulation_frequency(self):
 

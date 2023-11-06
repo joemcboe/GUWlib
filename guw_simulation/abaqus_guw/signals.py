@@ -10,7 +10,6 @@ class Burst:
         self.n_cycles = n_cycles
         self.dt = dt
         self.window = window
-        pass
 
     def get_value_at(self, t):
         """
@@ -68,16 +67,12 @@ class Burst:
 
         return highest_contained_frequency
 
-    # def plot(self):
-    #     """
-    #     Plots the signal.
-    #     """
-    #     dt = self.dt
-    #     length = self.get_duration()
-    #     t_values = np.linspace(dt - length * 2, dt + length * 3, num=1000)
-    #     y_values = [self.get_value_at(t=t) for t in t_values]
-    #     plt.plot(t_values, y_values, linestyle='-')
-    #     plt.xlabel('t')
-    #     plt.ylabel('y')
-    #     plt.grid(True)
-    #     plt.show()
+
+class DiracImpulse:
+    def __init__(self, magnitude=1):
+        self.magnitude = magnitude
+
+    def get_value_at(self, t):
+        y = t * 0
+        y[0] = self.magnitude
+        return y

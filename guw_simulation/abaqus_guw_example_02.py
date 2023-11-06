@@ -31,7 +31,7 @@ plate = IsotropicPlate(material='aluminum',
                        width=PLATE_WIDTH)
 
 # add defects
-defects = [Hole(position_x=6e-3, position_y=20e-3, radius=2e-3)]
+defects = [Hole(position_x=6e-3, position_y=20e-3, diameter=2e-3)]
 
 # add two piezo elements
 piezo_radius = 8e-3
