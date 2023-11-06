@@ -52,18 +52,17 @@ for i in range(len(phased_array)):
     piezo_signals = [None] * len(phased_array)
     piezo_signals[i] = dirac_impulse
     i_step = LoadCase(name='impulse_piezo_{}'.format(i),
-                      propagation_distance=PLATE_WIDTH,
+                      duration=0.1,
                       piezo_signals=piezo_signals,
                       output_request='history')
     load_cases.append(i_step)
 
 # add one additional step and apply a burst signal on piezo element 2
 burst = Burst(carrier_frequency=300e3, n_cycles=3, dt=0, window='hanning')
-
 piezo_signals = [None] * len(phased_array)
 piezo_signals[i] = burst
 load_cases.append(LoadCase(name='control_step',
-                           propagation_distance=PLATE_WIDTH,
+                           duration=0.1,
                            piezo_signals=piezo_signals,
                            output_request='field'))
 

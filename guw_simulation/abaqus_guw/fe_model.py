@@ -149,17 +149,6 @@ class FEModel:
 
         if self.model_approach == 'point_force':
             for i, step in enumerate(self.load_cases):
-                # # get maximum excitation frequency for this step
-                # all_signals = [signal for signal in step.piezo_signals]
-                # max_exciting_frequency = self.determine_max_signals_frequency(all_signals)
-                #
-                # # get simulation duration for this step
-                # wavelengths = get_lamb_wavelength(material=self.plate.material,
-                #                                   thickness=self.plate.thickness,
-                #                                   frequency=max_exciting_frequency)
-                # min_wavelength = min(min(wavelengths[0]), min(wavelengths[1]))
-                # min_phase_velocity = min_wavelength * max_exciting_frequency
-                step_duration = step.duration
 
                 # delete all steps except initial
                 remove_all_steps()
@@ -167,7 +156,7 @@ class FEModel:
                 # create new explicit step
                 step_name = 'load_case_{}_{}'.format(i, step.name)
                 create_step_dynamic_explicit(step_name=step_name,
-                                             time_period=step_duration,
+                                             time_period=step.duration,
                                              max_increment=max_time_increment,
                                              previous_step_name='Initial')
 
@@ -233,7 +222,7 @@ class FEModel:
             elif max_piezo_frequency > self.max_frequency:
                 info = ("Maximum frequency excited by the piezo elements is {:.2f}, which is higher than the requested"
                         "maximum frequency of {:.2f} kHz.\nSetting the maximum frequency of this simulation to a "
-                        "value of {:.2f} kHz.".format(self.max_frequency * 1e-3, max_piezo_frequency * 1e-3,
+                        "value of {:.2f} kHz.".format(max_piezo_frequency * 1e-3, self.max_frequency * 1e-3,
                                                       max_piezo_frequency * 1e-3, ))
                 return max_piezo_frequency, info
 
@@ -241,4 +230,4 @@ class FEModel:
                 info = ("\nSetting the maximum frequency of this simulation to the requested value of {:.2f} kHz.\n"
                         "(This might be an unnecessarily high value since the maximum frequency excited by the piezo "
                         "elements is {:.2f}) kHz".format(self.max_frequency * 1e-3, max_piezo_frequency * 1e-3))
-                return self.max_frequency
+                return self.max_frequency, info

@@ -29,6 +29,7 @@ import visualization
 import xyPlot
 import displayGroupOdbToolset as dgo
 import connectorBehavior
+import step
 
 import numpy as np
 import datetime
@@ -352,8 +353,9 @@ def create_step_dynamic_explicit(step_name, previous_step_name, time_period, max
 
 def remove_standard_field_output_request():
     # delete standard field output request
-    if 'F-Output-1' in mdb.models[MODEL_NAME].fieldOutputRequests:
-        del mdb.models[MODEL_NAME].fieldOutputRequests['F-Output-1']
+    if hasattr(mdb.models[MODEL_NAME], 'fieldOutputRequests'):
+        if 'F-Output-1' in mdb.models[MODEL_NAME].fieldOutputRequests:
+            del mdb.models[MODEL_NAME].fieldOutputRequests['F-Output-1']
 
 
 def add_piezo_signal_history_output_request(phased_array, create_step_name):
@@ -372,7 +374,7 @@ def add_piezo_signal_history_output_request(phased_array, create_step_name):
 def add_field_output_request(create_step_name):
     mdb.models[MODEL_NAME].FieldOutputRequest(name='full_field_{}'.format(create_step_name),
                                               createStepName=create_step_name, variables=('U',),
-                                              ntimeInterval=EVERY_TIME_INCREMENT, position=NODES)
+                                              timeInterval=EVERY_TIME_INCREMENT, position=NODES)
 
 
 def add_amplitude(name, signal, max_time_increment):
@@ -448,7 +450,7 @@ def write_input_file(job_name, num_cpus=1):
                 contactPrint=OFF, historyPrint=OFF, userSubroutine='', scratch='',
                 resultsFormat=ODB, parallelizationMethodExplicit=DOMAIN, numDomains=num_cpus,
                 activateLoadBalancing=False, multiprocessingMode=DEFAULT, numCpus=num_cpus)
-    # mdb.jobs[job_name].writeInput(consistencyChecking=OFF)
+    mdb.jobs[job_name].writeInput(consistencyChecking=OFF)
 
 
 def print_generate_area_vector(set_name):
