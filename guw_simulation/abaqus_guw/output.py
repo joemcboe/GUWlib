@@ -1,3 +1,5 @@
+import sys
+
 LINE_LENGTH = 100
 
 
@@ -15,6 +17,7 @@ def log_error(text):
 
 def log_helper(type_of_log, text):
     lines = split_string_with_whitespace(text, LINE_LENGTH - 10)
+    # abaqus redirected output stream
     print("\n\n")
     for i in range(len(lines)):
         if i == 0:
@@ -23,6 +26,16 @@ def log_helper(type_of_log, text):
             left_str = " " * 10
         print(left_str + lines[i])
     print("\n\n")
+
+    # standard console output stream
+    for i in range(len(lines)):
+        if i == 0:
+            left_str = "  [" + type_of_log + "]  "
+        else:
+            left_str = " " * 10
+        print >> sys.__stdout__, (left_str + lines[i])
+    print("\n")
+
 
 
 def append_text_to_file(text, filename):

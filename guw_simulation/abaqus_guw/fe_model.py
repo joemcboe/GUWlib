@@ -1,25 +1,43 @@
+"""
+FEModel
+========
+The core module of my example project
+"""
+
 # -*- coding: utf-8 -*-
 from .abaqus_utility_functions import *
 from .disperse import *
 from .output import *
 from .signals import *
 from .defect import *
+from .plate import *
 
 DEFAULT_MAX_FREQUENCY = 50e3
 
 
 class FEModel:
     """
-    A class representing an Abaqus FE model for the simulation of GUW and interaction with defects.
+    Represents an Abaqus Finite Element (FE) model for structural analysis.
 
-    Instances of this class bundle attributes (main components of the FE model) and methods (geometry generation, mesh
-    generation, utility functions) related to the FE model for GUW simulation.
+    This class serves as a container for various components and information needed to set up
+    and perform a finite element analysis using Abaqus.
 
-    TODO: add description
+    :param IsotropicPlate plate: The isotropic plate to be analyzed.
+    :param list[Hole] defects: List of defects.
+    :param list[PiezoElement] phased_array: List of piezo elements for phased array.
+    :param list[LoadCase] load_cases: List of load cases.
+    :param str model_approach: The modeling approach. Choose from:
+
+        - *'point_force'*: Point force modeling.
+        - *'piezo_electric'*: Piezoelectric modeling.
+        - *'pin_force'*: Pin force modeling.
+
+    :param float max_frequency: Maximum frequency for analysis.
+    :param int nodes_per_wavelength: Number of nodes per wavelength.
+    :param int elements_in_thickness_direction: Number of elements in the thickness direction.
     """
 
-    def __init__(self, plate, defects=None, phased_array=None, load_cases=None,
-                 model_approach='point_force',
+    def __init__(self, plate, defects=None, phased_array=None, load_cases=None, model_approach='point_force',
                  max_frequency=None, nodes_per_wavelength=10, elements_in_thickness_direction=4):
 
         if defects is None:
@@ -227,7 +245,7 @@ class FEModel:
                 return max_piezo_frequency, info
 
             elif max_piezo_frequency < self.max_frequency:
-                info = ("\nSetting the maximum frequency of this simulation to the requested value of {:.2f} kHz.\n"
+                info = ("Setting the maximum frequency of this simulation to the requested value of {:.2f} kHz.\n"
                         "(This might be an unnecessarily high value since the maximum frequency excited by the piezo "
                         "elements is {:.2f}) kHz".format(self.max_frequency * 1e-3, max_piezo_frequency * 1e-3))
                 return self.max_frequency, info
