@@ -21,9 +21,7 @@ from abaqus_guw.load_case import *
 
 # parameters
 PLATE_THICKNESS = 3e-3
-PLATE_WIDTH = 0.25
-PHASED_ARRAY_RADIUS = PLATE_WIDTH / 4
-PHASED_ARRAY_N_ELEMENTS = 2
+PLATE_WIDTH = 0.05
 
 # create an instance of isotropic plate --------------------------------------------------------------------------------
 plate = IsotropicPlate(material='aluminum',
@@ -32,20 +30,15 @@ plate = IsotropicPlate(material='aluminum',
                        width=PLATE_WIDTH)
 
 # add defects ----------------------------------------------------------------------------------------------------------
-defects = [Hole(position_x=50e-3, position_y=50e-3, diameter=10e-3)]
+defects = []
 
 # add phased array -----------------------------------------------------------------------------------------------------
-phased_array = []
-phi = np.linspace(0, 2 * np.pi, PHASED_ARRAY_N_ELEMENTS + 1)
-pos_x = PLATE_WIDTH / 2 + PHASED_ARRAY_RADIUS * np.cos(phi)
-pos_y = PLATE_WIDTH / 2 + PHASED_ARRAY_RADIUS * np.sin(phi)
-for i in range(len(phi) - 1):
-    phased_array.append(PiezoElement(position_x=pos_x[i],
-                                     position_y=pos_y[i],
-                                     diameter=18e-3,
-                                     thickness=0.2e-3,
-                                     material='pic255',
-                                     electrode_thickness=1e-4))
+phased_array = [PiezoElement(position_x=PLATE_WIDTH/2,
+                             position_y=PLATE_WIDTH/2,
+                             diameter=18e-3,
+                             thickness=0.2e-3,
+                             material='pic255',
+                             electrode_thickness=1e-4)]
 
 # create FE model from plate, defects and phased array -----------------------------------------------------------------
 fe_model = FEModel(plate=plate, phased_array=phased_array, defects=defects, load_cases=[])

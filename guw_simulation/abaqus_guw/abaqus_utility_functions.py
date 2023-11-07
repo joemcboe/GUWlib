@@ -38,9 +38,9 @@ from .materials import *
 from .output import *
 from .signals import *
 
-PART_NAME = 'plate'
+PLATE_PART_NAME = 'plate'
 MODEL_NAME = 'Model-1'
-INSTANCE_NAME = PART_NAME
+INSTANCE_NAME = PLATE_PART_NAME
 STEP_NAME = 'lamb_excitation'
 
 # these are all sets and should maybe be named as such ...
@@ -61,7 +61,7 @@ def create_plate(plate):
         s1.Line(point1=plate.shape[i], point2=plate.shape[i + 1])
 
     # s1.rectangle(point1=(0.0, 0.0), point2=(plate.width, plate.length))
-    p = mdb.models[MODEL_NAME].Part(name=PART_NAME, dimensionality=THREE_D, type=DEFORMABLE_BODY)
+    p = mdb.models[MODEL_NAME].Part(name=PLATE_PART_NAME, dimensionality=THREE_D, type=DEFORMABLE_BODY)
     p.BaseSolidExtrude(sketch=s1, depth=plate.thickness)
     del mdb.models[MODEL_NAME].sketches['__profile__']
 
@@ -94,7 +94,7 @@ def create_circular_hole_in_plate(plate, hole):
     boundbox_cell_name = '{}_{}_{}'.format(DEFECT_CELL_NAME, circle_id, BOUNDBOX_CELL_NAME)
 
     # add sketch of circle and cut through all
-    p = mdb.models[MODEL_NAME].parts[PART_NAME]
+    p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
     sketch_plane_id = plate.datum_plane_abaqus_id
     sketch_up_edge_id = plate.datum_axis_abaqus_id
     t = p.MakeSketchTransform(sketchPlane=p.datums[sketch_plane_id],
@@ -172,7 +172,7 @@ def create_piezo_as_point_load(plate, piezo_element):
     piezo_element.set_name = piezo_node_set_name
 
     # retrieve Abaqus part and datums
-    p = mdb.models[MODEL_NAME].parts[PART_NAME]
+    p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
     sketch_plane_id = plate.datum_plane_abaqus_id
     sketch_up_edge_id = plate.datum_axis_abaqus_id
 
@@ -214,7 +214,7 @@ def create_piezo_as_point_load(plate, piezo_element):
 
 def _add_bounding_box_to_plate(plate, lower_left_coord, upper_right_coord, boundbox_cell_name):
     # retrieve Abaqus part and datums
-    p = mdb.models[MODEL_NAME].parts[PART_NAME]
+    p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
     sketch_plane_id = plate.datum_plane_abaqus_id
     sketch_up_edge_id = plate.datum_axis_abaqus_id
 
@@ -276,7 +276,7 @@ def assign_material(set_name, material):
         thickness=None)
 
     # create new set containing all cells and assign section to set
-    p = mdb.models[MODEL_NAME].parts[PART_NAME]
+    p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
     p.SectionAssignment(region=p.sets[set_name],
                         sectionName=section_name,
                         offset=0.0,
@@ -288,7 +288,7 @@ def assign_material(set_name, material):
 # MESH MODULE HELPER FUNCTIONS -----------------------------------------------------------------------------------------
 def mesh_part_point_force_approach(element_size, phased_array, defects):
     # set meshing algorithm for plate
-    p = mdb.models[MODEL_NAME].parts[PART_NAME]
+    p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
     p.setMeshControls(regions=p.sets[PLATE_CELL_NAME].cells, algorithm=MEDIAL_AXIS)
 
     # set meshing algorithm for piezo elements
@@ -311,7 +311,7 @@ def mesh_part_point_force_approach(element_size, phased_array, defects):
 
 # ASSEMBLY MODULE HELPER FUNCTIONS -------------------------------------------------------------------------------------
 def create_assembly_instantiate_part():
-    p = mdb.models[MODEL_NAME].parts[PART_NAME]
+    p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
     a = mdb.models[MODEL_NAME].rootAssembly
     a.DatumCsysByDefault(CARTESIAN)
     a.Instance(name=INSTANCE_NAME,
@@ -455,7 +455,7 @@ def write_input_file(job_name, num_cpus=1):
 
 def print_generate_area_vector(set_name):
     print(set_name)
-    p = mdb.models[MODEL_NAME].parts[PART_NAME]
+    p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
     for element in p.sets[set_name].cells[0].getElements():
         for face in element.getElemFaces():
             pass
@@ -501,7 +501,7 @@ def add_piezo_load(piezo, max_time_increment):
     surface_name = 'surface-piezo-{}'.format(piezo.id)
 
     assembly = mdb.models[MODEL_NAME].rootAssembly
-    instance = assembly.instances[PART_NAME]
+    instance = assembly.instances[PLATE_PART_NAME]
     region = assembly.Surface(side1Faces=instance.sets[piezo.wall_face_set_name].faces, name=surface_name)
     mdb.models[MODEL_NAME].Pressure(name=load_name,
                                     createStepName=STEP_NAME,
@@ -528,7 +528,7 @@ def create_piezo_element(plate, piezo_element):
     piezo_element.set_name = piezo_cell_name
 
     # create solid extrusion
-    p = mdb.models[MODEL_NAME].parts[PART_NAME]
+    p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
     sketch_plane_id = plate.datum_plane_abaqus_id
     sketch_up_edge_id = plate.datum_axis_abaqus_id
     t = p.MakeSketchTransform(sketchPlane=p.datums[sketch_plane_id],

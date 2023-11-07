@@ -1,11 +1,10 @@
 """
-FEModel
-========
 The core module of my example project
 """
 
 # -*- coding: utf-8 -*-
 from .abaqus_utility_functions import *
+from .abaqus_utility_functions_advanced import *
 from .disperse import *
 from .output import *
 from .signals import *
@@ -67,27 +66,27 @@ class FEModel:
         num_nodes = None
 
         # PART MODULE --------------------------------------------------------------------------------------------------
+        # plate geometry
+        create_plate(plate=self.plate)
+        log_info("Created plate geometry: {}".format(self.plate.description))
+
+        # defects geometry --------------------------------------------------------------------------------
+        log_txt = ""
+        for i, defect in enumerate(self.defects):
+            if isinstance(defect, Hole):
+                defect.id = i
+                create_circular_hole_in_plate(plate=self.plate, hole=defect)
+                log_txt = "{}\n{:g}-mm circular hole at ({:g},{:g}) mm".format(log_txt,
+                                                                               defect.radius * 2e3,
+                                                                               defect.position_x * 1e3,
+                                                                               defect.position_y * 1e3)
+            if isinstance(defect, Crack):
+                pass
+                # TODO
+
+        log_info("Added {} defect(s):\n{}".format(len(self.defects), log_txt))
+
         if self.model_approach == 'point_force':
-            # plate geometry
-            create_plate(plate=self.plate)
-            log_info("Created plate geometry: {}".format(self.plate.description))
-
-            # defects geometry --------------------------------------------------------------------------------
-            log_txt = ""
-            for i, defect in enumerate(self.defects):
-                if isinstance(defect, Hole):
-                    defect.id = i
-                    create_circular_hole_in_plate(plate=self.plate, hole=defect)
-                    log_txt = "{}\n{:g}-mm circular hole at ({:g},{:g}) mm".format(log_txt,
-                                                                                   defect.radius * 2e3,
-                                                                                   defect.position_x * 1e3,
-                                                                                   defect.position_y * 1e3)
-                if isinstance(defect, Crack):
-                    pass
-                    # TODO
-
-            log_info("Added {} defect(s):\n{}".format(len(self.defects), log_txt))
-
             # piezo geometry ----------------------------------------------------------------------------------
             for i, piezo in enumerate(self.phased_array):
                 piezo.id = i
@@ -96,10 +95,12 @@ class FEModel:
             log_info("Added " + str(len(self.phased_array)) + " point forces, representing the piezoelectric"
                                                               " transducers.")
 
-        if self.model_approach == 'piezoelectric':
-            # plate geometry
-            # defects geometry
+        if self.model_approach == 'piezo_electric':
             # piezo geometry
+            for i, piezo in enumerate(self.phased_array):
+                piezo.id = i
+                create_piezo_socket_on_plate(plate=self.plate, piezo_element=piezo)
+                create_piezo_element(plate=self.plate, piezo_element=piezo)
             pass
 
         # PROPERTY MODULE ----------------------------------------------------------------------------------------------
@@ -107,7 +108,7 @@ class FEModel:
             create_material(self.plate.material)
             assign_material(set_name=self.plate.set_name, material=self.plate.material)
 
-        if self.model_approach == 'piezoelectric':
+        if self.model_approach == 'piezo_electric':
             # create all materials needed
             materials = set()
             materials.add(self.plate.material)
@@ -117,10 +118,10 @@ class FEModel:
                 create_material(material)
                 log_info("Material ({}) created.".format(material))
 
-            # assign all materials
-            assign_material(set_name=self.plate.set_name, material=self.plate.material)
-            for piezo in self.phased_array:
-                assign_material(set_name=piezo.set_name, material=piezo.material)
+            # # assign all materials
+            # assign_material(set_name=self.plate.set_name, material=self.plate.material)
+            # for piezo in self.phased_array:
+            #     assign_material(set_name=piezo.set_name, material=piezo.material)
 
         # MESH MODULE --------------------------------------------------------------------------------------------------
         all_signals = [signal for step in self.load_cases for signal in step.piezo_signals]
@@ -148,14 +149,19 @@ class FEModel:
                                                        phased_array=self.phased_array,
                                                        defects=self.defects)
 
-        if self.model_approach == 'piezoelectric':
-            pass
+        if self.model_approach == 'piezo_electric':
+            num_nodes = mesh_part_piezo_electric_approach(element_size=element_size,
+                                                          phased_array=self.phased_array,
+                                                          defects=self.defects)
 
         # ASSEMBLY MODULE ----------------------------------------------------------------------------------------------
         # create assembly and instantiate the plate
         if self.model_approach == 'point_force':
             create_assembly_instantiate_part()
             log_info("Plate instantiated in new assembly")
+
+        if self.model_approach == 'piezo_electric':
+            create_assembly_instantiate_plate_piezo_elements(self.plate, self.phased_array)
 
         # STEP / LOAD / JOB MODULE -------------------------------------------------------------------------------------
         max_time_increment_condition_1 = (0.5 / ((self.nodes_per_wavelength - 1) * max_exciting_frequency))

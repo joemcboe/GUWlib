@@ -1,4 +1,5 @@
 """
+abaqus_guw_example_02
 This script generates a non-rectangular Abaqus/CAE plate measuring approximately 0.2 x 0.2 x 0.02 meters. It adds
 a 2 mm diameter through-thickness hole and applies a point force, transmitting a burst signal through it.
 
