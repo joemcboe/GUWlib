@@ -26,11 +26,14 @@ PLATE_WIDTH = 50e-3
 PHASED_ARRAY_RADIUS = PLATE_WIDTH/4
 PHASED_ARRAY_N_ELEMENTS = 3
 
+
+
 # create an instance of isotropic plate --------------------------------------------------------------------------------
 plate = IsotropicPlate(material='aluminum',
                        thickness=PLATE_THICKNESS,
                        length=PLATE_WIDTH,
                        width=PLATE_WIDTH)
+
 
 # add defects ----------------------------------------------------------------------------------------------------------
 defects = [Hole(position_x=40e-3, position_y=40e-3, diameter=4e-3)]

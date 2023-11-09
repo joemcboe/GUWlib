@@ -15,12 +15,24 @@ class PiezoElement:
 
         # private properties
         self.id = None
-        self.wall_face_set_name = None
-        self.set_name = None
+        self.cell_set_name = None
+        self.bounding_box_cell_set_name = None
 
-        # properties for standard/explicit cosimulation
-        self.part_name = None
-        self.xpl_interface_set_name = None
-        self.std_interface_set_name = None
+        # properties only needed for standard/explicit co-simulation ---------------------------------------------------
+        self.piezo_material_cell_set_name = None
+        self.electrode_material_cell_set_name = None
+
+        self.piezo_top_surf_set_name = None
+        self.piezo_bot_surf_set_name = None
+        self.interface_surf_set_name = None
+
+        # electrical contact node sets
+        self.signal_main_node_set_name = None
+        self.gnd_main_node_set_name = None
+        self.signal_slave_node_set_name = None
+        self.gnd_slave_node_set_name = None
+
+
+
 
 

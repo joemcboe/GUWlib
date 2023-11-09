@@ -26,7 +26,7 @@ PLATE_WIDTH = 0.05
 # create an instance of isotropic plate --------------------------------------------------------------------------------
 plate = IsotropicPlate(material='aluminum',
                        thickness=PLATE_THICKNESS,
-                       length=PLATE_WIDTH,
+                       length=PLATE_WIDTH*2,
                        width=PLATE_WIDTH)
 
 # add defects ----------------------------------------------------------------------------------------------------------
@@ -38,10 +38,29 @@ phased_array = [PiezoElement(position_x=PLATE_WIDTH/2,
                              diameter=18e-3,
                              thickness=0.2e-3,
                              material='pic255',
-                             electrode_thickness=1e-4)]
+                             electrode_thickness=1e-4,
+                             electrode_material='silver'),
+                PiezoElement(position_x=PLATE_WIDTH * 3 / 2,
+                             position_y=PLATE_WIDTH / 2,
+                             diameter=18e-3,
+                             thickness=0.2e-3,
+                             material='pic255',
+                             electrode_thickness=1e-4,
+                             electrode_material='silver')]
+
+# create one step / load case ------------------------------------------------------------------------------------------
+# apply a burst signal on piezo element 2
+load_cases = []
+burst = Burst(carrier_frequency=10e3, n_cycles=3, dt=0, window='hanning')
+piezo_signals = [None] * len(phased_array)
+piezo_signals[1] = burst
+load_cases.append(LoadCase(name='control_step',
+                           duration=0.1,
+                           piezo_signals=piezo_signals,
+                           output_request='field'))
 
 # create FE model from plate, defects and phased array -----------------------------------------------------------------
-fe_model = FEModel(plate=plate, phased_array=phased_array, defects=defects, load_cases=[])
+fe_model = FEModel(plate=plate, phased_array=phased_array, defects=defects, load_cases=load_cases)
 fe_model.max_frequency = 40e3
 fe_model.nodes_per_wavelength = 10
 fe_model.elements_in_thickness_direction = 4

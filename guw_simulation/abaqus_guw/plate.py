@@ -17,9 +17,6 @@ class IsotropicPlate:
         """
         self.material = material
         self.thickness = thickness
-        self.datum_plane_abaqus_id = None
-        self.datum_axis_abaqus_id = None
-        self.set_name = None
 
         input_is_rectangle = length is not None and width is not None
         input_is_shape = shape is not None and is_valid_coordinate_list(shape)
@@ -35,6 +32,15 @@ class IsotropicPlate:
         else:
             raise ValueError("Invalid input. Provide either 'shape' as a valid coordinate list or 'length' and "
                              "'width' (but not both).")
+
+        # private attributes
+        self.datum_plane_abaqus_id = None
+        self.datum_axis_abaqus_id = None
+        self.cell_set_name = None
+        self.material_cell_set_name = None
+        self.top_surf_face_set_name = None
+        self.std_interface_node_set_name = None
+        self.xpl_interface_node_set_name = None
 
 
 def is_valid_coordinate_list(variable):
