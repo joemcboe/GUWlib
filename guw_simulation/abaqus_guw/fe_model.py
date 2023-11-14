@@ -70,7 +70,7 @@ class FEModel:
         create_plate(plate=self.plate)
         log_info("Created plate geometry: {}".format(self.plate.description))
 
-        # defects geometry --------------------------------------------------------------------------------
+        # defects geometry
         log_txt = ""
         for i, defect in enumerate(self.defects):
             if isinstance(defect, Hole):
@@ -87,7 +87,7 @@ class FEModel:
         log_info("Added {} defect(s):\n{}".format(len(self.defects), log_txt))
 
         if self.model_approach == 'point_force':
-            # piezo geometry ----------------------------------------------------------------------------------
+            # piezo geometry
             for i, piezo in enumerate(self.phased_array):
                 piezo.id = i
                 create_piezo_as_point_load(plate=self.plate, piezo_element=piezo)
@@ -108,21 +108,8 @@ class FEModel:
             assign_material(set_name=self.plate.material_cell_set_name, material=self.plate.material)
 
         if self.model_approach == 'piezo_electric':
-            # create all materials needed
-            materials = set()
-            materials.add(self.plate.material)
-            for piezo in self.phased_array:
-                materials.add(piezo.material)
-                materials.add(piezo.electrode_material)
-            for material in materials:
-                create_material(material)
-                log_info("Material ({}) created.".format(material))
-
-            # assign all materials
-            assign_material(set_name=self.plate.material_cell_set_name, material=self.plate.material)
-            for piezo in self.phased_array:
-                assign_material(set_name=piezo.piezo_material_cell_set_name, material=piezo.material)
-                assign_material(set_name=piezo.electrode_material_cell_set_name, material=piezo.electrode_material)
+            pass
+            # materials will be assigned after splitting the model for co-simulation
 
         # MESH MODULE --------------------------------------------------------------------------------------------------
         all_signals = [signal for step in self.load_cases for signal in step.piezo_signals]
@@ -161,18 +148,23 @@ class FEModel:
         # ASSEMBLY MODULE ----------------------------------------------------------------------------------------------
         # create assembly and instantiate the plate
         if self.model_approach == 'point_force':
-            create_assembly_instantiate_part()
+            assemble()
             log_info("Plate instantiated in new assembly")
 
         if self.model_approach == 'piezo_electric':
-            create_assembly_instantiate_plate_piezo_elements()
+            assemble_co_sim()
 
         # INTERACTION MODULE -------------------------------------------------------------------------------------------
-
+        # split model and create electrical interface
         if self.model_approach == 'piezo_electric':
-            split_model_for_co_simulation()
+            split_model_for_co_sim()
             setup_electric_interface(self.phased_array)
-            pass
+
+        # PROPERTY MODULE ----------------------------------------------------------------------------------------------
+        if self.model_approach == 'piezo_electric':
+            # create and assign materials in individual models (dielectric materials are not permitted in XPL model)
+            create_materials_co_sim(self.plate, self.phased_array)
+            assign_material_co_sim(self.plate, self.phased_array)
 
         # STEP / LOAD / JOB MODULE -------------------------------------------------------------------------------------
         max_time_increment_condition_1 = (0.5 / ((self.nodes_per_wavelength - 1) * max_exciting_frequency))
@@ -239,30 +231,27 @@ class FEModel:
 
                 # create history output request for piezo node sets
                 remove_standard_field_output_request_co_sim()
-                # if step.output_request == 'history':
-                #     add_piezo_signal_history_output_request(phased_array=self.phased_array,
-                #                                             create_step_name=step_name)
+                if step.output_request == 'history':
+                    add_piezo_signal_history_output_request_co_sim(phased_array=self.phased_array,
+                                                                   create_step_name=step_name)
                 #
-                # if step.output_request == 'field':
-                #     add_piezo_signal_history_output_request(phased_array=self.phased_array,
-                #                                             create_step_name=step_name)
-                #     add_field_output_request(create_step_name=step_name)
-                #
+                if step.output_request == 'field':
+                    add_piezo_signal_history_output_request_co_sim(phased_array=self.phased_array,
+                                                                   create_step_name=step_name)
+                    add_field_output_request_co_sim(create_step_name=step_name)
 
                 # create all amplitudes and loads
-                add_piezo_boundary_conditions(step_name, self.phased_array)
+                add_piezo_boundary_conditions_co_sim(step_name, self.phased_array)
                 for j, signal in enumerate(step.piezo_signals):
                     if signal is not None:
-                        add_piezo_potential(load_name='sgn_{}_{}'.format(self.phased_array[j].cell_set_name,
-                                                                         signal.__class__.__name__),
-                                            step_name=step_name,
-                                            piezo=self.phased_array[j],
-                                            signal=signal,
-                                            max_time_increment=max_time_increment)
+                        add_piezo_potential_co_sim(load_name='sgn_{}_{}'.format(self.phased_array[j].cell_set_name,
+                                                                                signal.__class__.__name__),
+                                                   step_name=step_name,
+                                                   piezo=self.phased_array[j],
+                                                   signal=signal,
+                                                   max_time_increment=max_time_increment)
 
-                #
                 # # write input file for this load case
-                # write_input_file(job_name=step_name, num_cpus=1)
 
                 log_info("Created a job definition for the current load case. To run or view this load case,"
                          "please refer to the created input file '{}.inp'. ".format(step_name))

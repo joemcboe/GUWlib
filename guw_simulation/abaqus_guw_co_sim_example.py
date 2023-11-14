@@ -21,7 +21,7 @@ from abaqus_guw.load_case import *
 
 # parameters
 PLATE_THICKNESS = 3e-3
-PLATE_WIDTH = 0.05
+PLATE_WIDTH = 33e-3
 
 # create an instance of isotropic plate --------------------------------------------------------------------------------
 plate = IsotropicPlate(material='aluminum',
@@ -55,16 +55,16 @@ burst = Burst(carrier_frequency=10e3, n_cycles=3, dt=0, window='hanning')
 piezo_signals = [None] * len(phased_array)
 piezo_signals[1] = burst
 load_cases.append(LoadCase(name='control_step',
-                           duration=0.1,
+                           duration=1e-4,
                            piezo_signals=piezo_signals,
                            output_request='field'))
 
 # create FE model from plate, defects and phased array -----------------------------------------------------------------
 fe_model = FEModel(plate=plate, phased_array=phased_array, defects=defects, load_cases=load_cases)
-fe_model.max_frequency = 40e3
-fe_model.nodes_per_wavelength = 10
-fe_model.elements_in_thickness_direction = 4
-fe_model.model_approach = 'piezo_electric'
+fe_model.max_frequency = 10e3
+fe_model.nodes_per_wavelength = 5
+fe_model.elements_in_thickness_direction = 1
+fe_model.model_approach = 'point_force'
 
 # generate in abaqus
 fe_model.setup_in_abaqus()

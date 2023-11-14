@@ -281,7 +281,6 @@ def create_material(material_name):
 
 def assign_material(set_name, material):
     # create new homogenous section
-    print(set_name)
     section_name = set_name + '_section_homogenous_' + material
     mdb.models[MODEL_NAME].HomogeneousSolidSection(
         name=section_name,
@@ -323,7 +322,7 @@ def mesh_part_point_force_approach(element_size, phased_array, defects):
 
 
 # ASSEMBLY MODULE HELPER FUNCTIONS -------------------------------------------------------------------------------------
-def create_assembly_instantiate_part():
+def assemble():
     p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
     a = mdb.models[MODEL_NAME].rootAssembly
     a.DatumCsysByDefault(CARTESIAN)

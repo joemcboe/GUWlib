@@ -415,6 +415,83 @@ def get_guidelines(x, y, radius):
 
 
 # PROPERTY MODULE HELPER FUNCTIONS -------------------------------------------------------------------------------------
+def create_materials_co_sim(plate, phased_array):
+    # create material for plate
+    create_material_co_sim(plate.material, XPL_MODEL_NAME)
+    log_info("Material ({}) created.".format(plate.material))
+
+    # create all materials needed for piezo
+    piezo_materials = set()
+    for piezo in phased_array:
+        piezo_materials.add(piezo.material)
+        piezo_materials.add(piezo.electrode_material)
+    for material in piezo_materials:
+        create_material_co_sim(material, STD_MODEL_NAME)
+        log_info("Material ({}) created.".format(material))
+
+
+def create_material_co_sim(material_name, model_name):
+    # todo: double of function in abaqus_utility_functions!
+    try:
+        material_properties = get_material_properties(material_name)
+
+        type_of_material = material_properties["type"]
+        if type_of_material == "isotropic":
+            mdb.models[model_name].Material(name=material_name)
+            mdb.models[model_name].materials[material_name].Density(table=((material_properties["density"],),))
+            mdb.models[model_name].materials[material_name].Elastic(table=((material_properties["youngs_modulus"],
+                                                                            material_properties["poissons_ratio"]),))
+        if type_of_material == "piezo_electric":
+            mdb.models[model_name].Material(name=material_name)
+            mdb.models[model_name].materials[material_name].Density(table=((material_properties["density"],),))
+            mdb.models[model_name].materials[material_name].Elastic(type=ENGINEERING_CONSTANTS,
+                                                                    table=material_properties[
+                                                                        "elastic_engineering_constants_table"])
+            mdb.models[model_name].materials[material_name].Dielectric(type=ORTHOTROPIC, table=material_properties[
+                "dielectric_orthotropic_table"])
+            mdb.models[model_name].materials[material_name].Piezoelectric(type=STRAIN, table=material_properties[
+                "piezo_electric_strain_table"])
+    except ValueError as e:
+        log_error(e)
+
+
+def assign_material_co_sim(plate, phased_array):
+    # assign plate material
+    _assign_material(XPL_MODEL_NAME, PLATE_MESH_PART_NAME, plate.material_cell_set_name, plate.material)
+
+    # assign piezo materials
+    for piezo in phased_array:
+        _assign_material(STD_MODEL_NAME, PIEZO_MESH_PART_NAME,
+                         piezo.piezo_material_cell_set_name, piezo.material)
+        _assign_material(STD_MODEL_NAME, PIEZO_MESH_PART_NAME,
+                         piezo.electrode_material_cell_set_name, piezo.electrode_material)
+        _add_orientation(STD_MODEL_NAME, PIEZO_MESH_PART_NAME, piezo.piezo_material_cell_set_name)
+
+
+def _add_orientation(model_name, part_name, set_name):
+    p = mdb.models[model_name].parts[part_name]
+    region = p.sets[set_name]
+    p.MaterialOrientation(region=region, orientationType=GLOBAL, axis=AXIS_1, additionalRotationType=ROTATION_NONE,
+                          localCsys=None, fieldName='', stackDirection=STACK_3)
+
+
+def _assign_material(model_name, part_name, set_name, material):
+    # todo: double of function in abaqus_utility_function!
+    # create new homogenous section
+    section_name = set_name + '_section_homogenous_' + material
+    mdb.models[model_name].HomogeneousSolidSection(
+        name=section_name,
+        material=material,
+        thickness=None)
+
+    # create new set containing all cells and assign section to set
+    p = mdb.models[model_name].parts[part_name]
+    p.SectionAssignment(region=p.sets[set_name],
+                        sectionName=section_name,
+                        offset=0.0,
+                        offsetType=MIDDLE_SURFACE,
+                        offsetField='',
+                        thicknessAssignment=FROM_SECTION)
 
 
 # MESH MODULE HELPER FUNCTIONS -----------------------------------------------------------------------------------------
@@ -464,6 +541,9 @@ def create_mesh_parts():
     # copy the orphan mesh part (serves as basis for the piezo transducers mesh)
     mdb.models[MODEL_NAME].Part(name=PIEZO_MESH_PART_NAME,
                                 objectToCopy=mdb.models[MODEL_NAME].parts[PLATE_MESH_PART_NAME])
+
+    # remove the original part
+    del mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
 
 
 def split_mesh_parts(plate, phased_array):
@@ -519,7 +599,7 @@ def create_electric_interface(phased_array):
 
 
 # ASSEMBLY MODULE HELPER FUNCTIONS -------------------------------------------------------------------------------------
-def create_assembly_instantiate_plate_piezo_elements():
+def assemble_co_sim():
     a = mdb.models[MODEL_NAME].rootAssembly
     a.DatumCsysByDefault(CARTESIAN)
 
@@ -550,7 +630,7 @@ def setup_electric_interface(phased_array):
                                                                          piezo.gnd_main_node_set_name), 9)))
 
 
-def split_model_for_co_simulation():
+def split_model_for_co_sim():
     mdb.Model(name=STD_MODEL_NAME, objectToCopy=mdb.models[MODEL_NAME])
     mdb.models.changeKey(fromName=MODEL_NAME, toName=XPL_MODEL_NAME)
 
@@ -594,7 +674,11 @@ def create_steps_co_sim(step_name, time_period, max_increment, previous_step_nam
 
     m = mdb.models[STD_MODEL_NAME]
     m.ImplicitDynamicsStep(name=step_name,
-                           previous=previous_step_name if previous_step_name is not None else 'Initial', )
+                           previous=previous_step_name if previous_step_name is not None else 'Initial',
+                           timePeriod=time_period,
+                           maxNumInc=int(1e6),
+                           initialInc=max_increment,
+                           minInc=max_increment * 1e-2)  # minInc > dirac step time
 
 
 def remove_standard_field_output_request_co_sim():
@@ -625,7 +709,7 @@ def add_amplitude(name, signal, max_time_increment):
                                                 data=tuple(time_data_table))
 
 
-def add_piezo_boundary_conditions(step_name, phased_array):
+def add_piezo_boundary_conditions_co_sim(step_name, phased_array):
     a = mdb.models[STD_MODEL_NAME].rootAssembly
     for piezo in phased_array:
         region = a.instances[PIEZO_MESH_PART_NAME].sets[piezo.gnd_main_node_set_name]
@@ -636,7 +720,7 @@ def add_piezo_boundary_conditions(step_name, phased_array):
                                                        amplitude=UNSET)
 
 
-def add_piezo_potential(load_name, step_name, piezo, signal, max_time_increment):
+def add_piezo_potential_co_sim(load_name, step_name, piezo, signal, max_time_increment):
     add_amplitude(load_name, signal, max_time_increment)
     a = mdb.models[STD_MODEL_NAME].rootAssembly
     region = a.instances[PIEZO_MESH_PART_NAME].sets[piezo.signal_main_node_set_name]
@@ -644,22 +728,31 @@ def add_piezo_potential(load_name, step_name, piezo, signal, max_time_increment)
                                                    createStepName=step_name, region=region, fixed=OFF,
                                                    distributionType=UNIFORM, fieldName='', magnitude=1.0,
                                                    amplitude=load_name)
-    # a = mdb.models['Model-1-STD'].rootAssembly
-    # region = a.instances['STD_mesh'].sets['transducer_0_GND']
-    # mdb.models['Model-1-STD'].ElectricPotentialBC(name='BC-2',
-    #                                               createStepName='load_case_0_control_step', region=region, fixed=OFF,
-    #                                               distributionType=UNIFORM, fieldName='', magnitude=0.0,
-    #                                               amplitude=UNSET)
-    # a = mdb.models[MODEL_NAME].rootAssembly
-    # region = a.instances[INSTANCE_NAME].sets[piezo.cell_set_name]
-    # mdb.models[MODEL_NAME].ConcentratedForce(name=load_name,
-    #                                          createStepName=step_name, region=region, cf3=1.0,
-    #                                          amplitude=load_name, distributionType=UNIFORM,
-    #                                          field='', localCsys=None)
+
+
+def add_piezo_signal_history_output_request_co_sim(phased_array, create_step_name):
+    for i, piezo in enumerate(phased_array):
+        a = mdb.models[STD_MODEL_NAME].rootAssembly
+        region_def = a.allInstances[PIEZO_MESH_PART_NAME].sets[piezo.signal_main_node_set_name]
+        mdb.models[STD_MODEL_NAME].HistoryOutputRequest(name='piezo_{}_out'.format(i),
+                                                        createStepName=create_step_name,
+                                                        variables=('EPOT',),
+                                                        frequency=1,
+                                                        region=region_def,
+                                                        sectionPoints=DEFAULT,
+                                                        rebar=EXCLUDE)
+
+
+def add_field_output_request_co_sim(create_step_name):
+    mdb.models[XPL_MODEL_NAME].FieldOutputRequest(name='full_field_{}'.format(create_step_name),
+                                                  createStepName=create_step_name, variables=('U',),
+                                                  timeInterval=EVERY_TIME_INCREMENT, position=NODES)
+    mdb.models[STD_MODEL_NAME].FieldOutputRequest(name='full_field_{}'.format(create_step_name),
+                                                  createStepName=create_step_name, variables=('U',),
+                                                  frequency=1)
 
 
 # INTERACTION MODULE HELPER FUNCTIONS ----------------------------------------------------------------------------------
-
 def create_interaction_std_xpl_co_sim(plate, step_name):
     # setup co-sim interaction for xpl model
     a = mdb.models[XPL_MODEL_NAME].rootAssembly
