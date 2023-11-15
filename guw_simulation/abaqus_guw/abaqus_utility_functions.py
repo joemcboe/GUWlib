@@ -6,7 +6,8 @@ and to perform meshing in Abaqus/CAE using its python interpreter (Abaqus Script
 Author: j.froboese(at)tu-braunschweig.de
 Created on: September 20, 2023
 """
-from math import sqrt
+import math
+from math import sqrt, pi
 
 # Do not delete the following import lines
 from abaqus import *
@@ -37,8 +38,10 @@ import datetime
 from .materials import *
 from .output import *
 from .signals import *
+from .plate import *
 
 PLATE_PART_NAME = 'plate'
+REFERENCE_PLATE_PART_NAME = 'reference-plate'
 MODEL_NAME = 'Model-1'
 INSTANCE_NAME = PLATE_PART_NAME
 STEP_NAME = 'lamb_excitation'
@@ -55,113 +58,123 @@ BOUNDBOX_CELL_NAME = 'bounding_box'
 
 # PART MODULE HELPER FUNCTIONS -----------------------------------------------------------------------------------------
 def create_plate(plate):
+    """
+    Creates the plate as an Abaqus part by solid extrusion.
+    :param IsotropicPlate plate: Plate instance to be modelled in Abaqus.
+    :return: None
+    """
     # create an extrusion from two-dimensional shape
     s1 = mdb.models[MODEL_NAME].ConstrainedSketch(name='__profile__', sheetSize=2.0)
     for i in range(len(plate.shape) - 1):
         s1.Line(point1=plate.shape[i], point2=plate.shape[i + 1])
 
-    # s1.rectangle(point1=(0.0, 0.0), point2=(plate.width, plate.length))
     p = mdb.models[MODEL_NAME].Part(name=PLATE_PART_NAME, dimensionality=THREE_D, type=DEFORMABLE_BODY)
     p.BaseSolidExtrude(sketch=s1, depth=plate.thickness)
     del mdb.models[MODEL_NAME].sketches['__profile__']
 
     # define datum plane and store abaqus id
-    plate.datum_plane_abaqus_id = p.DatumPlaneByPrincipalPlane(principalPlane=XYPLANE,
-                                                               offset=plate.thickness).id
+    plate.datum_xy_plane_id = p.DatumPlaneByPrincipalPlane(principalPlane=XYPLANE, offset=plate.thickness).id
+    plate.datum_y_axis_id = p.DatumAxisByTwoPoint(point1=(0, 0, plate.thickness), point2=(0, 1, plate.thickness)).id
+    plate.datum_z_axis_id = p.DatumAxisByTwoPoint(point1=(0, 0, 0), point2=(0, 0, plate.thickness)).id
 
-    # define datum axis and store abaqus id
-    plate.datum_axis_abaqus_id = p.DatumAxisByTwoPoint(point1=(0, 0, plate.thickness),
-                                                       point2=(0, 1, plate.thickness)).id
-    session.viewports['Viewport: 1'].setValues(displayedObject=p)
-
-    # store plate cell in set
+    # store plate cell in sets
     p.Set(cells=p.cells, name=PLATE_CELL_NAME)  # contains the plate without the bounding boxes
     p.Set(cells=p.cells, faces=p.faces, name=PLATE_SET_NAME)  # contains the whole plate (for material assignment)
     p.Set(faces=p.faces.getByBoundingBox(zMin=plate.thickness / 2), name=PLATE_TOP_FACE_NAME)
-
     plate.cell_set_name = PLATE_CELL_NAME
     plate.material_cell_set_name = PLATE_SET_NAME
     plate.top_surf_face_set_name = PLATE_TOP_FACE_NAME
 
 
-def create_circular_hole_in_plate(plate, hole):
+def create_circular_hole_in_plate(plate, hole, element_size):
+    """
+    Adds a cut extrude hole to an existing plate part in Abaqus and partitions the region so that structured meshing can
+    be applied. The hole position must be on the plate and must not intersect other features already added to the plate.
+    :param IsotropicPlate plate: Plate to which the hole is to be added.
+    :param Hole hole: Hole that is to be added.
+    :param element_size: Desired element size of the FE mesh, needed to determine a suitable position of the partition.
+    :return:
+    """
     # decompose hole attributes
     circle_pos_x = hole.position_x
     circle_pos_y = hole.position_y
     circle_radius = hole.radius
     circle_id = hole.id
-    guideline_option = hole.guideline_option
 
-    # constants
+    # bounding box scaling and name
     boundbox_scale = 2.5
     boundbox_cell_name = '{}_{}_{}'.format(DEFECT_CELL_NAME, circle_id, BOUNDBOX_CELL_NAME)
 
-    # add sketch of circle and cut through all
+    # add a sketch of the circle on the plate top surface and cut extrude through the plate
     p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
-    sketch_plane_id = plate.datum_plane_abaqus_id
-    sketch_up_edge_id = plate.datum_axis_abaqus_id
-    t = p.MakeSketchTransform(sketchPlane=p.datums[sketch_plane_id],
-                              sketchUpEdge=p.datums[sketch_up_edge_id],
-                              sketchPlaneSide=SIDE1,
-                              sketchOrientation=RIGHT,
-                              origin=(0.0, 0.0, 0.0))
-    s = mdb.models[MODEL_NAME].ConstrainedSketch(name='__profile__',
-                                                 sheetSize=3.25,
-                                                 gridSpacing=0.08,
-                                                 transform=t)
+    sketch_plane_id = plate.datum_xy_plane_id
+    sketch_up_edge_id = plate.datum_y_axis_id
+    t = p.MakeSketchTransform(sketchPlane=p.datums[sketch_plane_id], sketchUpEdge=p.datums[sketch_up_edge_id],
+                              sketchPlaneSide=SIDE1, sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0))
+    s = mdb.models[MODEL_NAME].ConstrainedSketch(name='__profile__', sheetSize=3.25, gridSpacing=0.08, transform=t)
     p.projectReferencesOntoSketch(sketch=s, filter=COPLANAR_EDGES)
     s.CircleByCenterPerimeter(center=(circle_pos_x, circle_pos_y),
                               point1=(circle_pos_x + circle_radius, circle_pos_y))
-    p.CutExtrude(sketchPlane=p.datums[sketch_plane_id],
-                 sketchUpEdge=p.datums[sketch_up_edge_id],
-                 sketchPlaneSide=SIDE1,
-                 sketchOrientation=RIGHT,
-                 sketch=s,
-                 flipExtrudeDirection=OFF)
+    p.CutExtrude(sketchPlane=p.datums[sketch_plane_id], sketchUpEdge=p.datums[sketch_up_edge_id],
+                 sketchPlaneSide=SIDE1, sketchOrientation=RIGHT, sketch=s, flipExtrudeDirection=OFF)
     del mdb.models[MODEL_NAME].sketches['__profile__']
 
-    # helper coordinates
-    x_left = circle_pos_x - boundbox_scale * circle_radius
-    x_right = circle_pos_x + boundbox_scale * circle_radius
-    y_lower = circle_pos_y - boundbox_scale * circle_radius
-    y_upper = circle_pos_y + boundbox_scale * circle_radius
-    x_click = circle_pos_x - 0.5 * boundbox_scale * circle_radius
-    y_click = circle_pos_y + 0.5 * boundbox_scale * circle_radius
-
-    # partition the plate to get a rectangular bounding box around the hole
+    # the area around the circular hole needs to be a separate partition, otherwise Abaqus can't mesh the part
+    # create a rectangular partition (bounding box) around the hole and adjust the corner coordinates so that they lie
+    # on the nodes of a reference structured mesh
+    boundbox_radius = boundbox_scale * circle_radius
+    x_left, x_right, y_lower, y_upper, x_center, y_center = (
+        __get_bounding_box_coordinates_from_reference_mesh(circle_pos_x, circle_pos_y, plate.thickness, boundbox_radius,
+                                                           element_size))
     lower_left_coord = (x_left, y_lower)
     upper_right_coord = (x_right, y_upper)
-    _add_bounding_box_to_plate(plate, lower_left_coord, upper_right_coord, boundbox_cell_name)
+    __add_bounding_box_to_plate(plate, lower_left_coord, upper_right_coord, boundbox_cell_name)
 
-    # partition face inside bounding box to achieve better mesh quality
-    if guideline_option == 'none':
-        pass
-    else:
-        t = p.MakeSketchTransform(sketchPlane=p.datums[sketch_plane_id],
-                                  sketchUpEdge=p.datums[sketch_up_edge_id],
-                                  sketchPlaneSide=SIDE1,
-                                  origin=(0.0, 0.0, 0))
-        s1 = mdb.models[MODEL_NAME].ConstrainedSketch(name='__profile__',
-                                                      sheetSize=1.84,
-                                                      gridSpacing=0.04,
-                                                      transform=t)
-        p.projectReferencesOntoSketch(sketch=s1, filter=COPLANAR_EDGES)
+    # the geometry inside the bounding box needs further partitioning so Abaqus can mesh the region w structured meshing
+    # draw a sketch to add four face partitions to the bounding box top surface
+    t = p.MakeSketchTransform(sketchPlane=p.datums[sketch_plane_id], sketchUpEdge=p.datums[sketch_up_edge_id],
+                              sketchPlaneSide=SIDE1, origin=(0.0, 0.0, 0))
+    s1 = mdb.models[MODEL_NAME].ConstrainedSketch(name='__profile__', sheetSize=1.84, gridSpacing=0.04, transform=t)
+    p.projectReferencesOntoSketch(sketch=s1, filter=COPLANAR_EDGES)
+    s1.Line(point1=(x_left, y_center), point2=(circle_pos_x - circle_radius, circle_pos_y))
+    s1.Line(point1=(circle_pos_x + circle_radius, circle_pos_y), point2=(x_right, y_center))
+    s1.Line(point1=(x_center, y_lower), point2=(circle_pos_x, circle_pos_y - circle_radius))
+    s1.Line(point1=(circle_pos_x, circle_pos_y + circle_radius), point2=(x_center, y_upper))
 
-        if guideline_option == 'plus' or guideline_option == 'asterisk':
-            s1.Line(point1=(x_left, circle_pos_y), point2=(x_right, circle_pos_y))
-            s1.Line(point1=(circle_pos_x, y_lower), point2=(circle_pos_x, y_upper))
-        if guideline_option == 'star' or guideline_option == 'asterisk':
-            s1.Line(point1=(x_left, y_upper), point2=(x_right, y_lower))
-            s1.Line(point1=(x_left, y_lower), point2=(x_right, y_upper))
+    # find the face of the bounding box with findAt() method and apply the sketch to partition the face
+    x_click = circle_pos_x
+    y_click = 0.5 * (circle_pos_y + circle_radius + y_upper)
+    picked_faces = p.faces.findAt(((x_click, y_click, plate.thickness),))
+    p.PartitionFaceBySketch(sketchUpEdge=p.datums[sketch_up_edge_id], faces=picked_faces, sketch=s1)
+    del mdb.models[MODEL_NAME].sketches['__profile__']
 
-        picked_faces = p.faces.findAt(((x_click, y_click, plate.thickness),))
-        p.PartitionFaceBySketch(sketchUpEdge=p.datums[sketch_up_edge_id],
-                                faces=picked_faces,
-                                sketch=s1)
-        del mdb.models[MODEL_NAME].sketches['__profile__']
+    # use the four generated faces to create cell partitions
+    for phi in [i * math.pi for i in [0.25, 0.75, 1.25]]:
+        x_click, y_click = (circle_pos_x + 1.2 * circle_radius * math.cos(phi),
+                            circle_pos_y + 1.2 * circle_radius * math.sin(phi))
+        picked_face = p.faces.findAt(((x_click, y_click, plate.thickness),))
+        e = picked_face[0].getEdges()
+        # print(e)
+        # print(plate.datum_z_axis_id)
+        cell_to_partition = p.sets[boundbox_cell_name].cells[:]
+        p.PartitionCellByExtrudeEdge(cells=cell_to_partition,
+                                     line=p.datums[plate.datum_z_axis_id],
+                                     edges=[p.edges[i] for i in e],
+                                     sense=REVERSE)
+
+    return [x_left, y_lower, x_right, y_upper]
 
 
-def create_piezo_as_point_load(plate, piezo_element):
+def create_piezo_as_point_load(plate, piezo_element, element_size):
+    """
+    Creates a line intersection on the plate part, to ensure that a node is generated at the exact position of the piezo
+    element during meshing.
+
+    :param IsotropicPlate plate:
+    :param piezo_element:
+    :param element_size:
+    :return:
+    """
     # decompose piezo attributes
     piezo_pos_x = piezo_element.position_x
     piezo_pos_y = piezo_element.position_y
@@ -176,33 +189,31 @@ def create_piezo_as_point_load(plate, piezo_element):
 
     # retrieve Abaqus part and datums
     p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
-    sketch_plane_id = plate.datum_plane_abaqus_id
-    sketch_up_edge_id = plate.datum_axis_abaqus_id
+    sketch_plane_id = plate.datum_xy_plane_id
+    sketch_up_edge_id = plate.datum_y_axis_id
 
     # partition the plate to get a rectangular bounding box around the piezo element position
-    lower_left_coord = (piezo_pos_x - boundbox_scale * piezo_radius, piezo_pos_y - boundbox_scale * piezo_radius)
-    upper_right_coord = (piezo_pos_x + boundbox_scale * piezo_radius, piezo_pos_y + boundbox_scale * piezo_radius)
-    _add_bounding_box_to_plate(plate, lower_left_coord, upper_right_coord, boundbox_cell_name)
+    boundbox_radius = piezo_radius * boundbox_scale
+    x_left, x_right, y_lower, y_upper, x_center, y_center = \
+        (__get_bounding_box_coordinates_from_reference_mesh(piezo_pos_x, piezo_pos_y, plate.thickness,
+                                                            boundbox_radius, element_size))
+    lower_left_coord = (x_left, y_lower)
+    upper_right_coord = (x_right, y_upper)
+    __add_bounding_box_to_plate(plate, lower_left_coord, upper_right_coord, boundbox_cell_name)
 
     # add line intersection at piezo center location by face partitioning (inside bounding box)
-    t = p.MakeSketchTransform(sketchPlane=p.datums[sketch_plane_id],
-                              sketchUpEdge=p.datums[sketch_up_edge_id],
-                              sketchPlaneSide=SIDE1,
-                              sketchOrientation=RIGHT,
-                              origin=(0.0, 0.0, 0.0))
-    s = mdb.models[MODEL_NAME].ConstrainedSketch(name='__profile__',
-                                                 sheetSize=3.25,
-                                                 gridSpacing=0.08,
-                                                 transform=t)
-    s.Line(point1=(piezo_pos_x - boundbox_scale * piezo_radius, piezo_pos_y),
-           point2=(piezo_pos_x + boundbox_scale * piezo_radius, piezo_pos_y))
-    s.Line(point1=(piezo_pos_x, piezo_pos_y - boundbox_scale * piezo_radius),
-           point2=(piezo_pos_x, piezo_pos_y + boundbox_scale * piezo_radius))
+    # draw the lines as a sketch to the top surface
+    t = p.MakeSketchTransform(sketchPlane=p.datums[sketch_plane_id], sketchUpEdge=p.datums[sketch_up_edge_id],
+                              sketchPlaneSide=SIDE1, sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0))
+    s = mdb.models[MODEL_NAME].ConstrainedSketch(name='__profile__', sheetSize=3.25, gridSpacing=0.08, transform=t)
+    s.Line(point1=(x_left, y_center), point2=(piezo_pos_x, piezo_pos_y))
+    s.Line(point1=(piezo_pos_x, piezo_pos_y), point2=(x_right, y_center))
+    s.Line(point1=(x_center, y_lower), point2=(piezo_pos_x, piezo_pos_y))
+    s.Line(point1=(piezo_pos_x, piezo_pos_y), point2=(x_center, y_upper))
 
+    # partition the face
     p.projectReferencesOntoSketch(sketch=s, filter=COPLANAR_EDGES)
-    sketch_face = p.faces.findAt(
-        ((piezo_pos_x, piezo_pos_y, plate.thickness),),
-    )
+    sketch_face = p.faces.findAt(((piezo_pos_x, piezo_pos_y, plate.thickness),), )
     p.PartitionFaceBySketchThruAll(
         faces=sketch_face,
         sketchPlane=p.datums[sketch_plane_id],
@@ -214,19 +225,106 @@ def create_piezo_as_point_load(plate, piezo_element):
     intersection_point = p.vertices.findAt(((piezo_pos_x, piezo_pos_y, plate.thickness),))
     p.Set(name=piezo_node_set_name, vertices=intersection_point)
 
+    return [x_left, y_lower, x_right, y_upper]
 
-def _add_bounding_box_to_plate(plate, lower_left_coord, upper_right_coord, boundbox_cell_name):
+
+def add_rectangular_partition_to_plate(plate, left, lower, right, top):
+    """
+    Creates a rectangular cell partition from the plate that can be meshed using structured meshing.
+    :param plate:
+    :param left:
+    :param lower:
+    :param right:
+    :param top:
+    :param cell_name:
+    :return:
+    """
     # retrieve Abaqus part and datums
     p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
-    sketch_plane_id = plate.datum_plane_abaqus_id
-    sketch_up_edge_id = plate.datum_axis_abaqus_id
+    sketch_plane_id = plate.datum_xy_plane_id
+    sketch_up_edge_id = plate.datum_y_axis_id
+
+    # partition the plate to get a rectangular partition that cen be meshed using structured meshing
+    # draw the rectangular region
+    t = p.MakeSketchTransform(sketchPlane=p.datums[sketch_plane_id], sketchUpEdge=p.datums[sketch_up_edge_id],
+                              sketchPlaneSide=SIDE1, sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0))
+    s = mdb.models[MODEL_NAME].ConstrainedSketch(name='__profile__', sheetSize=3.25, gridSpacing=0.08, transform=t)
+    p.projectReferencesOntoSketch(sketch=s, filter=COPLANAR_EDGES)
+    s.rectangle(point1=(left, lower), point2=(right, top))
+
+    # create a face partition from the sketch on the plates top surface
+    plate_faces = p.sets[PLATE_TOP_FACE_NAME].faces.findAt((((left + right) / 2, (lower + top) / 2, plate.thickness),))
+    try:
+        f = p.PartitionFaceBySketch(faces=plate_faces[0], sketch=s)
+        del mdb.models[MODEL_NAME].sketches['__profile__']
+    except Exception as e:
+        log_warning("Face partition could not be created: {}. "
+                    "Probably the target region is already rectangular.".format(e))
+        return
+
+    # get the rectangular regions face and use its edges to create a cell partition
+    rectangular_face = p.sets[PLATE_TOP_FACE_NAME].faces.getByBoundingBox(zMin=plate.thickness, zMax=plate.thickness,
+                                                                          xMin=left, yMin=lower, xMax=right, yMax=top)
+    e = rectangular_face[0].getEdges()
+    cell_to_partition = p.sets[PLATE_CELL_NAME].cells.findAt(
+        ((left + right) / 2, (lower + top) / 2, plate.thickness / 2), )
+    try:
+        p.PartitionCellByExtrudeEdge(cells=cell_to_partition, line=p.datums[plate.datum_z_axis_id],
+                                     edges=[p.edges[i] for i in e], sense=REVERSE)
+    except Exception as e:
+        log_warning("Cell partition could not be created: {} "
+                    "Probably the target region is already rectangular.".format(e))
+        return
+
+
+def create_reference_mesh_plate(plate, element_size):
+    """
+    Creates and meshes a temporary reference plate without any defects or piezoelectric transducers. The reference mesh
+    is used to create suitable partitions on the actual plate part for a better mesh quality.
+    :param plate:
+    :param element_size:
+    :return:
+    """
+    # create an extrusion from two-dimensional shape
+    s1 = mdb.models[MODEL_NAME].ConstrainedSketch(name='__profile__', sheetSize=2.0)
+    for i in range(len(plate.shape) - 1):
+        s1.Line(point1=plate.shape[i], point2=plate.shape[i + 1])
+
+    p = mdb.models[MODEL_NAME].Part(name=REFERENCE_PLATE_PART_NAME, dimensionality=THREE_D, type=DEFORMABLE_BODY)
+    p.BaseSolidExtrude(sketch=s1, depth=plate.thickness)
+    del mdb.models[MODEL_NAME].sketches['__profile__']
+
+    # seed and mesh part with desired element size
+    p.setMeshControls(regions=p.cells, technique=STRUCTURED)
+    p.seedPart(size=element_size, deviationFactor=0.1, minSizeFactor=0.1)
+    p.generateMesh()
+
+
+def remove_reference_mesh_plate():
+    """
+    Removes the temporary reference plate part.
+    :return: None
+    """
+    del mdb.models[MODEL_NAME].parts[REFERENCE_PLATE_PART_NAME]
+
+
+def __add_bounding_box_to_plate(plate, lower_left_coord, upper_right_coord, boundbox_cell_name):
+    """
+    Creates a rectangular cell partition around a defect or piezoelectric transducer and adds it to a set.
+    :param plate:
+    :param lower_left_coord:
+    :param upper_right_coord:
+    :param boundbox_cell_name:
+    :return:
+    """
+    # retrieve Abaqus part and datums
+    p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
+    sketch_plane_id = plate.datum_xy_plane_id
+    sketch_up_edge_id = plate.datum_y_axis_id
 
     # partition the plate to get a rectangular bounding box around the piezo element position
-    t = p.MakeSketchTransform(sketchPlane=p.datums[sketch_plane_id],
-                              sketchUpEdge=p.datums[sketch_up_edge_id],
-                              sketchPlaneSide=SIDE1,
-                              sketchOrientation=RIGHT,
-                              origin=(0.0, 0.0, 0.0))
+    t = p.MakeSketchTransform(sketchPlane=p.datums[sketch_plane_id], sketchUpEdge=p.datums[sketch_up_edge_id],
+                              sketchPlaneSide=SIDE1, sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0))
     s = mdb.models[MODEL_NAME].ConstrainedSketch(name='__profile__',
                                                  sheetSize=3.25,
                                                  gridSpacing=0.08,
@@ -238,9 +336,8 @@ def _add_bounding_box_to_plate(plate, lower_left_coord, upper_right_coord, bound
     f = p.PartitionFaceBySketch(faces=plate_faces,
                                 sketch=s)
     e = p.sets[PLATE_TOP_FACE_NAME].faces[1].getEdges()
-    line_id = p.DatumAxisByTwoPoint(point1=(0, 0, 0), point2=(0, 0, plate.thickness)).id
     p.PartitionCellByExtrudeEdge(cells=p.sets[PLATE_CELL_NAME].cells[0:1],
-                                 line=p.datums[line_id],
+                                 line=p.datums[plate.datum_z_axis_id],
                                  edges=[p.edges[i] for i in e[0:4]],
                                  sense=REVERSE)
 
@@ -258,6 +355,51 @@ def _add_bounding_box_to_plate(plate, lower_left_coord, upper_right_coord, bound
                    name=PLATE_CELL_NAME)
 
 
+def __get_bounding_box_coordinates_from_reference_mesh(x, y, z, bounding_box_radius, element_size):
+    """
+    Returns corner- and edge-center-coordinates that snap to the nearest node of a reference mesh.
+    :param x:
+    :param y:
+    :param z:
+    :param bounding_box_radius:
+    :param element_size:
+    :return:
+    """
+    p = mdb.models[MODEL_NAME].parts[REFERENCE_PLATE_PART_NAME]
+
+    # lower left corner
+    lower_left_corner = p.nodes.getClosest((x - bounding_box_radius, y - bounding_box_radius, z), numToFind=1,
+                                           searchTolerance=element_size * 3)
+    if lower_left_corner:
+        x_left = lower_left_corner.coordinates[0]
+        y_lower = lower_left_corner.coordinates[1]
+    else:
+        x_left = x - bounding_box_radius
+        y_lower = y - bounding_box_radius
+
+    # upper right corner
+    upper_right_corner = p.nodes.getClosest((x + bounding_box_radius, y + bounding_box_radius, z), numToFind=1,
+                                            searchTolerance=element_size * 2)
+    if upper_right_corner:
+        x_right = upper_right_corner.coordinates[0]
+        y_upper = upper_right_corner.coordinates[1]
+    else:
+        x_right = x + bounding_box_radius
+        y_upper = y + bounding_box_radius
+
+    # center coordinates
+    center_node = p.nodes.getClosest((x, y, z), numToFind=1,
+                                     searchTolerance=element_size * 3)
+    if center_node:
+        x_center = center_node.coordinates[0]
+        y_center = center_node.coordinates[1]
+    else:
+        x_center = x + bounding_box_radius
+        y_center = y + bounding_box_radius
+
+    return x_left, x_right, y_lower, y_upper, x_center, y_center
+
+
 # PROPERTY MODULE HELPER FUNCTIONS -------------------------------------------------------------------------------------
 def create_material(material_name):
     try:
@@ -272,9 +414,13 @@ def create_material(material_name):
         if type_of_material == "piezo_electric":
             mdb.models[MODEL_NAME].Material(name=material_name)
             mdb.models[MODEL_NAME].materials[material_name].Density(table=((material_properties["density"],),))
-            mdb.models[MODEL_NAME].materials[material_name].Elastic(type=ENGINEERING_CONSTANTS, table=material_properties["elastic_engineering_constants_table"])
-            mdb.models[MODEL_NAME].materials[material_name].Dielectric(type=ORTHOTROPIC, table=material_properties["dielectric_orthotropic_table"])
-            mdb.models[MODEL_NAME].materials[material_name].Piezoelectric(type=STRAIN,table=material_properties["piezo_electric_strain_table"])
+            mdb.models[MODEL_NAME].materials[material_name].Elastic(type=ENGINEERING_CONSTANTS,
+                                                                    table=material_properties[
+                                                                        "elastic_engineering_constants_table"])
+            mdb.models[MODEL_NAME].materials[material_name].Dielectric(type=ORTHOTROPIC, table=material_properties[
+                "dielectric_orthotropic_table"])
+            mdb.models[MODEL_NAME].materials[material_name].Piezoelectric(type=STRAIN, table=material_properties[
+                "piezo_electric_strain_table"])
     except ValueError as e:
         log_error(e)
 
@@ -326,14 +472,10 @@ def assemble():
     p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
     a = mdb.models[MODEL_NAME].rootAssembly
     a.DatumCsysByDefault(CARTESIAN)
-    a.Instance(name=INSTANCE_NAME,
-               part=p,
-               dependent=ON)
+    a.Instance(name=INSTANCE_NAME, part=p, dependent=ON)
     session.viewports['Viewport: 1'].setValues(displayedObject=a)
-    session.viewports['Viewport: 1'].assemblyDisplay.setValues(
-        optimizationTasks=OFF,
-        geometricRestrictions=OFF,
-        stopConditions=OFF)
+    session.viewports['Viewport: 1'].assemblyDisplay.setValues(optimizationTasks=OFF, geometricRestrictions=OFF,
+                                                               stopConditions=OFF)
 
 
 def make_datums_invisible():
@@ -409,40 +551,16 @@ def add_amplitude(name, signal, max_time_increment):
             time_data_table.append((t, signal.get_value_at(t=t)))
 
     # create amplitude in Abaqus
-    mdb.models[MODEL_NAME].TabularAmplitude(name=name,
-                                            timeSpan=STEP,
-                                            smooth=SOLVER_DEFAULT,
-                                            data=tuple(time_data_table))
+    mdb.models[MODEL_NAME].TabularAmplitude(name=name, timeSpan=STEP, smooth=SOLVER_DEFAULT, data=tuple(time_data_table))
 
 
 def add_piezo_point_force(load_name, step_name, piezo, signal, max_time_increment):
     add_amplitude(load_name, signal, max_time_increment)
     a = mdb.models[MODEL_NAME].rootAssembly
     region = a.instances[INSTANCE_NAME].sets[piezo.cell_set_name]
-    mdb.models[MODEL_NAME].ConcentratedForce(name=load_name,
-                                             createStepName=step_name, region=region, cf3=1.0,
+    mdb.models[MODEL_NAME].ConcentratedForce(name=load_name, createStepName=step_name, region=region, cf3=1.0,
                                              amplitude=load_name, distributionType=UNIFORM,
                                              field='', localCsys=None)
-
-
-# deprecated functions -------------------------------------------------------------------------------------------------
-def save_viewport_to_png(center_x, center_y):
-    # function to save a screenshot of the Abaqus viewport to a png file
-    # center_x: x-coordinate of the center of the viewport
-    # center_y: y-coordinate of the center of the viewport
-    #
-    # example:
-    # save_viewport_to_png(0.5, 0.5, 1)
-    # saves a screenshot of the viewport with the center at (0.5, 0.5) to the file '1.png'
-    session.viewports['Viewport: 1'].view.setValues(session.views['Front'])
-    session.viewports['Viewport: 1'].view.setValues(cameraPosition=(center_x, center_y, 2.83871),
-                                                    cameraTarget=(center_x, center_y, 0.01),
-                                                    width=0.15)
-    session.printToFile(
-        filename='abaqus_screenshot_' + str(datetime.datetime.now()),
-        format=PNG,
-        canvasObjects=(session.viewports['Viewport: 1'],))
-    log_info('Saved screenshot.')
 
 
 def write_input_file(job_name, num_cpus=1):
@@ -465,235 +583,14 @@ def write_input_file(job_name, num_cpus=1):
     mdb.jobs[job_name].writeInput(consistencyChecking=OFF)
 
 
-def print_generate_area_vector(set_name):
-    print(set_name)
-    p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
-    for element in p.sets[set_name].cells[0].getElements():
-        for face in element.getElemFaces():
-            pass
-
-
-def beautify_set_colors(phased_array):
-    color_data = {}
-    for i in range(len(phased_array)):
-        key_1 = '{}_{}'.format(BOUNDBOX_CELL_NAME, i)
-        key_2 = '{}_{}'.format(PIEZO_CELL_NAME, i)
-        value_1 = (True, '#CCCCCC', 'Default', '#CCCCCC')
-        value_2 = (True, '#FFDE7F', 'Default', '#FFDE7F')
-        color_data[key_1] = value_1
-        color_data[key_2] = value_2
-
-    color_data[PLATE_CELL_NAME] = (True, '#CCCCCC', 'Default', '#CCCCCC')
-    color_data[PLATE_TOP_FACE_NAME] = (True, '#CCCCCC', 'Default', '#CCCCCC')
-
-    cmap = session.viewports['Viewport: 1'].colorMappings['Set']
-    cmap.updateOverrides(overrides=color_data)
-    session.viewports['Viewport: 1'].enableMultipleColors()  #
-    session.viewports['Viewport: 1'].setColor(initialColor='#BDBDBD')  #
-    session.viewports['Viewport: 1'].setColor(colorMapping=cmap)
-    session.viewports['Viewport: 1'].disableMultipleColors()  #
-
-
-def add_piezo_load(piezo, max_time_increment):
-    # generate time data
-    time_data_table = []
-    for t in np.arange(start=piezo.signal.dt, stop=piezo.signal.dt + piezo.signal.get_duration() * 1.01,
-                       step=max_time_increment / 2):
-        time_data_table.append((t, piezo.signal.get_value_at(t=t)))
-
-    # create amplitude in Abaqus
-    amplitude_name = 'amp-piezo-{}'.format(piezo.id)
-    mdb.models[MODEL_NAME].TabularAmplitude(name=amplitude_name,
-                                            timeSpan=STEP,
-                                            smooth=SOLVER_DEFAULT,
-                                            data=tuple(time_data_table))
-
-    # create the load
-    load_name = 'load-piezo-{}'.format(piezo.id)
-    surface_name = 'surface-piezo-{}'.format(piezo.id)
-
-    assembly = mdb.models[MODEL_NAME].rootAssembly
-    instance = assembly.instances[PLATE_PART_NAME]
-    region = assembly.Surface(side1Faces=instance.sets[piezo.wall_face_set_name].faces, name=surface_name)
-    mdb.models[MODEL_NAME].Pressure(name=load_name,
-                                    createStepName=STEP_NAME,
-                                    region=region,
-                                    distributionType=UNIFORM,
-                                    field='', magnitude=1.0,
-                                    amplitude=amplitude_name)
-
-
-# def create_piezo_element(plate, piezo_element):
-#     # decompose piezo attributes
-#     piezo_pos_x = piezo_element.position_x
-#     piezo_pos_y = piezo_element.position_y
-#     piezo_radius = piezo_element.radius
-#     piezo_thickness = piezo_element.thickness
-#     piezo_id = piezo_element.id
-#
-#     # constants
-#     boundbox_scale = 1.5
-#     boundbox_cell_name = '{}_{}_{}'.format(PIEZO_CELL_NAME, piezo_id, BOUNDBOX_CELL_NAME)
-#     piezo_cell_name = '{}_{}'.format(PIEZO_CELL_NAME, piezo_id)
-#     piezo_wall_face_set_name = '{}_{}_wall'.format(PIEZO_CELL_NAME, piezo_id)
-#     piezo_element.wall_face_set_name = piezo_wall_face_set_name
-#     piezo_element.set_name = piezo_cell_name
-#
-#     # create solid extrusion
-#     p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
-#     sketch_plane_id = plate.datum_plane_abaqus_id
-#     sketch_up_edge_id = plate.datum_axis_abaqus_id
-#     t = p.MakeSketchTransform(sketchPlane=p.datums[sketch_plane_id],
-#                               sketchUpEdge=p.datums[sketch_up_edge_id],
-#                               sketchPlaneSide=SIDE1,
-#                               sketchOrientation=RIGHT,
-#                               origin=(0.0, 0.0, 0.0))
-#     s = mdb.models[MODEL_NAME].ConstrainedSketch(name='__profile__',
-#                                                  sheetSize=3.25,
-#                                                  gridSpacing=0.08,
-#                                                  transform=t)
-#     p.projectReferencesOntoSketch(sketch=s, filter=COPLANAR_EDGES)
-#     s.CircleByCenterPerimeter(center=(piezo_pos_x, piezo_pos_y),
-#                               point1=(piezo_pos_x + piezo_radius, piezo_pos_y))
-#     p.SolidExtrude(sketchPlane=p.datums[sketch_plane_id],
-#                    sketchUpEdge=p.datums[sketch_up_edge_id],
-#                    sketchPlaneSide=SIDE1,
-#                    sketchOrientation=RIGHT,
-#                    sketch=s,
-#                    depth=piezo_thickness,
-#                    flipExtrudeDirection=OFF)
-#     del mdb.models[MODEL_NAME].sketches['__profile__']
-#
-#     # partition the part into two cells (piezo-element and plate)
-#     plate_cell = p.sets[PLATE_CELL_NAME].cells[0:1]
-#     p.PartitionCellByDatumPlane(cells=plate_cell, datumPlane=p.datums[sketch_plane_id])
-#     p.Set(cells=p.sets[PLATE_CELL_NAME].cells.getByBoundingBox(zMin=plate.thickness),
-#           faces=p.sets[PLATE_CELL_NAME].faces.getByBoundingBox(zMin=plate.thickness), name=piezo_cell_name)
-#     p.Set(cells=p.sets[PLATE_CELL_NAME].cells.getByBoundingBox(zMax=plate.thickness), name=PLATE_CELL_NAME)
-#
-#     # partition the plate to get a rectangular bounding box around the piezo element
-#     lower_left_coord = (piezo_pos_x - boundbox_scale * piezo_radius, piezo_pos_y - boundbox_scale * piezo_radius)
-#     upper_right_coord = (piezo_pos_x + boundbox_scale * piezo_radius, piezo_pos_y + boundbox_scale * piezo_radius)
-#     t = p.MakeSketchTransform(sketchPlane=p.datums[sketch_plane_id],
-#                               sketchUpEdge=p.datums[sketch_up_edge_id],
-#                               sketchPlaneSide=SIDE1,
-#                               sketchOrientation=RIGHT,
-#                               origin=(0.0, 0.0, 0.0))
-#     s = mdb.models[MODEL_NAME].ConstrainedSketch(name='__profile__',
-#                                                  sheetSize=3.25,
-#                                                  gridSpacing=0.08,
-#                                                  transform=t)
-#     p.projectReferencesOntoSketch(sketch=s, filter=COPLANAR_EDGES)
-#     s.rectangle(point1=lower_left_coord, point2=upper_right_coord)
-#
-#     plate_faces = p.sets[PLATE_TOP_FACE_NAME].faces[0]
-#     f = p.PartitionFaceBySketch(faces=plate_faces,
-#                                 sketch=s)
-#     e = p.sets[PLATE_TOP_FACE_NAME].faces[1].getEdges()
-#     line_id = p.DatumAxisByTwoPoint(point1=(0, 0, 0), point2=(0, 0, plate.thickness)).id
-#     p.PartitionCellByExtrudeEdge(cells=p.sets[PLATE_CELL_NAME].cells[0:1],
-#                                  line=p.datums[line_id],
-#                                  edges=[p.edges[i] for i in e[0:4]],
-#                                  sense=REVERSE)
-#
-#     # update sets for plate top surface, bounding box, plate, and plate cell
-#     p.Set(faces=p.sets[PLATE_TOP_FACE_NAME].faces[0:1], name=PLATE_TOP_FACE_NAME)
-#     boundbox_cell = p.sets[PLATE_CELL_NAME].cells.getByBoundingBox(zMin=0,
-#                                                                    zMax=plate.thickness,
-#                                                                    xMin=lower_left_coord[0],
-#                                                                    yMin=lower_left_coord[1],
-#                                                                    xMax=upper_right_coord[0],
-#                                                                    yMax=upper_right_coord[1])
-#     p.Set(cells=boundbox_cell, name=boundbox_cell_name)
-#     p.SetByBoolean(operation=DIFFERENCE,
-#                    sets=[p.sets[PLATE_CELL_NAME], p.sets[boundbox_cell_name]],
-#                    name=PLATE_CELL_NAME)
-#     p.SetByBoolean(operation=DIFFERENCE,
-#                    sets=[p.sets[PLATE_SET_NAME], p.sets[piezo_cell_name]],
-#                    name=PLATE_SET_NAME)
-#
-#     # generate guidelines for better mesh quality
-#     a = 1.3
-#     b = 0.7
-#     x_seq = np.array([-1, -1, -1, 0, 1, 1, 1, 0])
-#     y_seq = np.array([-1, 0, 1, 1, 1, 0, -1, -1])
-#     mask_x = np.array([1, a, 1, 1, 1, a, 1, 1])
-#     mask_y = np.array([1, 1, 1, a, 1, 1, 1, a])
-#
-#     c = 1 / (sqrt(2) * boundbox_scale)
-#     temp = np.array([c, 1, c, 1, c, 1, c, 1])
-#
-#     x_outer = x_seq * piezo_radius * boundbox_scale * temp + piezo_pos_x
-#     y_outer = y_seq * piezo_radius * boundbox_scale * temp + piezo_pos_y
-#     x_inner = x_seq * b * (1 / np.sqrt(2)) * piezo_radius * mask_x + piezo_pos_x
-#     y_inner = y_seq * b * (1 / np.sqrt(2)) * piezo_radius * mask_y + piezo_pos_y
-#
-#     # draw guidelines
-#     temp_sketch_plane_id = p.DatumPlaneByPrincipalPlane(principalPlane=XYPLANE,
-#                                                         offset=plate.thickness + piezo_thickness).id
-#     t = p.MakeSketchTransform(sketchPlane=p.datums[temp_sketch_plane_id],
-#                               sketchUpEdge=p.datums[sketch_up_edge_id],
-#                               sketchPlaneSide=SIDE1,
-#                               sketchOrientation=RIGHT,
-#                               origin=(0.0, 0.0, 0.0))
-#     s = mdb.models[MODEL_NAME].ConstrainedSketch(name='__profile__',
-#                                                  sheetSize=3.25,
-#                                                  gridSpacing=0.08,
-#                                                  transform=t)
-#     for i in range(len(x_seq)):
-#         s.Line(point1=(x_outer[i], y_outer[i]), point2=(x_inner[i], y_inner[i]))
-#         s.Line(point1=(x_inner[i - 1], y_inner[i - 1]), point2=(x_inner[i], y_inner[i]))
-#
-#     p.projectReferencesOntoSketch(sketch=s, filter=COPLANAR_EDGES)
-#
-#     # notiz an mich selbst: warum nicht cell -> faces -> getbyboundingbox? weil cell - faces leer ist
-#     face_array = p.faces.findAt(
-#         ((piezo_pos_x + piezo_radius * (1 + boundbox_scale) / 2, piezo_pos_y, plate.thickness),),
-#         ((piezo_pos_x + piezo_radius, piezo_pos_y, plate.thickness + 0.5 * piezo_thickness),),
-#         ((piezo_pos_x, piezo_pos_y, plate.thickness + piezo_thickness),)
-#     )
-#
-#     p.PartitionFaceBySketchThruAll(
-#         faces=face_array,
-#         sketchPlane=p.datums[temp_sketch_plane_id],
-#         sketchUpEdge=p.datums[sketch_up_edge_id],
-#         sketchPlaneSide=SIDE1,
-#         sketch=s)
-#
-#     # save the wall faces of the piezo element to a set named
-#     face_ids = p.sets[piezo_cell_name].cells[0].getFaces()
-#     vertical_face_ids = [face_id for face_id in face_ids if p.faces[face_id].getNormal()[2] == 0]
-#     vertical_faces = [p.faces[i:i + 1] for i in vertical_face_ids]
-#     p.Set(faces=vertical_faces, name=piezo_wall_face_set_name)
-#     # face_array = p.faces.getByBoundingCylinder(center1=(piezo_pos_x, piezo_pos_y, plate.thickness),
-#     #                                            center2=(piezo_pos_x, piezo_pos_y, plate.thickness + piezo_thickness),
-#     #                                            radius=piezo_radius)
-#     # p.Set(faces=face_array, name=piezo_wall_face_set_name)
-
-
-# def add_vertex_to_plate(pos_x, pos_y):
-#     id_cut_plane = [float("nan")] * 2
-#     p = mdb.models[MODEL_NAME].parts[PART_NAME]
-#     id_cut_plane[0] = p.DatumPlaneByPrincipalPlane(principalPlane=YZPLANE, offset=pos_x).id
-#     id_cut_plane[1] = p.DatumPlaneByPrincipalPlane(principalPlane=XZPLANE, offset=pos_y).id
-#     for i in range(2):
-#         try:
-#             p.PartitionCellByDatumPlane(datumPlane=p.datums[id_cut_plane[i]], cells=p.cells)
-#         except:
-#             log_warning('No partition created for excitation.')
-
-
-# def add_concentrated_force(pos_x, pos_y, pos_z, amplitude, excitation_id):
-#     set_name = "set-concentrated-force-{}".format(excitation_id)
-#     a = mdb.models[MODEL_NAME].rootAssembly
-#     v1 = a.instances[INSTANCE_NAME].vertices
-#     verts1 = v1.findAt(coordinates=((pos_x, pos_y, pos_z),))
-#     region = a.Set(vertices=verts1, name=set_name)
-#     mdb.models[MODEL_NAME].ConcentratedForce(name='point-load-{}'.format(excitation_id),
-#                                              createStepName=STEP_NAME,
-#                                              region=region,
-#                                              cf3=amplitude,
-#                                              amplitude='amp-{}'.format(excitation_id),
-#                                              distributionType=UNIFORM,
-#                                              field='',
-#                                              localCsys=None)
+# deprecated functions -------------------------------------------------------------------------------------------------
+def save_viewport_to_png(center_x, center_y):
+    session.viewports['Viewport: 1'].view.setValues(session.views['Front'])
+    session.viewports['Viewport: 1'].view.setValues(cameraPosition=(center_x, center_y, 2.83871),
+                                                    cameraTarget=(center_x, center_y, 0.01),
+                                                    width=0.15)
+    session.printToFile(
+        filename='abaqus_screenshot_' + str(datetime.datetime.now()),
+        format=PNG,
+        canvasObjects=(session.viewports['Viewport: 1'],))
+    log_info('Saved screenshot.')

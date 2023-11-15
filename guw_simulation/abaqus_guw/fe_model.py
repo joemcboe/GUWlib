@@ -10,6 +10,7 @@ from .output import *
 from .signals import *
 from .defect import *
 from .plate import *
+from .rectilinear_partitioning import partition_rectangular_plate
 
 DEFAULT_MAX_FREQUENCY = 50e3
 
@@ -29,7 +30,6 @@ class FEModel:
 
         - *'point_force'*: Point force modeling.
         - *'piezo_electric'*: Piezoelectric modeling.
-        - *'pin_force'*: Pin force modeling.
 
     :param float max_frequency: Maximum frequency for analysis.
     :param int nodes_per_wavelength: Number of nodes per wavelength.
@@ -63,58 +63,12 @@ class FEModel:
     # public methods
     def setup_in_abaqus(self):
 
-        num_nodes = None
+        # PRELIMINARY --------------------------------------------------------------------------------------------------
 
-        # PART MODULE --------------------------------------------------------------------------------------------------
-        # plate geometry
-        create_plate(plate=self.plate)
-        log_info("Created plate geometry: {}".format(self.plate.description))
-
-        # defects geometry
-        log_txt = ""
-        for i, defect in enumerate(self.defects):
-            if isinstance(defect, Hole):
-                defect.id = i
-                create_circular_hole_in_plate(plate=self.plate, hole=defect)
-                log_txt = "{}\n{:g}-mm circular hole at ({:g},{:g}) mm".format(log_txt,
-                                                                               defect.radius * 2e3,
-                                                                               defect.position_x * 1e3,
-                                                                               defect.position_y * 1e3)
-            if isinstance(defect, Crack):
-                pass
-                # TODO
-
-        log_info("Added {} defect(s):\n{}".format(len(self.defects), log_txt))
-
-        if self.model_approach == 'point_force':
-            # piezo geometry
-            for i, piezo in enumerate(self.phased_array):
-                piezo.id = i
-                create_piezo_as_point_load(plate=self.plate, piezo_element=piezo)
-
-            log_info("Added " + str(len(self.phased_array)) + " point forces, representing the piezoelectric"
-                                                              " transducers.")
-
-        if self.model_approach == 'piezo_electric':
-            # piezo geometry
-            for i, piezo in enumerate(self.phased_array):
-                piezo.id = i
-                create_piezo_element(plate=self.plate, piezo_element=piezo)
-            pass
-
-        # PROPERTY MODULE ----------------------------------------------------------------------------------------------
-        if self.model_approach == 'point_force':
-            create_material(self.plate.material)
-            assign_material(set_name=self.plate.material_cell_set_name, material=self.plate.material)
-
-        if self.model_approach == 'piezo_electric':
-            pass
-            # materials will be assigned after splitting the model for co-simulation
-
-        # MESH MODULE --------------------------------------------------------------------------------------------------
+        # determine the element size according to CFL condition
         all_signals = [signal for step in self.load_cases for signal in step.piezo_signals]
-        max_exciting_frequency, info = self.determine_max_signals_frequency(all_signals)
-        log_info(info)
+        max_exciting_frequency, info_string = self.determine_max_signals_frequency(all_signals)
+        log_info(info_string)
 
         wavelengths = get_lamb_wavelength(material=self.plate.material,
                                           thickness=self.plate.thickness,
@@ -132,6 +86,69 @@ class FEModel:
                            element_size_nodes_per_wavelength, self.elements_in_thickness_direction,
                            element_size_thickness))
 
+        # create a pristine plate w/o defects or piezo-elements, and obtain a structured mesh for better partitioning
+        create_reference_mesh_plate(plate=self.plate, element_size=element_size)
+
+        # PART MODULE --------------------------------------------------------------------------------------------------
+        # plate geometry
+        create_plate(plate=self.plate)
+        log_info("Created plate geometry: {}".format(self.plate.description))
+
+        # defects geometry
+        bounding_box_list = []
+        log_txt = ""
+        for i, defect in enumerate(self.defects):
+            defect.id = i
+            if isinstance(defect, Hole):
+                bounding_box = create_circular_hole_in_plate(plate=self.plate, hole=defect, element_size=element_size)
+                bounding_box_list.append(bounding_box)
+                log_txt = "{}\n{:g}-mm circular hole at ({:g},{:g}) mm".format(log_txt,
+                                                                               defect.radius * 2e3,
+                                                                               defect.position_x * 1e3,
+                                                                               defect.position_y * 1e3)
+            if isinstance(defect, Crack):
+                pass
+                # TODO
+
+        log_info("Added {} defect(s):\n{}".format(len(self.defects), log_txt))
+
+        # piezo geometry
+        if self.model_approach == 'point_force':
+            for i, piezo in enumerate(self.phased_array):
+                piezo.id = i
+                bounding_box = create_piezo_as_point_load(plate=self.plate, piezo_element=piezo,
+                                                          element_size=element_size)
+                bounding_box_list.append(bounding_box)
+
+            log_info("Added " + str(len(self.phased_array)) + " point forces, representing the piezoelectric"
+                                                              " transducers.")
+
+        if self.model_approach == 'piezo_electric':
+            for i, piezo in enumerate(self.phased_array):
+                piezo.id = i
+                create_piezo_element(plate=self.plate, piezo_element=piezo)
+
+        # partition the plate into partitions that are suitable for structured meshing
+        log_info("Generating a rectilinear partitioning strategy for the plate. This might take some time...")
+        cells = partition_rectangular_plate(self.plate, bounding_box_list)
+        log_info("Done. Starting to create {:d} rectangular partitions on the plate part.".format(len(cells)))
+        for i, cell in enumerate(cells[:-1]):
+            left, bottom, right, top = (cell[0], cell[1], cell[2], cell[3])
+            add_rectangular_partition_to_plate(self.plate, left, bottom, right, top)
+
+        # delete the reference mesh plate
+        remove_reference_mesh_plate()
+
+        # PROPERTY MODULE ----------------------------------------------------------------------------------------------
+        if self.model_approach == 'point_force':
+            create_material(self.plate.material)
+            assign_material(set_name=self.plate.material_cell_set_name, material=self.plate.material)
+
+        if self.model_approach == 'piezo_electric':
+            pass
+            # materials will be assigned after splitting the model for co-simulation
+
+        # MESH MODULE --------------------------------------------------------------------------------------------------
         if self.model_approach == 'point_force':
             num_nodes = mesh_part_point_force_approach(element_size=element_size,
                                                        phased_array=self.phased_array,
@@ -208,7 +225,7 @@ class FEModel:
                                               max_time_increment=max_time_increment)
 
                 # write input file for this load case
-                write_input_file(job_name=step_name, num_cpus=1)
+                # write_input_file(job_name=step_name, num_cpus=1)
 
                 log_info("Created a job definition for the current load case. To run or view this load case,"
                          "please refer to the created input file '{}.inp'. ".format(step_name))

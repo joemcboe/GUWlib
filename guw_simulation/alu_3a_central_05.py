@@ -21,50 +21,65 @@ from abaqus_guw.load_case import *
 
 # parameters
 PLATE_THICKNESS = 3e-3
-PLATE_WIDTH = 33e-3
+PLATE_WIDTH = 0.5
+PHASED_ARRAY_RADIUS = 55e-3
+PHASED_ARRAY_N_ELEMENTS = 9
 
 # create an instance of isotropic plate --------------------------------------------------------------------------------
 plate = IsotropicPlate(material='aluminum',
                        thickness=PLATE_THICKNESS,
-                       length=PLATE_WIDTH*2,
+                       length=PLATE_WIDTH,
                        width=PLATE_WIDTH)
 
 # add defects ----------------------------------------------------------------------------------------------------------
-defects = []
+r = PHASED_ARRAY_RADIUS * 3
+phi = 120.0*np.pi/180
+pos_x = PLATE_WIDTH/2 + r * np.cos(phi)
+pos_y = PLATE_WIDTH/2 + r * np.sin(phi)
+defects = [Hole(position_x=pos_x, position_y=pos_y, diameter=5e-3)]
 
-# add phased array -----------------------------------------------------------------------------------------------------
-phased_array = [PiezoElement(position_x=PLATE_WIDTH/2,
-                             position_y=PLATE_WIDTH/2,
-                             diameter=18e-3,
-                             thickness=0.2e-3,
-                             material='pic255',
-                             electrode_thickness=1e-4,
-                             electrode_material='silver'),
-                PiezoElement(position_x=PLATE_WIDTH * 3 / 2,
-                             position_y=PLATE_WIDTH / 2,
-                             diameter=18e-3,
-                             thickness=0.2e-3,
-                             material='pic255',
-                             electrode_thickness=1e-4,
-                             electrode_material='silver')]
+# add phased array -----------------------------------------------------------------------------------------------------                            
+phased_array = []
+phi = np.linspace(0, 2 * np.pi, PHASED_ARRAY_N_ELEMENTS+1)
+pos_x = PLATE_WIDTH/2 + PHASED_ARRAY_RADIUS * np.cos(phi)
+pos_y = PLATE_WIDTH/2 + PHASED_ARRAY_RADIUS * np.sin(phi)
+for i in range(len(phi) - 1):
+    print(pos_x[i])
+    print(pos_y[i])
+    phased_array.append(PiezoElement(position_x=pos_x[i],
+                                     position_y=pos_y[i],
+                                     diameter=18e-3,
+                                     thickness=0.2e-3,
+                                     material='pic255',
+                                     electrode_thickness=1e-4,
+                                     electrode_material='silver'))
 
 # create one step / load case ------------------------------------------------------------------------------------------
-# apply a burst signal on piezo element 2
+dirac_impulse = DiracImpulse()
 load_cases = []
-burst = Burst(carrier_frequency=10e3, n_cycles=3, dt=0, window='hanning')
+for i in range(len(phased_array)):
+    piezo_signals = [None] * len(phased_array)
+    piezo_signals[i] = dirac_impulse
+    i_step = LoadCase(name='impulse_piezo_{}'.format(i),
+                      duration=3e-3,
+                      piezo_signals=piezo_signals,
+                      output_request='history')
+    load_cases.append(i_step)
+
+# apply a burst signal on piezo element 2
+burst = Burst(carrier_frequency=50e3, n_cycles=3, dt=0, window='hanning')
 piezo_signals = [None] * len(phased_array)
-piezo_signals[1] = burst
+piezo_signals[0] = burst
 load_cases.append(LoadCase(name='control_step',
-                           duration=1e-4,
+                           duration=3e-3,
                            piezo_signals=piezo_signals,
-                           output_request='field'))
+                           output_request='history'))
 
 # create FE model from plate, defects and phased array -----------------------------------------------------------------
 fe_model = FEModel(plate=plate, phased_array=phased_array, defects=defects, load_cases=load_cases)
-fe_model.max_frequency = 10e3
-fe_model.nodes_per_wavelength = 5
+fe_model.nodes_per_wavelength = 4
 fe_model.elements_in_thickness_direction = 1
-fe_model.model_approach = 'piezo_electric'
+fe_model.model_approach = 'point_force'
 
 # generate in abaqus
 fe_model.setup_in_abaqus()

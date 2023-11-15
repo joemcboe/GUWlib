@@ -27,10 +27,10 @@ PLATE_WIDTH = 33e-3
 plate = IsotropicPlate(material='aluminum',
                        thickness=PLATE_THICKNESS,
                        length=PLATE_WIDTH*2,
-                       width=PLATE_WIDTH)
+                       width=PLATE_WIDTH*2)
 
 # add defects ----------------------------------------------------------------------------------------------------------
-defects = []
+defects = [Hole(position_x=PLATE_WIDTH, position_y=(3.0/2.0)*PLATE_WIDTH, diameter=10e-3)]
 
 # add phased array -----------------------------------------------------------------------------------------------------
 phased_array = [PiezoElement(position_x=PLATE_WIDTH/2,
@@ -49,22 +49,31 @@ phased_array = [PiezoElement(position_x=PLATE_WIDTH/2,
                              electrode_material='silver')]
 
 # create one step / load case ------------------------------------------------------------------------------------------
-# apply a burst signal on piezo element 2
+dirac_impulse = DiracImpulse()
 load_cases = []
+for i in range(len(phased_array)):
+    piezo_signals = [None] * len(phased_array)
+    piezo_signals[i] = dirac_impulse
+    i_step = LoadCase(name='impulse_piezo_{}'.format(i),
+                      duration=5e-3,
+                      piezo_signals=piezo_signals,
+                      output_request='history')
+    load_cases.append(i_step)
+    
+# apply a burst signal on piezo element 2
 burst = Burst(carrier_frequency=10e3, n_cycles=3, dt=0, window='hanning')
 piezo_signals = [None] * len(phased_array)
-piezo_signals[1] = burst
+piezo_signals[0] = burst
 load_cases.append(LoadCase(name='control_step',
-                           duration=1e-4,
+                           duration=5e-3,
                            piezo_signals=piezo_signals,
-                           output_request='field'))
+                           output_request='history'))
 
 # create FE model from plate, defects and phased array -----------------------------------------------------------------
 fe_model = FEModel(plate=plate, phased_array=phased_array, defects=defects, load_cases=load_cases)
-fe_model.max_frequency = 10e3
-fe_model.nodes_per_wavelength = 5
-fe_model.elements_in_thickness_direction = 1
-fe_model.model_approach = 'piezo_electric'
+fe_model.nodes_per_wavelength = 10
+fe_model.elements_in_thickness_direction = 4
+fe_model.model_approach = 'point_force'
 
 # generate in abaqus
 fe_model.setup_in_abaqus()

@@ -62,174 +62,6 @@ BOUNDBOX_CELL_NAME = 'bounding_box'
 
 
 # PART MODULE HELPER FUNCTIONS -----------------------------------------------------------------------------------------
-def create_piezo_socket_on_plate(plate, piezo_element):
-    # decompose piezo attributes
-    piezo_pos_x = piezo_element.position_x
-    piezo_pos_y = piezo_element.position_y
-    piezo_radius = piezo_element.radius
-    piezo_thickness = piezo_element.thickness
-    piezo_id = piezo_element.id
-
-    # constants
-    boundbox_cell_name = '{}_{}_{}'.format(PIEZO_CELL_NAME, piezo_id, BOUNDBOX_CELL_NAME)
-    piezo_cell_name = '{}_{}'.format(PIEZO_CELL_NAME, piezo_id)
-    piezo_wall_face_set_name = '{}_{}_wall'.format(PIEZO_CELL_NAME, piezo_id)
-    piezo_element.wall_face_set_name = piezo_wall_face_set_name
-    piezo_element.cell_set_name = piezo_cell_name
-
-    # get part and datums
-    p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
-    sketch_plane_id = plate.datum_plane_abaqus_id
-    sketch_up_edge_id = plate.datum_axis_abaqus_id
-
-    # partition the plate to get a rectangular bounding box around the piezo element
-    lower_left_coord = (piezo_pos_x - BOUNDBOX_SCALE * piezo_radius, piezo_pos_y - BOUNDBOX_SCALE * piezo_radius)
-    upper_right_coord = (piezo_pos_x + BOUNDBOX_SCALE * piezo_radius, piezo_pos_y + BOUNDBOX_SCALE * piezo_radius)
-    t = p.MakeSketchTransform(sketchPlane=p.datums[sketch_plane_id],
-                              sketchUpEdge=p.datums[sketch_up_edge_id],
-                              sketchPlaneSide=SIDE1,
-                              sketchOrientation=RIGHT,
-                              origin=(0.0, 0.0, 0.0))
-    s = mdb.models[MODEL_NAME].ConstrainedSketch(name='__profile__',
-                                                 sheetSize=3.25,
-                                                 gridSpacing=0.08,
-                                                 transform=t)
-    p.projectReferencesOntoSketch(sketch=s, filter=COPLANAR_EDGES)
-    s.rectangle(point1=lower_left_coord, point2=upper_right_coord)
-
-    plate_faces = p.sets[PLATE_TOP_FACE_NAME].faces[0]
-    f = p.PartitionFaceBySketch(faces=plate_faces,
-                                sketch=s)
-    e = p.sets[PLATE_TOP_FACE_NAME].faces[1].getEdges()
-    line_id = p.DatumAxisByTwoPoint(point1=(0, 0, 0), point2=(0, 0, plate.thickness)).id
-    p.PartitionCellByExtrudeEdge(cells=p.sets[PLATE_CELL_NAME].cells[0:1],
-                                 line=p.datums[line_id],
-                                 edges=[p.edges[i] for i in e[0:4]],
-                                 sense=REVERSE)
-
-    # update sets for plate top surface, bounding box, plate, and plate cell
-    p.Set(faces=p.sets[PLATE_TOP_FACE_NAME].faces[0:1], name=PLATE_TOP_FACE_NAME)
-    boundbox_cell = p.sets[PLATE_CELL_NAME].cells.getByBoundingBox(zMin=0,
-                                                                   zMax=plate.thickness,
-                                                                   xMin=lower_left_coord[0],
-                                                                   yMin=lower_left_coord[1],
-                                                                   xMax=upper_right_coord[0],
-                                                                   yMax=upper_right_coord[1])
-    p.Set(cells=boundbox_cell, name=boundbox_cell_name)
-    p.SetByBoolean(operation=DIFFERENCE,
-                   sets=[p.sets[PLATE_CELL_NAME], p.sets[boundbox_cell_name]],
-                   name=PLATE_CELL_NAME)
-
-    # draw guidelines
-    temp_sketch_plane_id = p.DatumPlaneByPrincipalPlane(principalPlane=XYPLANE,
-                                                        offset=plate.thickness).id
-    t = p.MakeSketchTransform(sketchPlane=p.datums[temp_sketch_plane_id],
-                              sketchUpEdge=p.datums[sketch_up_edge_id],
-                              sketchPlaneSide=SIDE1,
-                              sketchOrientation=RIGHT,
-                              origin=(0.0, 0.0, 0.0))
-    s = mdb.models[MODEL_NAME].ConstrainedSketch(name='__profile__',
-                                                 sheetSize=3.25,
-                                                 gridSpacing=0.08,
-                                                 transform=t)
-    guideline_coordinates = get_guidelines(piezo_pos_x, piezo_pos_y, piezo_radius)
-    for coordinates in guideline_coordinates:
-        s.Line(point1=coordinates[0], point2=coordinates[1])
-
-    s.CircleByCenterPerimeter(center=(piezo_pos_x, piezo_pos_y),
-                              point1=(piezo_pos_x + piezo_radius, piezo_pos_y))
-
-    p.projectReferencesOntoSketch(sketch=s, filter=COPLANAR_EDGES)
-
-    face_array = p.faces.findAt(
-        ((piezo_pos_x + piezo_radius * (1 + BOUNDBOX_SCALE) / 2, piezo_pos_y, plate.thickness),),
-    )
-
-    p.PartitionFaceBySketchThruAll(
-        faces=face_array,
-        sketchPlane=p.datums[temp_sketch_plane_id],
-        sketchUpEdge=p.datums[sketch_up_edge_id],
-        sketchPlaneSide=SIDE1,
-        sketch=s)
-
-    interface_geometry_set_name = 'piezo_{}_expl_interface'.format(piezo_id)
-    interface_geometry = p.faces.getByBoundingCylinder(center1=(piezo_pos_x, piezo_pos_y, plate.thickness * 0.9),
-                                                       center2=(piezo_pos_x, piezo_pos_y, plate.thickness * 1.1),
-                                                       radius=piezo_radius * (1 + BOUNDBOX_SCALE) * 0.5)
-    p.Set(name=interface_geometry_set_name, faces=interface_geometry)
-    piezo_element.xpl_interface_set_name = interface_geometry_set_name
-    del mdb.models[MODEL_NAME].sketches['__profile__']
-
-
-def create_piezo_element_separate_part(plate, piezo_element):
-    # decompose piezo attributes
-    piezo_radius = piezo_element.radius
-    piezo_thickness = piezo_element.thickness
-    piezo_id = piezo_element.id
-    electrode_thickness = piezo_element.electrode_thickness
-
-    piezo_part_name = "piezo_{}".format(piezo_id)
-    piezo_element.part_name = piezo_part_name
-    piezo_set_name = "piezo_ceramic"
-    electrode_set_name = "electrode"
-
-    # create an extrusion from two-dimensional shape
-    s1 = mdb.models[MODEL_NAME].ConstrainedSketch(name='__profile__', sheetSize=2.0)
-    s1.CircleByCenterPerimeter(center=(0, 0),
-                               point1=(piezo_radius, 0))
-
-    p = mdb.models[MODEL_NAME].Part(name=piezo_part_name, dimensionality=THREE_D, type=DEFORMABLE_BODY)
-    p.BaseSolidExtrude(sketch=s1, depth=piezo_thickness + electrode_thickness)
-    del mdb.models[MODEL_NAME].sketches['__profile__']
-
-    # create cut plane
-    cut_plane_abaqus_id = p.DatumPlaneByPrincipalPlane(principalPlane=XYPLANE,
-                                                       offset=electrode_thickness).id
-
-    # partition the part into two cells by cut plane (piezo-element and plate)
-    p.PartitionCellByDatumPlane(cells=p.cells, datumPlane=p.datums[cut_plane_abaqus_id])
-    p.Set(name=piezo_set_name, cells=p.cells.getByBoundingBox(zMin=electrode_thickness))
-    p.Set(name=electrode_set_name, cells=p.cells.getByBoundingBox(zMax=electrode_thickness))
-
-    # draw guidelines
-    temp_sketch_plane_id = p.DatumPlaneByPrincipalPlane(principalPlane=XYPLANE,
-                                                        offset=electrode_thickness + piezo_thickness).id
-    sketch_up_edge_id = p.DatumAxisByTwoPoint(point1=(0, 0, 0),
-                                              point2=(0, 1, 0)).id
-
-    t = p.MakeSketchTransform(sketchPlane=p.datums[temp_sketch_plane_id],
-                              sketchUpEdge=p.datums[sketch_up_edge_id],
-                              sketchPlaneSide=SIDE1,
-                              sketchOrientation=RIGHT,
-                              origin=(0.0, 0.0, 0.0))
-    s = mdb.models[MODEL_NAME].ConstrainedSketch(name='__profile__',
-                                                 sheetSize=3.25,
-                                                 gridSpacing=0.08,
-                                                 transform=t)
-
-    guideline_coordinates = get_guidelines(0, 0, piezo_radius)
-    for coordinates in guideline_coordinates:
-        s.Line(point1=coordinates[0], point2=coordinates[1])
-
-    face_array = p.faces.findAt(
-        ((piezo_radius, 0, 0.5 * electrode_thickness),),
-        ((piezo_radius, 0, electrode_thickness + 0.5 * piezo_thickness),),
-        ((0, 0, 0),)
-    )
-    p.projectReferencesOntoSketch(sketch=s, filter=COPLANAR_EDGES)
-    p.PartitionFaceBySketchThruAll(
-        faces=face_array,
-        sketchPlane=p.datums[temp_sketch_plane_id],
-        sketchUpEdge=p.datums[sketch_up_edge_id],
-        sketchPlaneSide=SIDE1,
-        sketch=s)
-
-    interface_geometry_set_name = "std_interface"
-    interface_geometry = p.faces.getByBoundingBox(zMax=electrode_thickness / 2)
-    p.Set(name=interface_geometry_set_name, faces=interface_geometry)
-    piezo_element.std_interface_set_name = interface_geometry_set_name
-
-
 def create_piezo_element(plate, piezo_element):
     # decompose piezo attributes
     piezo_pos_x = piezo_element.position_x
@@ -251,8 +83,8 @@ def create_piezo_element(plate, piezo_element):
 
     # create solid extrusion
     p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
-    sketch_plane_id = plate.datum_plane_abaqus_id
-    sketch_up_edge_id = plate.datum_axis_abaqus_id
+    sketch_plane_id = plate.datum_xy_plane_id
+    sketch_up_edge_id = plate.datum_y_axis_id
     t = p.MakeSketchTransform(sketchPlane=p.datums[sketch_plane_id],
                               sketchUpEdge=p.datums[sketch_up_edge_id],
                               sketchPlaneSide=SIDE1,
@@ -438,19 +270,17 @@ def create_material_co_sim(material_name, model_name):
         type_of_material = material_properties["type"]
         if type_of_material == "isotropic":
             mdb.models[model_name].Material(name=material_name)
-            mdb.models[model_name].materials[material_name].Density(table=((material_properties["density"],),))
-            mdb.models[model_name].materials[material_name].Elastic(table=((material_properties["youngs_modulus"],
-                                                                            material_properties["poissons_ratio"]),))
+            m = mdb.models[model_name].materials[material_name]
+            m.Density(table=((material_properties["density"],),))
+            m.Elastic(table=((material_properties["youngs_modulus"], material_properties["poissons_ratio"]),))
+
         if type_of_material == "piezo_electric":
             mdb.models[model_name].Material(name=material_name)
-            mdb.models[model_name].materials[material_name].Density(table=((material_properties["density"],),))
-            mdb.models[model_name].materials[material_name].Elastic(type=ENGINEERING_CONSTANTS,
-                                                                    table=material_properties[
-                                                                        "elastic_engineering_constants_table"])
-            mdb.models[model_name].materials[material_name].Dielectric(type=ORTHOTROPIC, table=material_properties[
-                "dielectric_orthotropic_table"])
-            mdb.models[model_name].materials[material_name].Piezoelectric(type=STRAIN, table=material_properties[
-                "piezo_electric_strain_table"])
+            m = mdb.models[model_name].materials[material_name]
+            m.Density(table=((material_properties["density"],),))
+            m.Elastic(type=ENGINEERING_CONSTANTS, table=material_properties["elastic_engineering_constants_table"])
+            m.Dielectric(type=ORTHOTROPIC, table=material_properties["dielectric_orthotropic_table"])
+            m.Piezoelectric(type=STRAIN, table=material_properties["piezo_electric_strain_table"])
     except ValueError as e:
         log_error(e)
 
