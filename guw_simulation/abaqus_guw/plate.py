@@ -30,5 +30,6 @@ class IsotropicPlate:
         self.cell_set_name = None
         self.material_cell_set_name = None
         self.top_surf_face_set_name = None
+        self.field_output_face_set_name = None
         self.std_interface_node_set_name = None
         self.xpl_interface_node_set_name = None

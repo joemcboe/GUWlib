@@ -76,18 +76,17 @@ class FEModel:
         min_wavelength = min(min(wavelengths[0]), min(wavelengths[1]))
         element_size_nodes_per_wavelength = min_wavelength / (self.nodes_per_wavelength - 1)
         element_size_thickness = self.plate.thickness / self.elements_in_thickness_direction
-        element_size = min(element_size_thickness, element_size_nodes_per_wavelength)
+        # element_size = min(element_size_thickness, element_size_nodes_per_wavelength)
 
-        log_info("Element size set to {:.2e} m.\n"
-                 "(Max exciting frequency:   {:.2f} kHz\n"
-                 " For {:.0f} nodes per wavelength:   max element size: {:.2e} m\n"
-                 " For {:.0f} elements per thickness: max element size: {:.2e} m)"
-                 "".format(element_size, max_exciting_frequency * 1e-3, self.nodes_per_wavelength,
-                           element_size_nodes_per_wavelength, self.elements_in_thickness_direction,
-                           element_size_thickness))
+        log_info("Max exciting frequency:          {:.2f} kHz\n"
+                 "Element size, in-plane:          {:.2e} m (for {:.0f} nodes per wavelength)\n"
+                 "Element size, through-thickness: {:.2e} m (for {:.0f} elements per thickness)"
+                 "".format(max_exciting_frequency * 1e-3,
+                           element_size_nodes_per_wavelength, self.nodes_per_wavelength,
+                           element_size_thickness, self.elements_in_thickness_direction))
 
         # create a pristine plate w/o defects or piezo-elements, and obtain a structured mesh for better partitioning
-        create_reference_mesh_plate(plate=self.plate, element_size=element_size)
+        create_reference_mesh_plate(plate=self.plate, element_size=element_size_nodes_per_wavelength)
 
         # PART MODULE --------------------------------------------------------------------------------------------------
         # plate geometry
@@ -100,7 +99,8 @@ class FEModel:
         for i, defect in enumerate(self.defects):
             defect.id = i
             if isinstance(defect, Hole):
-                bounding_box = create_circular_hole_in_plate(plate=self.plate, hole=defect, element_size=element_size)
+                bounding_box = create_circular_hole_in_plate(plate=self.plate, hole=defect,
+                                                             element_size=element_size_nodes_per_wavelength)
                 bounding_box_list.append(bounding_box)
                 log_txt = "{}\n{:g}-mm circular hole at ({:g},{:g}) mm".format(log_txt,
                                                                                defect.radius * 2e3,
@@ -117,7 +117,7 @@ class FEModel:
             for i, piezo in enumerate(self.phased_array):
                 piezo.id = i
                 bounding_box = create_piezo_as_point_load(plate=self.plate, piezo_element=piezo,
-                                                          element_size=element_size)
+                                                          element_size=element_size_nodes_per_wavelength)
                 bounding_box_list.append(bounding_box)
 
             log_info("Added " + str(len(self.phased_array)) + " point forces, representing the piezoelectric"
@@ -132,9 +132,14 @@ class FEModel:
         log_info("Generating a rectilinear partitioning strategy for the plate. This might take some time...")
         cells = partition_rectangular_plate(self.plate, bounding_box_list)
         log_info("Done. Starting to create {:d} rectangular partitions on the plate part.".format(len(cells)))
+        err_count = 0
         for i, cell in enumerate(cells[:-1]):
             left, bottom, right, top = (cell[0], cell[1], cell[2], cell[3])
-            add_rectangular_partition_to_plate(self.plate, left, bottom, right, top)
+            status, warning = add_rectangular_partition_to_plate(self.plate, left, bottom, right, top)
+            err_count += status
+        if err_count > 0:
+            log_warning("{} partitions could not be created. Probably the target region"
+                        " was already rectangular".format(err_count))
 
         # delete the reference mesh plate
         remove_reference_mesh_plate()
@@ -150,12 +155,13 @@ class FEModel:
 
         # MESH MODULE --------------------------------------------------------------------------------------------------
         if self.model_approach == 'point_force':
-            num_nodes = mesh_part_point_force_approach(element_size=element_size,
+            num_nodes = mesh_part_point_force_approach(element_size_in_plane=element_size_nodes_per_wavelength,
+                                                       element_size_thru_thickness=element_size_thickness,
                                                        phased_array=self.phased_array,
                                                        defects=self.defects)
 
         if self.model_approach == 'piezo_electric':
-            num_nodes = mesh_part_piezo_electric_approach(element_size=element_size,
+            num_nodes = mesh_part_piezo_electric_approach(element_size=element_size_nodes_per_wavelength,
                                                           phased_array=self.phased_array,
                                                           defects=self.defects)
             create_mesh_parts()
@@ -213,7 +219,8 @@ class FEModel:
                 if step.output_request == 'field':
                     add_piezo_signal_history_output_request(phased_array=self.phased_array,
                                                             create_step_name=step_name)
-                    add_field_output_request(create_step_name=step_name)
+                    add_field_output_request(plate=self.plate, create_step_name=step_name,
+                                             time_interval=max_time_increment*40)
 
                 # create all amplitudes and loads
                 for j, signal in enumerate(step.piezo_signals):
@@ -269,7 +276,7 @@ class FEModel:
                                                    max_time_increment=max_time_increment)
 
                 # # write input file for this load case
-
+                write_input_file(job_name=step_name, num_cpus=4)
                 log_info("Created a job definition for the current load case. To run or view this load case,"
                          "please refer to the created input file '{}.inp'. ".format(step_name))
 

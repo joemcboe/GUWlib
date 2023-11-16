@@ -61,8 +61,16 @@ for i in range(len(phi) - 1):
                                      electrode_material='silver'))
 
 # create one step / load case ------------------------------------------------------------------------------------------
-dirac_impulse = DiracImpulse()
+# dirac_impulse = DiracImpulse()
 load_cases = []
+# apply a burst signal on piezo element 2
+burst = Burst(carrier_frequency=50e3, n_cycles=3, dt=0, window='hanning')
+piezo_signals = [None] * len(phased_array)
+piezo_signals[0] = burst
+load_cases.append(LoadCase(name='control_step',
+                           duration=3e-3,
+                           piezo_signals=piezo_signals,
+                           output_request='field'))
 
 # create FE model from plate, defects and phased array -----------------------------------------------------------------
 fe_model = FEModel(plate=plate, phased_array=phased_array, defects=defects, load_cases=load_cases)

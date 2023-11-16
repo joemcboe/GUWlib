@@ -49,6 +49,7 @@ STEP_NAME = 'lamb_excitation'
 # these are all sets and should maybe be named as such ...
 PLATE_CELL_NAME = 'plate'
 PLATE_TOP_FACE_NAME = 'plate-top-surface'
+PLATE_FIELD_OUTPUT_NAME = 'plate-field-output'
 PLATE_SET_NAME = 'plate-material'
 
 PIEZO_CELL_NAME = 'piezo'
@@ -81,9 +82,11 @@ def create_plate(plate):
     p.Set(cells=p.cells, name=PLATE_CELL_NAME)  # contains the plate without the bounding boxes
     p.Set(cells=p.cells, faces=p.faces, name=PLATE_SET_NAME)  # contains the whole plate (for material assignment)
     p.Set(faces=p.faces.getByBoundingBox(zMin=plate.thickness / 2), name=PLATE_TOP_FACE_NAME)
+    p.Set(faces=p.faces.getByBoundingBox(zMin=plate.thickness / 2), name=PLATE_FIELD_OUTPUT_NAME)
     plate.cell_set_name = PLATE_CELL_NAME
     plate.material_cell_set_name = PLATE_SET_NAME
     plate.top_surf_face_set_name = PLATE_TOP_FACE_NAME
+    plate.field_output_face_set_name = PLATE_FIELD_OUTPUT_NAME
 
 
 def create_circular_hole_in_plate(plate, hole, element_size):
@@ -124,7 +127,7 @@ def create_circular_hole_in_plate(plate, hole, element_size):
     # on the nodes of a reference structured mesh
     boundbox_radius = boundbox_scale * circle_radius
     x_left, x_right, y_lower, y_upper, x_center, y_center = (
-        __get_bounding_box_coordinates_from_reference_mesh(circle_pos_x, circle_pos_y, plate.thickness, boundbox_radius,
+        __get_bounding_box_coordinates_from_reference_mesh(circle_pos_x, circle_pos_y, boundbox_radius,
                                                            element_size))
     lower_left_coord = (x_left, y_lower)
     upper_right_coord = (x_right, y_upper)
@@ -195,7 +198,7 @@ def create_piezo_as_point_load(plate, piezo_element, element_size):
     # partition the plate to get a rectangular bounding box around the piezo element position
     boundbox_radius = piezo_radius * boundbox_scale
     x_left, x_right, y_lower, y_upper, x_center, y_center = \
-        (__get_bounding_box_coordinates_from_reference_mesh(piezo_pos_x, piezo_pos_y, plate.thickness,
+        (__get_bounding_box_coordinates_from_reference_mesh(piezo_pos_x, piezo_pos_y,
                                                             boundbox_radius, element_size))
     lower_left_coord = (x_left, y_lower)
     upper_right_coord = (x_right, y_upper)
@@ -239,6 +242,9 @@ def add_rectangular_partition_to_plate(plate, left, lower, right, top):
     :param cell_name:
     :return:
     """
+    status = 0
+    warning = ""
+
     # retrieve Abaqus part and datums
     p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
     sketch_plane_id = plate.datum_xy_plane_id
@@ -258,9 +264,10 @@ def add_rectangular_partition_to_plate(plate, left, lower, right, top):
         f = p.PartitionFaceBySketch(faces=plate_faces[0], sketch=s)
         del mdb.models[MODEL_NAME].sketches['__profile__']
     except Exception as e:
-        log_warning("Face partition could not be created: {}. "
-                    "Probably the target region is already rectangular.".format(e))
-        return
+        warning = ("Face partition could not be created: {}. "
+                   "Probably the target region is already rectangular.".format(e))
+        status = 1
+        return status, warning
 
     # get the rectangular regions face and use its edges to create a cell partition
     rectangular_face = p.sets[PLATE_TOP_FACE_NAME].faces.getByBoundingBox(zMin=plate.thickness, zMax=plate.thickness,
@@ -272,9 +279,12 @@ def add_rectangular_partition_to_plate(plate, left, lower, right, top):
         p.PartitionCellByExtrudeEdge(cells=cell_to_partition, line=p.datums[plate.datum_z_axis_id],
                                      edges=[p.edges[i] for i in e], sense=REVERSE)
     except Exception as e:
-        log_warning("Cell partition could not be created: {} "
-                    "Probably the target region is already rectangular.".format(e))
-        return
+        warning = ("Face partition could not be created: {}. "
+                   "Probably the target region is already rectangular.".format(e))
+        status = 1
+        return status, warning
+
+    return status, warning
 
 
 def create_reference_mesh_plate(plate, element_size):
@@ -290,8 +300,9 @@ def create_reference_mesh_plate(plate, element_size):
     for i in range(len(plate.shape) - 1):
         s1.Line(point1=plate.shape[i], point2=plate.shape[i + 1])
 
-    p = mdb.models[MODEL_NAME].Part(name=REFERENCE_PLATE_PART_NAME, dimensionality=THREE_D, type=DEFORMABLE_BODY)
-    p.BaseSolidExtrude(sketch=s1, depth=plate.thickness)
+    p = mdb.models[MODEL_NAME].Part(name=REFERENCE_PLATE_PART_NAME, dimensionality=TWO_D_PLANAR, type=DEFORMABLE_BODY)
+    p.BaseShell(sketch=s1)
+
     del mdb.models[MODEL_NAME].sketches['__profile__']
 
     # seed and mesh part with desired element size
@@ -355,12 +366,11 @@ def __add_bounding_box_to_plate(plate, lower_left_coord, upper_right_coord, boun
                    name=PLATE_CELL_NAME)
 
 
-def __get_bounding_box_coordinates_from_reference_mesh(x, y, z, bounding_box_radius, element_size):
+def __get_bounding_box_coordinates_from_reference_mesh(x, y, bounding_box_radius, element_size):
     """
     Returns corner- and edge-center-coordinates that snap to the nearest node of a reference mesh.
     :param x:
     :param y:
-    :param z:
     :param bounding_box_radius:
     :param element_size:
     :return:
@@ -368,7 +378,7 @@ def __get_bounding_box_coordinates_from_reference_mesh(x, y, z, bounding_box_rad
     p = mdb.models[MODEL_NAME].parts[REFERENCE_PLATE_PART_NAME]
 
     # lower left corner
-    lower_left_corner = p.nodes.getClosest((x - bounding_box_radius, y - bounding_box_radius, z), numToFind=1,
+    lower_left_corner = p.nodes.getClosest((x - bounding_box_radius, y - bounding_box_radius), numToFind=1,
                                            searchTolerance=element_size * 3)
     if lower_left_corner:
         x_left = lower_left_corner.coordinates[0]
@@ -378,7 +388,7 @@ def __get_bounding_box_coordinates_from_reference_mesh(x, y, z, bounding_box_rad
         y_lower = y - bounding_box_radius
 
     # upper right corner
-    upper_right_corner = p.nodes.getClosest((x + bounding_box_radius, y + bounding_box_radius, z), numToFind=1,
+    upper_right_corner = p.nodes.getClosest((x + bounding_box_radius, y + bounding_box_radius), numToFind=1,
                                             searchTolerance=element_size * 2)
     if upper_right_corner:
         x_right = upper_right_corner.coordinates[0]
@@ -388,7 +398,7 @@ def __get_bounding_box_coordinates_from_reference_mesh(x, y, z, bounding_box_rad
         y_upper = y + bounding_box_radius
 
     # center coordinates
-    center_node = p.nodes.getClosest((x, y, z), numToFind=1,
+    center_node = p.nodes.getClosest((x, y), numToFind=1,
                                      searchTolerance=element_size * 3)
     if center_node:
         x_center = center_node.coordinates[0]
@@ -428,23 +438,16 @@ def create_material(material_name):
 def assign_material(set_name, material):
     # create new homogenous section
     section_name = set_name + '_section_homogenous_' + material
-    mdb.models[MODEL_NAME].HomogeneousSolidSection(
-        name=section_name,
-        material=material,
-        thickness=None)
+    mdb.models[MODEL_NAME].HomogeneousSolidSection(name=section_name, material=material, thickness=None)
 
     # create new set containing all cells and assign section to set
     p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
-    p.SectionAssignment(region=p.sets[set_name],
-                        sectionName=section_name,
-                        offset=0.0,
-                        offsetType=MIDDLE_SURFACE,
-                        offsetField='',
-                        thicknessAssignment=FROM_SECTION)
+    p.SectionAssignment(region=p.sets[set_name], sectionName=section_name, offset=0.0, offsetType=MIDDLE_SURFACE,
+                        offsetField='', thicknessAssignment=FROM_SECTION)
 
 
 # MESH MODULE HELPER FUNCTIONS -----------------------------------------------------------------------------------------
-def mesh_part_point_force_approach(element_size, phased_array, defects):
+def mesh_part_point_force_approach(element_size_in_plane, element_size_thru_thickness, phased_array, defects):
     # set meshing algorithm for plate
     p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
     p.setMeshControls(regions=p.sets[PLATE_CELL_NAME].cells, algorithm=MEDIAL_AXIS)
@@ -458,8 +461,23 @@ def mesh_part_point_force_approach(element_size, phased_array, defects):
         boundbox_cell_name = '{}_{}_{}'.format(DEFECT_CELL_NAME, i, BOUNDBOX_CELL_NAME)
         p.setMeshControls(regions=p.sets[boundbox_cell_name].cells, algorithm=MEDIAL_AXIS)
 
-    # seed and mesh part with desired element size
-    p.seedPart(size=element_size, deviationFactor=0.1, minSizeFactor=0.1)
+    # seed and mesh part with desired in-plane element size
+    p.seedPart(size=element_size_in_plane, deviationFactor=0.1, minSizeFactor=0.1)
+
+    # seed all vertical edges with through-thickness element size
+    vertical_edge_indices = []
+    for edge in p.edges:
+        vertex_indices = edge.getVertices()
+        if len(vertex_indices) == 2:
+            x1, y1 = p.vertices[vertex_indices[0]].pointOn[0][0:2]
+            x2, y2 = p.vertices[vertex_indices[1]].pointOn[0][0:2]
+            if (x2 - x1) == 0 and (y2 - y1) == 0:
+                vertical_edge_indices.append(edge.index)
+    if len(vertical_edge_indices) > 0:
+        p.seedEdgeBySize(edges=[p.edges[i] for i in vertical_edge_indices], size=element_size_thru_thickness)
+    else:
+        log_warning("Something is wrong - no vertical edges found!")
+
     p.generateMesh()
 
     mesh_stats = p.getMeshStats()
@@ -480,17 +498,10 @@ def assemble():
 
 def make_datums_invisible():
     # function to hide all datum objects and set the projection to PARALLEL
-    session.viewports['Viewport: 1'].view.setProjection(projection=PARALLEL)
-    session.viewports['Viewport: 1'].partDisplay.geometryOptions.setValues(
-        datumPoints=OFF,
-        datumAxes=OFF,
-        datumPlanes=OFF,
-        datumCoordSystems=OFF)
-    session.viewports['Viewport: 1'].assemblyDisplay.geometryOptions.setValues(
-        datumPoints=OFF,
-        datumAxes=OFF,
-        datumPlanes=OFF,
-        datumCoordSystems=OFF)
+    v = session.viewports['Viewport: 1']
+    v.view.setProjection(projection=PARALLEL)
+    v.partDisplay.geometryOptions.setValues(datumPoints=OFF, datumAxes=OFF, datumPlanes=OFF, datumCoordSystems=OFF)
+    v.assemblyDisplay.geometryOptions.setValues(datumPoints=OFF, datumAxes=OFF, datumPlanes=OFF, datumCoordSystems=OFF)
 
 
 # STEP / LOAD MODULE HELPER FUNCTIONS ----------------------------------------------------------------------------------
@@ -532,10 +543,15 @@ def add_piezo_signal_history_output_request(phased_array, create_step_name):
                                                     rebar=EXCLUDE)
 
 
-def add_field_output_request(create_step_name):
+def add_field_output_request(plate, create_step_name, time_interval):
+    region = mdb.models[MODEL_NAME].rootAssembly.allInstances[INSTANCE_NAME].sets[plate.field_output_face_set_name]
     mdb.models[MODEL_NAME].FieldOutputRequest(name='full_field_{}'.format(create_step_name),
-                                              createStepName=create_step_name, variables=('U',),
-                                              timeInterval=EVERY_TIME_INCREMENT, position=NODES)
+                                              createStepName=create_step_name, variables=('UT',),
+                                              timeInterval=time_interval, region=region, sectionPoints=DEFAULT,
+                                              position=NODES)
+    # mdb.models[MODEL_NAME].FieldOutputRequest(name='full_field_{}'.format(create_step_name),
+    #                                           createStepName=create_step_name, variables=('U',),
+    #                                           timeInterval=EVERY_TIME_INCREMENT, position=NODES)
 
 
 def add_amplitude(name, signal, max_time_increment):
@@ -551,7 +567,8 @@ def add_amplitude(name, signal, max_time_increment):
             time_data_table.append((t, signal.get_value_at(t=t)))
 
     # create amplitude in Abaqus
-    mdb.models[MODEL_NAME].TabularAmplitude(name=name, timeSpan=STEP, smooth=SOLVER_DEFAULT, data=tuple(time_data_table))
+    mdb.models[MODEL_NAME].TabularAmplitude(name=name, timeSpan=STEP, smooth=SOLVER_DEFAULT,
+                                            data=tuple(time_data_table))
 
 
 def add_piezo_point_force(load_name, step_name, piezo, signal, max_time_increment):
