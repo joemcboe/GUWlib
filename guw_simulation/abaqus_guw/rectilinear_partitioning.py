@@ -37,7 +37,7 @@ def partition_rectangular_plate(plate, bounding_box_list):
 
 def __generate_cell_array(plate_width, plate_height, bounding_boxes):
     """
-    Returns a list of elementary rectangular cells, that partition the plate with bounding boxes into simple regions.
+    Returns a list of elementary rectangular cells that partition the plate with bounding boxes into simple regions.
     :param plate_width:
     :param plate_height:
     :param bounding_boxes:
