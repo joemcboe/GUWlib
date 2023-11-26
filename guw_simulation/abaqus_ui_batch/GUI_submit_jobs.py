@@ -6,6 +6,8 @@ import shutil
 import threading
 from tkinter import ttk
 
+guw_module_path = ".."
+
 
 class App:
     def __init__(self, root):
@@ -149,10 +151,11 @@ class App:
             os.makedirs(new_directory, exist_ok=True)
 
             # Change directory to original_path
-            os.chdir(original_path)
+            os.chdir(guw_module_path)
 
             # Run the command in CMD
-            command = f"abaqus cae noGUI={script_name}.py"
+            command = f"abaqus cae noGUI=\"{script_path}\""
+            print(command)
             proc = subprocess.Popen(command, shell=True)
             self.progress_bar.place(**self.pb_place_attributes)
             self.progress_bar.start()

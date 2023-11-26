@@ -3,9 +3,7 @@
 *.pyc
 
 # Ignore the results folder
-guw_simulation/user_results/*
-!guw_simulation/user_results
-
+*.gz
 
 # these directories have to be included
 !guw_simulation/*.py
@@ -18,3 +16,4 @@ guw_simulation/user_results/*
 # ignore all compiled python files
 *.pyc
 
+*.gz
