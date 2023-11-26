@@ -59,6 +59,10 @@ class FEModel:
         self.max_frequency = max_frequency  # optional
         self.nodes_per_wavelength = nodes_per_wavelength
         self.elements_in_thickness_direction = elements_in_thickness_direction
+        self.element_type_temp = 'continuum'
+
+        # abaqus job properties
+        self.num_cores = 1
 
     # public methods
     def setup_in_abaqus(self):
@@ -141,13 +145,14 @@ class FEModel:
             log_warning("{} partitions could not be created. Probably the target region"
                         " was already rectangular".format(err_count))
 
-        # delete the reference mesh plate
-        remove_reference_mesh_plate()
 
         # PROPERTY MODULE ----------------------------------------------------------------------------------------------
         if self.model_approach == 'point_force':
+            use_continuum_shell_elements = True if self.element_type_temp == 'continuum_shell' else False
             create_material(self.plate.material)
-            assign_material(set_name=self.plate.material_cell_set_name, material=self.plate.material)
+            assign_material(set_name=self.plate.material_cell_set_name, material=self.plate.material,
+                            use_continuum_shell_elements=use_continuum_shell_elements,
+                            shell_thickness=self.plate.thickness)
 
         if self.model_approach == 'piezo_electric':
             pass
@@ -155,10 +160,19 @@ class FEModel:
 
         # MESH MODULE --------------------------------------------------------------------------------------------------
         if self.model_approach == 'point_force':
+            use_continuum_shell_elements = True if self.element_type_temp == 'continuum_shell' else False
             num_nodes = mesh_part_point_force_approach(element_size_in_plane=element_size_nodes_per_wavelength,
                                                        element_size_thru_thickness=element_size_thickness,
+                                                       plate=self.plate,
                                                        phased_array=self.phased_array,
-                                                       defects=self.defects)
+                                                       defects=self.defects,
+                                                       use_continuum_shell_elements=use_continuum_shell_elements)
+            # remove todo
+            create_dispersion_2d_fft_node_set(plate=self.plate,
+                                              piezo=self.phased_array[0],
+                                              element_size_in_plane=element_size_nodes_per_wavelength,
+                                              element_size_thru_thickness=element_size_thickness,
+                                              set_name=self.plate.dispersion_node_set)
 
         if self.model_approach == 'piezo_electric':
             num_nodes = mesh_part_piezo_electric_approach(element_size=element_size_nodes_per_wavelength,
@@ -167,6 +181,9 @@ class FEModel:
             create_mesh_parts()
             split_mesh_parts(self.plate, self.phased_array)
             create_electric_interface(self.phased_array)
+
+        # delete the reference mesh plate
+        remove_reference_mesh_plate()
 
         # ASSEMBLY MODULE ----------------------------------------------------------------------------------------------
         # create assembly and instantiate the plate
@@ -210,7 +227,7 @@ class FEModel:
                                              max_increment=max_time_increment,
                                              previous_step_name='Initial')
 
-                # create history output request for piezo node sets
+                # create output request for piezo node sets
                 remove_standard_field_output_request()
                 if step.output_request == 'history':
                     add_piezo_signal_history_output_request(phased_array=self.phased_array,
@@ -219,8 +236,13 @@ class FEModel:
                 if step.output_request == 'field':
                     add_piezo_signal_history_output_request(phased_array=self.phased_array,
                                                             create_step_name=step_name)
-                    add_field_output_request(plate=self.plate, create_step_name=step_name,
-                                             time_interval=max_time_increment*40)
+                    add_full_field_output_request(plate=self.plate, create_step_name=step_name,
+                                                  time_interval=max_time_increment * 10)
+
+                # create field output request for the 2d fft line
+                add_2d_fft_field_output_request(create_step_name=step_name,
+                                                time_interval=max_time_increment,
+                                                set_name=self.plate.dispersion_node_set)
 
                 # create all amplitudes and loads
                 for j, signal in enumerate(step.piezo_signals):
@@ -232,7 +254,7 @@ class FEModel:
                                               max_time_increment=max_time_increment)
 
                 # write input file for this load case
-                # write_input_file(job_name=step_name, num_cpus=1)
+                write_input_file(job_name=step_name, num_cpus=self.num_cores)
 
                 log_info("Created a job definition for the current load case. To run or view this load case,"
                          "please refer to the created input file '{}.inp'. ".format(step_name))

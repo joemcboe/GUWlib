@@ -435,22 +435,48 @@ def create_material(material_name):
         log_error(e)
 
 
-def assign_material(set_name, material):
-    # create new homogenous section
-    section_name = set_name + '_section_homogenous_' + material
-    mdb.models[MODEL_NAME].HomogeneousSolidSection(name=section_name, material=material, thickness=None)
+def assign_material(set_name, material, use_continuum_shell_elements=False, shell_thickness=None):
+    if use_continuum_shell_elements:
+        # create new homogenous shell section
+        section_name = set_name + '_shell_section_homogenous_' + material
+        mdb.models[MODEL_NAME].HomogeneousShellSection(name=section_name,
+                                                       preIntegrate=ON, material=material, thicknessType=UNIFORM,
+                                                       thickness=shell_thickness, thicknessField='',
+                                                       nodalThicknessField='', idealization=NO_IDEALIZATION,
+                                                       poissonDefinition=DEFAULT, thicknessModulus=None, useDensity=OFF)
+        p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
+        p.SectionAssignment(region=p.sets[set_name], sectionName=section_name, offset=0.0,
+                            offsetType=MIDDLE_SURFACE, offsetField='',
+                            thicknessAssignment=FROM_SECTION)
+    else:
+        # create new homogenous continuum section
+        section_name = set_name + '_continuum_section_homogenous_' + material
+        mdb.models[MODEL_NAME].HomogeneousSolidSection(name=section_name, material=material, thickness=None)
 
-    # create new set containing all cells and assign section to set
-    p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
-    p.SectionAssignment(region=p.sets[set_name], sectionName=section_name, offset=0.0, offsetType=MIDDLE_SURFACE,
-                        offsetField='', thicknessAssignment=FROM_SECTION)
+        # create new set containing all cells and assign section to set
+        p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
+        p.SectionAssignment(region=p.sets[set_name], sectionName=section_name, offset=0.0, offsetType=MIDDLE_SURFACE,
+                            offsetField='', thicknessAssignment=FROM_SECTION)
 
 
 # MESH MODULE HELPER FUNCTIONS -----------------------------------------------------------------------------------------
-def mesh_part_point_force_approach(element_size_in_plane, element_size_thru_thickness, phased_array, defects):
+def mesh_part_point_force_approach(element_size_in_plane, element_size_thru_thickness, plate, phased_array, defects,
+                                   use_continuum_shell_elements=False):
+    # continuum shell element type
+    element_type_1 = mesh.ElemType(elemCode=SC8R, elemLibrary=EXPLICIT, secondOrderAccuracy=OFF,  ## todo
+                                   hourglassControl=DEFAULT)
+    element_type_2 = mesh.ElemType(elemCode=SC6R, elemLibrary=EXPLICIT)
+    element_type_3 = mesh.ElemType(elemCode=UNKNOWN_TET, elemLibrary=EXPLICIT)
+
     # set meshing algorithm for plate
     p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
     p.setMeshControls(regions=p.sets[PLATE_CELL_NAME].cells, algorithm=MEDIAL_AXIS)
+
+    # set element type to continuum shell elements, if requested
+    if use_continuum_shell_elements:
+        p.setElementType(regions=(p.cells,),
+                         elemTypes=(element_type_1, element_type_2, element_type_3))
+        p.assignStackDirection(referenceRegion=p.sets[plate.top_surf_face_set_name].faces[0], cells=p.cells)
 
     # set meshing algorithm for piezo elements
     for i in range(len(phased_array)):
@@ -482,7 +508,24 @@ def mesh_part_point_force_approach(element_size_in_plane, element_size_thru_thic
 
     mesh_stats = p.getMeshStats()
     log_info("The FE model has {} nodes.".format(mesh_stats.numNodes))
+
     return mesh_stats.numNodes
+
+
+def create_dispersion_2d_fft_node_set(plate, piezo, element_size_in_plane, element_size_thru_thickness, set_name):
+    x_left, x_right, y_lower, y_upper, x_center, y_center = \
+        __get_bounding_box_coordinates_from_reference_mesh(piezo.position_x, piezo.position_y,
+                                                           piezo.radius, element_size_in_plane)
+    x_min = x_right - element_size_in_plane / 2
+    y_min = y_center - element_size_in_plane / 2
+    x_max = plate.width + element_size_in_plane / 2
+    y_max = y_center + element_size_in_plane / 2
+    z_min = plate.thickness - element_size_thru_thickness / 2
+    z_max = plate.thickness + element_size_thru_thickness / 2
+
+    p = p = mdb.models[MODEL_NAME].parts[PLATE_PART_NAME]
+    nodes = p.nodes.getByBoundingBox(xMin=x_min, xMax=x_max, yMin=y_min, yMax=y_max, zMax=z_max, zMin=z_min)
+    p.Set(nodes=nodes, name=set_name)
 
 
 # ASSEMBLY MODULE HELPER FUNCTIONS -------------------------------------------------------------------------------------
@@ -547,11 +590,24 @@ def add_field_output_request(plate, create_step_name, time_interval):
     region = mdb.models[MODEL_NAME].rootAssembly.allInstances[INSTANCE_NAME].sets[plate.field_output_face_set_name]
     mdb.models[MODEL_NAME].FieldOutputRequest(name='full_field_{}'.format(create_step_name),
                                               createStepName=create_step_name, variables=('UT',),
-                                              timeInterval=time_interval, region=region, sectionPoints=DEFAULT,
-                                              position=NODES)
+                                              timeInterval=time_interval, region=region, sectionPoints=DEFAULT)
     # mdb.models[MODEL_NAME].FieldOutputRequest(name='full_field_{}'.format(create_step_name),
     #                                           createStepName=create_step_name, variables=('U',),
     #                                           timeInterval=EVERY_TIME_INCREMENT, position=NODES)
+
+
+def add_full_field_output_request(plate, create_step_name, time_interval):
+    # todo remove
+    mdb.models[MODEL_NAME].FieldOutputRequest(name='full_field_{}'.format(create_step_name),
+                                              createStepName=create_step_name, variables=('UT',),
+                                              timeInterval=time_interval)
+
+
+def add_2d_fft_field_output_request(create_step_name, time_interval, set_name):
+    region = mdb.models[MODEL_NAME].rootAssembly.allInstances[INSTANCE_NAME].sets[set_name]
+    mdb.models[MODEL_NAME].FieldOutputRequest(name=set_name,
+                                              createStepName=create_step_name, variables=('UT',),
+                                              timeInterval=time_interval, region=region, sectionPoints=DEFAULT)
 
 
 def add_amplitude(name, signal, max_time_increment):

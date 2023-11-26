@@ -1,10 +1,20 @@
 # Default ignored files
-/shelf/
-/.idea
-/workspace.xml
-/guw_simulation/.idea/
-/guw_simulation/*
-!\guw_simulation/*.py
-!\guw_simulation/abaqus_guw/
+*.odb
+*.pyc
+
+# Ignore the results folder
+guw_simulation/user_results/*
+!guw_simulation/user_results
+
+
+# these directories have to be included
+!guw_simulation/*.py
+!guw_simulation/*.lnk
+!guw_simulation/abaqus_guw/*
+!guw_simulation/abaqus_ui_batch/*
+!guw_simulation/example_models/*
+!guw_simulation/user_models/*
+
+# ignore all compiled python files
 *.pyc
 

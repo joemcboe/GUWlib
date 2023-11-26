@@ -33,3 +33,6 @@ class IsotropicPlate:
         self.field_output_face_set_name = None
         self.std_interface_node_set_name = None
         self.xpl_interface_node_set_name = None
+
+        # temporary attributes - remove before releasing TODO
+        self.dispersion_node_set = 'dispersion_measurement'
