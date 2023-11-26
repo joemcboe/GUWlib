@@ -4,6 +4,7 @@
 
 # Ignore the results folder
 *.gz
+**/results*/*
 
 # these directories have to be included
 !guw_simulation/*.py
