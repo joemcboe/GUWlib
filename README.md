@@ -5,30 +5,20 @@ A python module to simulate Guided Ultrasonic Wave (GUW) propagation and defect 
 - Clone repository
 
 ```mermaid
----
-title: Animal example
----
 classDiagram
-    note "From Duck till Zebra"
-    Animal <|-- Duck
-    note for Duck "can fly\ncan swim\ncan dive\ncan help in debugging"
-    Animal <|-- Fish
-    Animal <|-- Zebra
-    Animal : +int age
-    Animal : +String gender
-    Animal: +isMammal()
-    Animal: +mate()
-    class Duck{
-        +String beakColor
-        +swim()
-        +quack()
+    note "note 01"
+    note for model "test\ntest\ntest"
+    steps --|> model : time data
+    plate --|> model : spatial data
+    class model{
+        - max_frequency
+        - model_mode
+        - nodes_per_wavelength
+        - elements_in_thickness_direction
+        setup_in_abaqus()
     }
-    class Fish{
-        -int sizeInFeet
-        -canEat()
+    class steps{
     }
-    class Zebra{
-        +bool is_wild
-        +run()
+    class plate{
     }
 ```
