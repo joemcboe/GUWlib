@@ -1,0 +1,238 @@
+{
+  "AluminumAlloy1100": {
+    "density": 2710.0,
+    "youngs_modulus": 69000000000.0,
+    "poissons_ratio": 0.33
+  },
+  "null": null,
+  "AluminumAlloy2024": {
+    "density": 2770.0,
+    "youngs_modulus": 72400000000.0,
+    "poissons_ratio": 0.33
+  },
+  "AluminumAlloy6061": {
+    "density": 2700.0,
+    "youngs_modulus": 69000000000.0,
+    "poissons_ratio": 0.33
+  },
+  "AluminumOxide": {
+    "density": 3980.0,
+    "youngs_modulus": 380000000000.0,
+    "poissons_ratio": 0.22
+  },
+  "Aluminum_Disperse": {
+    "density": 2700.0,
+    "youngs_modulus": 70758450267.8,
+    "poissons_ratio": 0.337506427162
+  },
+  "CastIronG3000": {
+    "density": 7300.0,
+    "youngs_modulus": 101500000000.0,
+    "poissons_ratio": 0.26
+  },
+  "CastIronG4000": {
+    "density": 7300.0,
+    "youngs_modulus": 124000000000.0,
+    "poissons_ratio": 0.26
+  },
+  "Concrete": {
+    "density": 2400.0,
+    "youngs_modulus": 31000000000.0,
+    "poissons_ratio": 0.2
+  },
+  "CopperAlloyC17200BerylliumCopper": {
+    "density": 8250.0,
+    "youngs_modulus": 128000000000.0,
+    "poissons_ratio": 0.3
+  },
+  "CopperAlloyC26000CartridgeBrass": {
+    "density": 8530.0,
+    "youngs_modulus": 110000000000.0,
+    "poissons_ratio": 0.35
+  },
+  "CopperAlloyC36000FreeCuttingBrass": {
+    "density": 8500.0,
+    "youngs_modulus": 97000000000.0,
+    "poissons_ratio": 0.34
+  },
+  "CopperAlloyC71500CopperNickel30": {
+    "density": 8940.0,
+    "youngs_modulus": 150000000000.0,
+    "poissons_ratio": 0.34
+  },
+  "CopperAlloyC93200BearingBronze": {
+    "density": 8930.0,
+    "youngs_modulus": 100000000000.0,
+    "poissons_ratio": 0.34
+  },
+  "DiamondNatural": {
+    "density": 3510.0,
+    "youngs_modulus": 950000000000.0,
+    "poissons_ratio": 0.2
+  },
+  "DiamondSynthetic": {
+    "density": 3360.0,
+    "youngs_modulus": 863000000000.0,
+    "poissons_ratio": 0.2
+  },
+  "Epoxy_Disperse": {
+    "density": 1170.0,
+    "youngs_modulus": 3941322345.19,
+    "poissons_ratio": 0.39200478392
+  },
+  "GlassBorosilicate": {
+    "density": 2230.0,
+    "youngs_modulus": 70000000000.0,
+    "poissons_ratio": 0.2
+  },
+  "GlassCeramic": {
+    "density": 2600.0,
+    "youngs_modulus": 120000000000.0,
+    "poissons_ratio": 0.25
+  },
+  "GlassQuartz": {
+    "density": 2200.0,
+    "youngs_modulus": 73000000000.0,
+    "poissons_ratio": 0.17
+  },
+  "GlassSodaLime": {
+    "density": 2500.0,
+    "youngs_modulus": 69000000000.0,
+    "poissons_ratio": 0.23
+  },
+  "Gold": {
+    "density": 19320.0,
+    "youngs_modulus": 77000000000.0,
+    "poissons_ratio": 0.42
+  },
+  "Ice": {
+    "density": 900.0,
+    "youngs_modulus": 9550000000.0,
+    "poissons_ratio": 0.33
+  },
+  "Inconel625": {
+    "density": 8440.0,
+    "youngs_modulus": 207000000000.0,
+    "poissons_ratio": 0.31
+  },
+  "Lead": {
+    "density": 11340.0,
+    "youngs_modulus": 13500000000.0,
+    "poissons_ratio": 0.44
+  },
+  "MagnesiumAlloyAZ31B": {
+    "density": 1770.0,
+    "youngs_modulus": 45000000000.0,
+    "poissons_ratio": 0.35
+  },
+  "Molybdenum": {
+    "density": 10220.0,
+    "youngs_modulus": 320000000000.0,
+    "poissons_ratio": 0.32
+  },
+  "Monel400": {
+    "density": 8800.0,
+    "youngs_modulus": 180000000000.0,
+    "poissons_ratio": 0.32
+  },
+  "Nickel200": {
+    "density": 8890.0,
+    "youngs_modulus": 204000000000.0,
+    "poissons_ratio": 0.31
+  },
+  "Nylon": {
+    "density": 1140.0,
+    "youngs_modulus": 2690000000.0,
+    "poissons_ratio": 0.39
+  },
+  "Platinum": {
+    "density": 21450.0,
+    "youngs_modulus": 171000000000.0,
+    "poissons_ratio": 0.39
+  },
+  "Plexiglass": {
+    "density": 1190.0,
+    "youngs_modulus": 2740000000.0,
+    "poissons_ratio": 0.31
+  },
+  "Polycarbonate": {
+    "density": 1200.0,
+    "youngs_modulus": 2380000000.0,
+    "poissons_ratio": 0.36
+  },
+  "Polystyrene": {
+    "density": 1050.0,
+    "youngs_modulus": 2780000000.0,
+    "poissons_ratio": 0.33
+  },
+  "PolyvinylChloride": {
+    "density": 1440.0,
+    "youngs_modulus": 3280000000.0,
+    "poissons_ratio": 0.38
+  },
+  "SiliconNitride": {
+    "density": 3300.0,
+    "youngs_modulus": 304000000000.0,
+    "poissons_ratio": 0.3
+  },
+  "Silver": {
+    "density": 10490.0,
+    "youngs_modulus": 74000000000.0,
+    "poissons_ratio": 0.37
+  },
+  "StainlessSteelAlloy304": {
+    "density": 8000.0,
+    "youngs_modulus": 193000000000.0,
+    "poissons_ratio": 0.3
+  },
+  "StainlessSteelAlloy405": {
+    "density": 7800.0,
+    "youngs_modulus": 200000000000.0,
+    "poissons_ratio": 0.3
+  },
+  "SteelAlloy1020": {
+    "density": 7850.0,
+    "youngs_modulus": 207000000000.0,
+    "poissons_ratio": 0.3
+  },
+  "Tantalum": {
+    "density": 16600.0,
+    "youngs_modulus": 185000000000.0,
+    "poissons_ratio": 0.35
+  },
+  "Teflon": {
+    "density": 2170.0,
+    "youngs_modulus": 475000000.0,
+    "poissons_ratio": 0.46
+  },
+  "Tin": {
+    "density": 7170.0,
+    "youngs_modulus": 44300000000.0,
+    "poissons_ratio": 0.33
+  },
+  "Titanium": {
+    "density": 4510.0,
+    "youngs_modulus": 103000000000.0,
+    "poissons_ratio": 0.34
+  },
+  "TitaniumAlloyTi6Al4V": {
+    "density": 4430.0,
+    "youngs_modulus": 114000000000.0,
+    "poissons_ratio": 0.34
+  },
+  "Tungsten": {
+    "density": 19300.0,
+    "youngs_modulus": 400000000000.0,
+    "poissons_ratio": 0.28
+  },
+  "Zinc": {
+    "density": 7140.0,
+    "youngs_modulus": 104500000000.0,
+    "poissons_ratio": 0.25
+  },
+  "Zirconium": {
+    "density": 6510.0,
+    "youngs_modulus": 99300000000.0,
+    "poissons_ratio": 0.35
+  }
+}
