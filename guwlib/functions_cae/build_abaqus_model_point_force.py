@@ -124,6 +124,7 @@ def build_abaqus_model_point_force(model):
 
         # write input file for this load case
         if model.no_gui_mode:
-            write_input_file(job_name=step_name)
+            output_directory = os.path.join(model.output_directory, step_name)
+            write_input_file(job_name=step_name, output_directory=output_directory)
             log_info("Created an ABAQUS job definition (*.INP) file for "
                      "the current load case ({}.inp).".format(step_name))

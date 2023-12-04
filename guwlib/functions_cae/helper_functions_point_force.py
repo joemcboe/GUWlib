@@ -1,3 +1,5 @@
+import os
+
 from guwlib.guw_objects import *
 import math
 
@@ -499,7 +501,10 @@ def add_transducer_concentrated_force(load_name, step_name, transducer, signal, 
                                              field='', localCsys=None)
 
 
-def write_input_file(job_name):
+def write_input_file(job_name, output_directory):
+    original_directory = os.getcwd()
+    os.mkdir(output_directory)
+    os.chdir(output_directory)
     mdb.Job(name=job_name, model=MODEL_NAME, description='', type=ANALYSIS,
             atTime=None, waitMinutes=0, waitHours=0, queue=None, memory=90,
             memoryUnits=PERCENTAGE, explicitPrecision=SINGLE,
@@ -507,3 +512,4 @@ def write_input_file(job_name):
             contactPrint=OFF, historyPrint=OFF, userSubroutine='', scratch='',
             resultsFormat=ODB)
     mdb.jobs[job_name].writeInput(consistencyChecking=OFF)
+    os.chdir(original_directory)

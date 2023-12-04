@@ -1,6 +1,8 @@
 import sys
 import inspect
 import os
+import shutil
+from datetime import datetime
 
 
 class FEModel:
@@ -26,8 +28,11 @@ class FEModel:
         self.model_approach = 'point_force'
 
         # other parameters
-        input_file_name = os.path.basename(inspect.getouterframes(inspect.currentframe())[1][1])
+        input_file_path = inspect.getouterframes(inspect.currentframe())[1][1]
+        input_file_name = os.path.basename(input_file_path)
         self.input_file_name = os.path.splitext(input_file_name)[0]
+        self.input_file_path = input_file_path
+        self.output_directory = os.path.join('results', self.input_file_name)
         self.no_gui_mode = any(arg == "-noGUI" for arg in sys.argv)
 
     def setup_in_abaqus(self):
@@ -37,6 +42,9 @@ class FEModel:
         """
 
         self.check_model()
+
+        if self.no_gui_mode:
+            self.make_output_directory()
 
         if self.model_approach == 'piezo_electric':
             from guwlib.functions_cae.build_abaqus_model_piezo_electric import build_abaqus_model_piezo_electric
@@ -62,6 +70,21 @@ class FEModel:
             self.courant_number = 0.1
 
         self.adjust_max_frequency()
+
+    def make_output_directory(self):
+        if os.path.exists(self.output_directory):
+            # Archive the existing directory by renaming it with a timestamp
+            timestamp = datetime.now().strftime("%d_%m_%y_%H-%M")
+            archived_directory = "{}_archived_{}".format(self.output_directory, timestamp)
+            os.rename(self.output_directory, archived_directory)
+
+        # Create the output directory
+        os.makedirs(self.output_directory)
+
+        # Copy the model file to the output directory
+        src = self.input_file_path
+        dst = os.path.join(self.output_directory, self.input_file_name + '.mdl')
+        shutil.copy(src, dst)
 
     def adjust_max_frequency(self):
         pass
