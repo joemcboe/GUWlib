@@ -13,14 +13,14 @@ class Material:
         parent_dir = os.path.dirname(os.path.dirname(script_path))
 
         if self.type == 'isotropic':
-            json_path = os.path.join(parent_dir, 'data\\isotropic_materials.json')
+            json_path = os.path.join(parent_dir, 'data', 'isotropic_materials.json')
             check_file_existence(json_path)
             material_properties = get_material_properties(json_path, self.name)
             validate_isotropic_material(material_properties)
             return material_properties
 
         elif self.type == 'piezoelectric':
-            json_path = os.path.join(parent_dir, 'data\\piezoelectric_materials.json')
+            json_path = os.path.join(parent_dir, 'data', 'piezoelectric_materials.json')
             check_file_existence(json_path)
             material_properties = get_material_properties(json_path, self.name)
             validate_piezoelectric_material(material_properties)
@@ -32,7 +32,7 @@ class Material:
 
 def check_file_existence(file_path):
     if not os.path.exists(file_path):
-        raise FileNotFoundError("{} not found.".format(file_path))
+        raise IOError("{} not found.".format(file_path))
 
 
 def get_material_properties(json_path, material_name):

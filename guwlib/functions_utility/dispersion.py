@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import os
 from guwlib.guw_objects.material import Material
 
@@ -40,14 +39,14 @@ def get_lamb_dispersion_txt_files_path(material_name):
     script_path = os.path.abspath(__file__)
     parent_dir = os.path.dirname(os.path.dirname(script_path))
 
-    symmetric_path = os.path.join(parent_dir, 'data\\{}_S_Lamb.txt'.format(material_name))
-    asymmetric_path = os.path.join(parent_dir, 'data\\{}_A_Lamb.txt'.format(material_name))
+    symmetric_path = os.path.join(parent_dir, 'data', '{}_S_Lamb.txt'.format(material_name))
+    asymmetric_path = os.path.join(parent_dir, 'data', '{}_A_Lamb.txt'.format(material_name))
 
     if not os.path.exists(symmetric_path):
-        raise FileNotFoundError("{} not found.".format(symmetric_path))
+        raise IOError("{} not found.".format(symmetric_path))
 
     if not os.path.exists(asymmetric_path):
-        raise FileNotFoundError("{} not found.".format(asymmetric_path))
+        raise IOError("{} not found.".format(asymmetric_path))
 
     return symmetric_path, asymmetric_path
 
