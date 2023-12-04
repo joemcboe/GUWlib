@@ -36,7 +36,6 @@ class FEModel:
         :return:
         """
 
-        self.adjust_max_frequency()
         self.check_model()
 
         if self.model_approach == 'piezo_electric':

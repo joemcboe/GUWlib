@@ -4,25 +4,25 @@ import os
 
 class Material:
     def __init__(self, material_name, material_type):
-        self.material_name = material_name
-        self.material_type = material_type
+        self.name = material_name
+        self.type = material_type
         self.properties = self.load_material_properties()
 
     def load_material_properties(self):
         script_path = os.path.abspath(__file__)
         parent_dir = os.path.dirname(os.path.dirname(script_path))
 
-        if self.material_type == 'isotropic':
+        if self.type == 'isotropic':
             json_path = os.path.join(parent_dir, 'data\\isotropic_materials.json')
             check_file_existence(json_path)
-            material_properties = get_material_properties(json_path, self.material_name)
+            material_properties = get_material_properties(json_path, self.name)
             validate_isotropic_material(material_properties)
             return material_properties
 
-        elif self.material_type == 'piezoelectric':
+        elif self.type == 'piezoelectric':
             json_path = os.path.join(parent_dir, 'data\\piezoelectric_materials.json')
             check_file_existence(json_path)
-            material_properties = get_material_properties(json_path, self.material_name)
+            material_properties = get_material_properties(json_path, self.name)
             validate_piezoelectric_material(material_properties)
             return material_properties
 

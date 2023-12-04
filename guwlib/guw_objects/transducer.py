@@ -1,11 +1,13 @@
 class CircularTransducer:
     def __init__(self, position_x, position_y, diameter, thickness=None, material=None, electrode_thickness=None,
-                 electrode_material=None):
+                 electrode_material=None, position_z='top'):
+        # position_z could either be top, bottom, symmetric or asymmetric
 
         # basic properties
-        self.radius = diameter/2
+        self.radius = diameter / 2
         self.position_x = position_x
         self.position_y = position_y
+        self.position_z = position_z
 
         # abaqus properties --------------------------------------------------------------------------------------------
         self.id = None
@@ -52,6 +54,3 @@ class CircularTransducer:
         self.gnd_main_node_set_name = "transducer_{:d}_gnd_master".format(self.id)
         self.signal_slave_node_set_name = "transducer_{:d}_sgn_slave".format(self.id)
         self.gnd_slave_node_set_name = "transducer_{:d}_gnd_slave".format(self.id)
-
-
-

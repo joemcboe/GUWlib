@@ -61,7 +61,7 @@ def get_minimal_lamb_wavelength(material, thickness, frequency_range):
     :param [float, float] frequency_range: A tuple representing the frequency range (min_freq, max_freq).
     :return: A tuple containing the minimal wavelength and the corresponding frequency within frequency_range.
     """
-    symmetric_txt_path, asymmetric_txt_path = get_lamb_dispersion_txt_files_path(material.material_name)
+    symmetric_txt_path, asymmetric_txt_path = get_lamb_dispersion_txt_files_path(material.name)
     symmetric_modes_data = read_dispersion_data_from_txt_file(symmetric_txt_path, thickness)
     asymmetric_modes_data = read_dispersion_data_from_txt_file(asymmetric_txt_path, thickness)
 
