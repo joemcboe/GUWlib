@@ -6,7 +6,7 @@ import subprocess
 
 model_file_paths = \
     [
-        "models/example_01_point_force_isotropic.py",
+        os.path.join("models", "example_01_point_force_isotropic.py"),
     ]
 
 for model_file in model_file_paths:
