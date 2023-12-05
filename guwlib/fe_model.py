@@ -24,7 +24,7 @@ class FEModel:
         self.max_frequency = None
         self.elements_per_wavelength = 20
         self.elements_in_thickness_direction = 4
-        self.courant_number = 0.1
+        self.courant_number = 0.5
         self.model_approach = 'point_force'
 
         # other parameters

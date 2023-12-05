@@ -13,5 +13,5 @@ module load python/3.9.7
 
 working_dir=/work/y0106916/GitHub/GUW/
 cd $working_dir
-python3.9 batch_run_phoenix.py "['models/example_01_point_force_isotropic.py']" 4 10
+python3.9 batch_run_phoenix.py "['models/phx_test.py']" 4 5 testing 1
 

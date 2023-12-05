@@ -3,18 +3,20 @@ from guwlib.functions_phoenix.slurm import *
 
 # specify the model files to upload to the cluster
 model_files_local = [
-    os.path.join('models', 'example_01_point_force_isotropic.py')
+    os.path.join('models', 'phx_test.py')
 ]
 
 # nodes and tasks to use for the actual abaqus/explicit execution
 n_nodes = 4
-n_tasks_per_node = 10
+n_tasks_per_node = 5
+partition = 'testing'
+max_time = 1
 
 # ----------------------------------------------------------------------------------------------------------------------
 # copy the model files to the cluster
 for model_file in model_files_local:
     file_name = os.path.basename(model_file)
-    remote_path = f'/work/y0106916/GitHub/GUW/models/{file_name}'
+    remote_path = f'/work/y0106916/GitHub2/GUW/models/{file_name}'
     copy_file_to_remote(model_file, remote_path, 'tubs_username', 'tubs_password')
     print(f'Copied {file_name} to Phoenix.')
 
@@ -23,8 +25,8 @@ model_files_remote = ('"[' +
                       ", ".join(["'models/{}'".format(os.path.basename(model_file))
                                  for model_file in model_files_local])
                       + ']"')
-args = f"{model_files_remote} {int(n_nodes)} {int(n_tasks_per_node)}"
-working_dir = '/work/y0106916/GitHub/GUW/'
+args = f"{model_files_remote} {int(n_nodes)} {int(n_tasks_per_node)} {partition} {max_time}"
+working_dir = '/work/y0106916/GitHub2/GUW/'
 job_file_name = 'temp.job'
 generate_python_job_script(output_file_path=job_file_name,
                            partition='standard',
