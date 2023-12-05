@@ -1,0 +1,94 @@
+<Description>
+   ABAQUS/ABQcaeG rank 0 received the INTERRUPT signal
+
+</Description>
+
+<Context>
+   ABQcaeG
+</Context>
+
+<Callstack>
+  1)  ucrtbase.dll                perror                                  
+  2)  KERNELBASE.dll              CtrlRoutine                             
+  3)  KERNEL32.DLL                BaseThreadInitThunk                     
+  4)  ntdll.dll                   RtlUserThreadStart                      
+</Callstack>
+
+<Memory>
+   <Current>            0 GB </Current>
+   <Resident>           0 GB </Resident>
+   <Physical>          15 GB </Physical>
+   <Limit>              0 GB </Limit>
+   <Accessible>        15 GB </Accessible>
+   <Available>          5 GB </Available>
+   <Allocator>            DL </Allocator>
+</Memory>
+
+<Swap>
+       <Size>          25 GB </Size>
+       <Used>          18 GB </Used>
+       <Free>           7 GB </Free>
+</Swap>
+
+<Directories>
+  <current> C:\Users\joern\Documents\GitHub\GUW </current> <free>     12 GB </free>   <used>    820 GB </used> 
+     <temp> C:\Users\joern\AppData\Local\Temp </temp>    <free>     12 GB </free>
+</Directories>
+
+<Installation>
+</Installation>
+
+<Description>
+   ABAQUS/ABQcaeG rank 0 received the ABORT signal
+
+</Description>
+
+<Context>
+   ABQcaeG
+</Context>
+
+<Callstack>
+  1)  ucrtbase.dll                abort                                   
+  2)  ucrtbase.dll                terminate                               
+  3)  VCRUNTIME140_1.dll          _NLG_Return2                            
+  4)  VCRUNTIME140_1.dll          _NLG_Return2                            
+  5)  VCRUNTIME140_1.dll          _CxxFrameHandler4                       
+  6)  ntdll.dll                   RtlRaiseException                       
+  7)  ntdll.dll                   RtlRaiseException                       
+  8)  KERNELBASE.dll              RaiseException                          
+  9)  VCRUNTIME140.dll            CxxThrowException                       
+ 10)  ABQSMAInbVwrIPC.dll         nex_PrimException<enum ipc_IPCMsgErrorTypeEnm,1>::Propagate
+ 11)  ABQSMAInbVwrIPC.dll         ipc_Socket::Send                        
+ 12)  ABQSMAInbVwrIPC.dll         ipc_OsokStreamDevice::flush             
+ 13)  ABQSMAInbVwrIPC.dll         ipc_Que::RemoteSend                     
+ 14)  ABQSMAInbVwrIPC.dll         ipc_Client::SendDirective               
+ 15)  ABQSMAIngVwrSesGui.dll      qryG_KerClntBase::QryUnRegisterPath     
+ 16)  ABQSMAIngVwrSesGui.dll      qryG_QueryRegistrarRole::UnRegister     
+ 17)  ABQSMAIngVwrSesGui.dll      qryG_Proxy::~qryG_Proxy                 
+ 18)  ABQSMAIngVwrSesGui.dll      operator+                               
+</Callstack>
+
+<Memory>
+   <Current>            0 GB </Current>
+   <Resident>           0 GB </Resident>
+   <Physical>          15 GB </Physical>
+   <Limit>              0 GB </Limit>
+   <Accessible>        15 GB </Accessible>
+   <Available>          5 GB </Available>
+   <Allocator>            DL </Allocator>
+</Memory>
+
+<Swap>
+       <Size>          25 GB </Size>
+       <Used>          18 GB </Used>
+       <Free>           7 GB </Free>
+</Swap>
+
+<Directories>
+  <current> C:\Users\joern\Documents\GitHub\GUW </current> <free>     12 GB </free>   <used>    820 GB </used> 
+     <temp> C:\Users\joern\AppData\Local\Temp </temp>    <free>     12 GB </free>
+</Directories>
+
+<Installation>
+</Installation>
+

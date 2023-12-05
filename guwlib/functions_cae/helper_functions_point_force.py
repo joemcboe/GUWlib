@@ -484,7 +484,7 @@ def add_amplitude(name, signal, max_time_increment):
     else:
         # all other signals besides impulses can be sampled from the signal definition in their method 'get_value_at'
         time_data_table = []
-        for t in np.arange(start=signal.dt, stop=signal.dt + signal.get_duration() * 1.01, step=max_time_increment / 2):
+        for t in np.arange(start=signal.delta_t, stop=signal.delta_t+signal.get_duration()*1.01, step=max_time_increment/2):
             time_data_table.append((t, signal.get_value_at(t=t)))
 
     # create amplitude in Abaqus

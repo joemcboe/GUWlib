@@ -26,6 +26,9 @@ class Signal(object):
         """
         pass
 
+    def get_duration(self):
+        pass
+
 
 # BURST ----------------------------------------------------------------------------------------------------------------
 class Burst(Signal):
@@ -67,6 +70,9 @@ class Burst(Signal):
             return y * hanning
         else:
             raise ValueError("Unsupported window type: {}".format(self.window))
+
+    def get_duration(self):
+        return self.n_cycles * (1/self.center_frequency)
 
 
 # DIRAC IMPULSE --------------------------------------------------------------------------------------------------------

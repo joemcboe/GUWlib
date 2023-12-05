@@ -13,9 +13,9 @@ PHASED_ARRAY_RADIUS = 90e-3
 
 # basic simulation parameters ------------------------------------------------------------------------------------------
 model = FEModel()
-model.max_frequency = 100e3
-model.elements_per_wavelength = 10
-model.elements_in_thickness_direction = 2
+model.max_frequency = 200e3
+model.elements_per_wavelength = 6
+model.elements_in_thickness_direction = 1
 model.model_approach = 'point_force'
 
 # setup plate, defects and transducers ---------------------------------------------------------------------------------
@@ -38,15 +38,15 @@ model.transducers = phased_array
 
 # set up the time / loading information --------------------------------------------------------------------------------
 # dirac impulses on every transducer
-dirac_impulse = DiracImpulse()
-for i in range(PHASED_ARRAY_N_ELEMENTS):
-    transducer_signals = [None] * len(model.transducers)
-    transducer_signals[i] = dirac_impulse
-    i_step = LoadCase(name='impulse_piezo_{}'.format(i),
-                      duration=3e-3,
-                      transducer_signals=transducer_signals,
-                      output_request='history')
-    model.load_cases.append(i_step)
+# dirac_impulse = DiracImpulse()
+# for i in range(PHASED_ARRAY_N_ELEMENTS):
+#     transducer_signals = [None] * len(model.transducers)
+#     transducer_signals[i] = dirac_impulse
+#     i_step = LoadCase(name='impulse_piezo_{}'.format(i),
+#                       duration=3e-3,
+#                       transducer_signals=transducer_signals,
+#                       output_request='history')
+#     model.load_cases.append(i_step)
 
 transducer_signals = [None] * len(model.transducers)
 transducer_signals[0] = Burst(center_frequency=50e3, n_cycles=3)
@@ -54,6 +54,7 @@ control_step = LoadCase(name='control_step',
                         duration=3e-3,
                         transducer_signals=transducer_signals,
                         output_request='history')
+model.load_cases.append(control_step)
 
 # ----------------------------------------------------------------------------------------------------------------------
 
