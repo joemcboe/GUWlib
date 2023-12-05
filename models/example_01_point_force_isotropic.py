@@ -14,8 +14,8 @@ PHASED_ARRAY_RADIUS = 90e-3
 # basic simulation parameters ------------------------------------------------------------------------------------------
 model = FEModel()
 model.max_frequency = 200e3
-model.elements_per_wavelength = 6
-model.elements_in_thickness_direction = 1
+model.elements_per_wavelength = 25
+model.elements_in_thickness_direction = 4
 model.model_approach = 'point_force'
 
 # setup plate, defects and transducers ---------------------------------------------------------------------------------

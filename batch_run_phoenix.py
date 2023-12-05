@@ -8,12 +8,15 @@ import textwrap
 import ast
 
 
-def submit_model_files(model_file_paths, n_nodes, n_tasks_per_node):
+def submit_model_files(model_file_paths, n_nodes, n_tasks_per_node, partition, max_time):
     """
 
     :param model_file_paths:
     :return:
     """
+
+    print(partition)
+    print(max_time)
 
     for k, model_file_path in enumerate(model_file_paths):
 
@@ -34,10 +37,10 @@ def submit_model_files(model_file_paths, n_nodes, n_tasks_per_node):
 
                     # generate a SLURM job file
                     generate_abaqus_job_script(output_file_path=job_file_path + '.job',
-                                               partition='standard',
+                                               partition=partition,
                                                n_nodes=n_nodes,
                                                n_tasks_per_node=n_tasks_per_node,
-                                               max_time_in_h=8,
+                                               max_time_in_h=max_time,
                                                slurm_job_name=f'{k}_{i}',
                                                inp_file=file_name + '.inp',
                                                working_dir=root)
@@ -129,7 +132,7 @@ if __name__ == "__main__":
     """
     Call this script like this:
     
-        python batch_run_phoenix.py "['models/model_1.py', 'models/model_2.py']" 1 2
+        python batch_run_phoenix.py "['models/model_1.py', 'models/model_2.py']" 1 2 "shortrun_small"
         
     """
 
@@ -140,10 +143,12 @@ if __name__ == "__main__":
     model_file_paths_str = arguments[0] if arguments else "[]"
     n_nodes = int(arguments[1]) if len(arguments) > 1 else 1
     n_tasks_per_node = int(arguments[2]) if len(arguments) > 2 else 1
+    partition = arguments[3] if len(arguments) > 3 else 'standard'
+    max_time = int(arguments[4]) if len(arguments) > 4 else 12
 
     # Parsing the string representation of a list into an actual list
     model_file_paths = ast.literal_eval(model_file_paths_str)
 
     if model_file_paths is not None:
-        submit_model_files(model_file_paths=model_file_paths, n_nodes=n_nodes, n_tasks_per_node=n_tasks_per_node)
-
+        submit_model_files(model_file_paths=model_file_paths, n_nodes=n_nodes, n_tasks_per_node=n_tasks_per_node,
+                           partition=partition, max_time=max_time)

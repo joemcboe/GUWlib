@@ -7,8 +7,8 @@ model_files_local = [
 ]
 
 # nodes and tasks to use for the actual abaqus/explicit execution
-n_nodes = 1
-n_tasks_per_node = 1
+n_nodes = 4
+n_tasks_per_node = 10
 
 # ----------------------------------------------------------------------------------------------------------------------
 # copy the model files to the cluster
