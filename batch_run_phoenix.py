@@ -3,8 +3,57 @@ Pipeline to preprocess, setup, solve and post process user defined GUW models.
 """
 import os
 import subprocess
-
 import textwrap
+
+
+def submit_model_files(model_file_paths, ):
+    """
+
+    :param model_file_paths:
+    :return:
+    """
+
+    for k, model_file_path in enumerate(model_file_paths):
+
+        # run ABAQUS/CAE on the model.py file to create *.INP file
+        model_file_name, _ = os.path.splitext(os.path.basename(model_file_path))
+        command = f"abaqus cae noGUI={model_file_path}"
+        proc = subprocess.Popen(command, shell=True)
+        proc.wait()
+
+        # iterate through all *.INP-files in the simulation directory and generate *.JOB file
+        i = 0
+        for root, dirs, files in os.walk(os.path.join('results', model_file_name)):
+            for file_name in files:
+                if file_name.endswith(".inp"):
+                    i = i + 1
+                    file_name = os.path.splitext(file_name)[0]
+                    job_file_path = os.path.join(root, file_name)
+
+                    # generate a SLURM job file
+                    generate_abaqus_job_script(output_file_path=job_file_path + '.job',
+                                               partition='standard',
+                                               n_nodes=1,
+                                               n_tasks_per_node=1,
+                                               max_time_in_h=1,
+                                               slurm_job_name=f'{i}',
+                                               inp_file=file_name + '.inp',
+                                               working_dir=root)
+
+                    # submit the job
+                    command = f"cd {root} && sbatch {file_name}.job"
+
+                    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    out, err = proc.communicate()
+
+                    if proc.returncode == 0:
+                        # Job submission successful, extract the job ID from the output
+                        job_id = out.decode().strip().split()[-1]
+                        print(f"Job submitted successfully. Job ID: {job_id}")
+
+                        # Now you can use job_id to monitor the log file
+                    else:
+                        print(f"Job submission failed. Error: {err.decode()}")
 
 
 def generate_abaqus_job_script(output_file_path, partition, n_nodes, n_tasks_per_node, max_time_in_h, slurm_job_name,
@@ -72,42 +121,3 @@ def generate_abaqus_job_script(output_file_path, partition, n_nodes, n_tasks_per
 
     with open(output_file_path, 'w', newline='\n') as file:
         file.write(content)
-
-
-# main script ----------------------------------------------------------------------------------------------------------
-model_file_paths = \
-    [
-        os.path.join("models", "example_01_point_force_isotropic.py"),
-    ]
-
-for k, model_file_path in enumerate(model_file_paths):
-
-    # run ABAQUS/CAE on the model.py file to create *.INP file
-    model_file_name, _ = os.path.splitext(os.path.basename(model_file_path))
-    command = f"abaqus cae noGUI={model_file_path}"
-    proc = subprocess.Popen(command, shell=True)
-    proc.wait()
-
-    # Iterate through all *.INP-files in the simulation directory and generate a *.JOB file
-    i = 0
-    for root, dirs, files in os.walk(os.path.join('results', model_file_name)):
-        for file_name in files:
-            if file_name.endswith(".inp"):
-                i = i + 1
-                file_path = os.path.join(root, file_name)
-                job_file_path = os.path.join(root, os.path.splitext(file_name)[0])
-
-                # generate a job file for slurm
-                generate_abaqus_job_script(output_file_path=job_file_path + '.job',
-                                           partition='standard',
-                                           n_nodes=1,
-                                           n_tasks_per_node=1,
-                                           max_time_in_h=1,
-                                           slurm_job_name=f'{i}',
-                                           inp_file=file_name,
-                                           working_dir='')
-
-                # submit the job
-                command = f"cd {root} && sbatch {file_name}"
-                proc = subprocess.Popen(command, shell=True)
-                proc.wait()

@@ -1,0 +1,496 @@
+# -*- coding: mbcs -*-
+from part import *
+from material import *
+from section import *
+from assembly import *
+from interaction import *
+from load import *
+from mesh import *
+from optimization import *
+from job import *
+from sketch import *
+from visualization import *
+from step import *
+mdb.models.changeKey(fromName='Model-1', toName='guw_model')
+mdb.models['guw_model'].ConstrainedSketch(name='__profile__', sheetSize=2.0)
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(0, 0), 
+    point2=(0.1, 0.1))
+mdb.models['guw_model'].Part(dimensionality=THREE_D, name='plate', type=
+    DEFORMABLE_BODY)
+mdb.models['guw_model'].parts['plate'].BaseSolidExtrude(depth=0.003, sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].parts['plate'].DatumPlaneByPrincipalPlane(offset=0.003, 
+    principalPlane=XYPLANE)
+mdb.models['guw_model'].parts['plate'].DatumAxisByTwoPoint(point1=(0, 0, 0.003)
+    , point2=(0, 1, 0.003))
+mdb.models['guw_model'].parts['plate'].DatumAxisByTwoPoint(point1=(0, 0, 0), 
+    point2=(0, 0, 0.003))
+mdb.models['guw_model'].parts['plate'].Set(cells=
+    mdb.models['guw_model'].parts['plate'].cells, name='plate')
+mdb.models['guw_model'].parts['plate'].Set(cells=
+    mdb.models['guw_model'].parts['plate'].cells, faces=
+    mdb.models['guw_model'].parts['plate'].faces, name='plate-material')
+mdb.models['guw_model'].parts['plate'].Set(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#10 ]', ), ), name='plate-top-surface')
+mdb.models['guw_model'].parts['plate'].Set(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#10 ]', ), ), name='plate-field-output')
+mdb.models['guw_model'].ConstrainedSketch(name='__profile__', sheetSize=2.0)
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(0, 0), 
+    point2=(0.1, 0.1))
+mdb.models['guw_model'].Part(dimensionality=TWO_D_PLANAR, name=
+    'reference_plate', type=DEFORMABLE_BODY)
+mdb.models['guw_model'].parts['reference_plate'].BaseShell(sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].parts['reference_plate'].setMeshControls(regions=
+    mdb.models['guw_model'].parts['reference_plate'].cells, technique=
+    STRUCTURED)
+mdb.models['guw_model'].parts['reference_plate'].seedPart(deviationFactor=0.1, 
+    minSizeFactor=0.1, size=0.0037426261599909985)
+mdb.models['guw_model'].parts['reference_plate'].generateMesh()
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].sketches['__profile__'].CircleByCenterPerimeter(center=
+    (0.02, 0.025), point1=(0.025, 0.025))
+mdb.models['guw_model'].parts['plate'].CutExtrude(flipExtrudeDirection=OFF, 
+    sketch=mdb.models['guw_model'].sketches['__profile__'], sketchOrientation=
+    RIGHT, sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, sketchUpEdge=
+    mdb.models['guw_model'].parts['plate'].datums[3])
+del mdb.models['guw_model'].sketches['__profile__']
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.00740740727633238, 0.0111111113801599), point2=(0.0333333350718021, 
+    0.0370370373129845))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[5], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#1 ]', ), ), edges=[mdb.models['guw_model'].parts['plate'].edges[4], 
+    mdb.models['guw_model'].parts['plate'].edges[5], 
+    mdb.models['guw_model'].parts['plate'].edges[6], 
+    mdb.models['guw_model'].parts['plate'].edges[7]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].parts['plate'].Set(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#20 ]', ), ), name='plate-top-surface')
+mdb.models['guw_model'].parts['plate'].Set(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#2 ]', ), ), name='hole_01_bound_box')
+mdb.models['guw_model'].parts['plate'].SetByBoolean(name='plate', operation=
+    DIFFERENCE, sets=[mdb.models['guw_model'].parts['plate'].sets['plate'], 
+    mdb.models['guw_model'].parts['plate'].sets['hole_01_bound_box']])
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.04, name='__profile__', 
+    sheetSize=1.84, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.00740740727633238, 0.025925925001502), point2=(0.015, 0.025))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(0.025, 0.025), 
+    point2=(0.0333333350718021, 0.025925925001502))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.0185185186564922, 0.0111111113801599), point2=(0.02, 0.02))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(0.02, 0.03), 
+    point2=(0.0185185186564922, 0.0370370373129845))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#800 ]', ), ), sketch=mdb.models['guw_model'].sketches['__profile__'], 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3])
+del mdb.models['guw_model'].sketches['__profile__']
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#2 ]', ), ), edges=[mdb.models['guw_model'].parts['plate'].edges[0], 
+    mdb.models['guw_model'].parts['plate'].edges[1], 
+    mdb.models['guw_model'].parts['plate'].edges[2], 
+    mdb.models['guw_model'].parts['plate'].edges[3], 
+    mdb.models['guw_model'].parts['plate'].edges[4]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#5 ]', ), ), edges=[mdb.models['guw_model'].parts['plate'].edges[6], 
+    mdb.models['guw_model'].parts['plate'].edges[16], 
+    mdb.models['guw_model'].parts['plate'].edges[22], 
+    mdb.models['guw_model'].parts['plate'].edges[23], 
+    mdb.models['guw_model'].parts['plate'].edges[24]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#b ]', ), ), edges=[mdb.models['guw_model'].parts['plate'].edges[2], 
+    mdb.models['guw_model'].parts['plate'].edges[12], 
+    mdb.models['guw_model'].parts['plate'].edges[33], 
+    mdb.models['guw_model'].parts['plate'].edges[36], 
+    mdb.models['guw_model'].parts['plate'].edges[37]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.0518518500030041, 0.0407407395541668), point2=(0.0703703686594963, 
+    0.059259258210659))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[22], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#8 ]', ), ), edges=[mdb.models['guw_model'].parts['plate'].edges[12], 
+    mdb.models['guw_model'].parts['plate'].edges[13], 
+    mdb.models['guw_model'].parts['plate'].edges[14], 
+    mdb.models['guw_model'].parts['plate'].edges[15]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].parts['plate'].Set(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#20 ]', ), ), name='plate-top-surface')
+mdb.models['guw_model'].parts['plate'].Set(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#10 ]', ), ), name='transducer_01_bound_box')
+mdb.models['guw_model'].parts['plate'].SetByBoolean(name='plate', operation=
+    DIFFERENCE, sets=[mdb.models['guw_model'].parts['plate'].sets['plate'], 
+    mdb.models['guw_model'].parts['plate'].sets['transducer_01_bound_box']])
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.0518518500030041, 0.0518518500030041), point2=(0.060000000000000005, 
+    0.05))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.060000000000000005, 0.05), point2=(0.0703703686594963, 
+    0.0518518500030041))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(0.059259258210659, 
+    0.0407407395541668), point2=(0.060000000000000005, 0.05))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.060000000000000005, 0.05), point2=(0.059259258210659, 0.059259258210659))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketchThruAll(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#10000000 ]', ), ), sketch=
+    mdb.models['guw_model'].sketches['__profile__'], sketchPlane=
+    mdb.models['guw_model'].parts['plate'].datums[2], sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3])
+mdb.models['guw_model'].parts['plate'].Set(name='transducer_01', vertices=
+    mdb.models['guw_model'].parts['plate'].vertices.getSequenceFromMask(mask=(
+    '[#1 ]', ), ))
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.0296296291053295, 0.0407407395541668), point2=(0.0481481477618217, 
+    0.059259258210659))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[8], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#1 ]', ), ), edges=[mdb.models['guw_model'].parts['plate'].edges[20], 
+    mdb.models['guw_model'].parts['plate'].edges[21], 
+    mdb.models['guw_model'].parts['plate'].edges[22], 
+    mdb.models['guw_model'].parts['plate'].edges[23]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].parts['plate'].Set(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#20 ]', ), ), name='plate-top-surface')
+mdb.models['guw_model'].parts['plate'].Set(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#2 ]', ), ), name='transducer_02_bound_box')
+mdb.models['guw_model'].parts['plate'].SetByBoolean(name='plate', operation=
+    DIFFERENCE, sets=[mdb.models['guw_model'].parts['plate'].sets['plate'], 
+    mdb.models['guw_model'].parts['plate'].sets['transducer_02_bound_box']])
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.0296296291053295, 0.0518518500030041), point2=(0.04, 0.05))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(0.04, 0.05), 
+    point2=(0.0481481477618217, 0.0518518500030041))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.0407407395541668, 0.0407407395541668), point2=(0.04, 0.05))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(0.04, 0.05), 
+    point2=(0.0407407395541668, 0.059259258210659))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketchThruAll(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#4000 ]', ), ), sketch=mdb.models['guw_model'].sketches['__profile__'], 
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, sketchUpEdge=
+    mdb.models['guw_model'].parts['plate'].datums[3])
+mdb.models['guw_model'].parts['plate'].Set(name='transducer_02', vertices=
+    mdb.models['guw_model'].parts['plate'].vertices.getSequenceFromMask(mask=(
+    '[#1 ]', ), ))
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(0, 
+    0.059259258210659), point2=(0.1, 0.1))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[8], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+del mdb.models['guw_model'].sketches['__profile__']
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells[0], edges=
+    [mdb.models['guw_model'].parts['plate'].edges[8], 
+    mdb.models['guw_model'].parts['plate'].edges[15], 
+    mdb.models['guw_model'].parts['plate'].edges[19], 
+    mdb.models['guw_model'].parts['plate'].edges[30], 
+    mdb.models['guw_model'].parts['plate'].edges[39], 
+    mdb.models['guw_model'].parts['plate'].edges[40], 
+    mdb.models['guw_model'].parts['plate'].edges[41], 
+    mdb.models['guw_model'].parts['plate'].edges[42], 
+    mdb.models['guw_model'].parts['plate'].edges[43], 
+    mdb.models['guw_model'].parts['plate'].edges[44]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.0333333350718021, 0), point2=(0.1, 0.0407407395541668))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[6], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+del mdb.models['guw_model'].sketches['__profile__']
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells[0], edges=
+    [mdb.models['guw_model'].parts['plate'].edges[0], 
+    mdb.models['guw_model'].parts['plate'].edges[6], 
+    mdb.models['guw_model'].parts['plate'].edges[11], 
+    mdb.models['guw_model'].parts['plate'].edges[12], 
+    mdb.models['guw_model'].parts['plate'].edges[13], 
+    mdb.models['guw_model'].parts['plate'].edges[14], 
+    mdb.models['guw_model'].parts['plate'].edges[15], 
+    mdb.models['guw_model'].parts['plate'].edges[16], 
+    mdb.models['guw_model'].parts['plate'].edges[17], 
+    mdb.models['guw_model'].parts['plate'].edges[18], 
+    mdb.models['guw_model'].parts['plate'].edges[19], 
+    mdb.models['guw_model'].parts['plate'].edges[20]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(0, 
+    0.0370370373129845), point2=(0.0296296291053295, 0.059259258210659))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[19], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+del mdb.models['guw_model'].sketches['__profile__']
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells[0], edges=
+    [mdb.models['guw_model'].parts['plate'].edges[0], 
+    mdb.models['guw_model'].parts['plate'].edges[4], 
+    mdb.models['guw_model'].parts['plate'].edges[5], 
+    mdb.models['guw_model'].parts['plate'].edges[6], 
+    mdb.models['guw_model'].parts['plate'].edges[7], 
+    mdb.models['guw_model'].parts['plate'].edges[8], 
+    mdb.models['guw_model'].parts['plate'].edges[9], 
+    mdb.models['guw_model'].parts['plate'].edges[10]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.0703703686594963, 0.0407407395541668), point2=(0.1, 0.059259258210659))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[19], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+#* Feature creation failed.
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(0, 0), 
+    point2=(0.0333333350718021, 0.0111111113801599))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[27], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+del mdb.models['guw_model'].sketches['__profile__']
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells[2], edges=
+    [mdb.models['guw_model'].parts['plate'].edges[0], 
+    mdb.models['guw_model'].parts['plate'].edges[38], 
+    mdb.models['guw_model'].parts['plate'].edges[59], 
+    mdb.models['guw_model'].parts['plate'].edges[90], 
+    mdb.models['guw_model'].parts['plate'].edges[91], 
+    mdb.models['guw_model'].parts['plate'].edges[92]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(0, 
+    0.0111111113801599), point2=(0.00740740727633238, 0.0370370373129845))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[3], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+#* Feature creation failed.
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.0481481477618217, 0.0407407395541668), point2=(0.0518518500030041, 
+    0.059259258210659))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[22], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+#* Feature creation failed.
+mdb.models['guw_model'].Material(name='AluminumAlloy1100')
+mdb.models['guw_model'].materials['AluminumAlloy1100'].Density(table=((2710.0, 
+    ), ))
+mdb.models['guw_model'].materials['AluminumAlloy1100'].Elastic(table=((
+    69000000000.0, 0.33), ))
+mdb.models['guw_model'].HomogeneousSolidSection(material='AluminumAlloy1100', 
+    name='plate-material_continuum_section_homogenous_AluminumAlloy1100', 
+    thickness=None)
+mdb.models['guw_model'].parts['plate'].SectionAssignment(offset=0.0, 
+    offsetField='', offsetType=MIDDLE_SURFACE, region=
+    mdb.models['guw_model'].parts['plate'].sets['plate-material'], sectionName=
+    'plate-material_continuum_section_homogenous_AluminumAlloy1100', 
+    thicknessAssignment=FROM_SECTION)
+mdb.models['guw_model'].parts['plate'].setMeshControls(regions=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#ff ]', ), ), technique=STRUCTURED)
+mdb.models['guw_model'].parts['plate'].setMeshControls(algorithm=MEDIAL_AXIS, 
+    regions=mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(
+    mask=('[#1000 ]', ), ))
+mdb.models['guw_model'].parts['plate'].setMeshControls(algorithm=MEDIAL_AXIS, 
+    regions=mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(
+    mask=('[#100 ]', ), ))
+mdb.models['guw_model'].parts['plate'].setMeshControls(algorithm=MEDIAL_AXIS, 
+    regions=mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(
+    mask=('[#2e00 ]', ), ))
+mdb.models['guw_model'].parts['plate'].seedPart(deviationFactor=0.1, 
+    minSizeFactor=0.1, size=0.0037426261599909985)
+mdb.models['guw_model'].parts['plate'].seedEdgeBySize(edges=
+    [mdb.models['guw_model'].parts['plate'].edges[0], 
+    mdb.models['guw_model'].parts['plate'].edges[2], 
+    mdb.models['guw_model'].parts['plate'].edges[9], 
+    mdb.models['guw_model'].parts['plate'].edges[14], 
+    mdb.models['guw_model'].parts['plate'].edges[16], 
+    mdb.models['guw_model'].parts['plate'].edges[17], 
+    mdb.models['guw_model'].parts['plate'].edges[27], 
+    mdb.models['guw_model'].parts['plate'].edges[29], 
+    mdb.models['guw_model'].parts['plate'].edges[37], 
+    mdb.models['guw_model'].parts['plate'].edges[39], 
+    mdb.models['guw_model'].parts['plate'].edges[41], 
+    mdb.models['guw_model'].parts['plate'].edges[43], 
+    mdb.models['guw_model'].parts['plate'].edges[45], 
+    mdb.models['guw_model'].parts['plate'].edges[46], 
+    mdb.models['guw_model'].parts['plate'].edges[48], 
+    mdb.models['guw_model'].parts['plate'].edges[61], 
+    mdb.models['guw_model'].parts['plate'].edges[64], 
+    mdb.models['guw_model'].parts['plate'].edges[81], 
+    mdb.models['guw_model'].parts['plate'].edges[82], 
+    mdb.models['guw_model'].parts['plate'].edges[83], 
+    mdb.models['guw_model'].parts['plate'].edges[84], 
+    mdb.models['guw_model'].parts['plate'].edges[85], 
+    mdb.models['guw_model'].parts['plate'].edges[87], 
+    mdb.models['guw_model'].parts['plate'].edges[114], 
+    mdb.models['guw_model'].parts['plate'].edges[116], 
+    mdb.models['guw_model'].parts['plate'].edges[120], 
+    mdb.models['guw_model'].parts['plate'].edges[122], 
+    mdb.models['guw_model'].parts['plate'].edges[124], 
+    mdb.models['guw_model'].parts['plate'].edges[128], 
+    mdb.models['guw_model'].parts['plate'].edges[130], 
+    mdb.models['guw_model'].parts['plate'].edges[132], 
+    mdb.models['guw_model'].parts['plate'].edges[137]], size=0.003)
+mdb.models['guw_model'].parts['plate'].generateMesh()
+del mdb.models['guw_model'].parts['reference_plate']
+mdb.models['guw_model'].rootAssembly.DatumCsysByDefault(CARTESIAN)
+mdb.models['guw_model'].rootAssembly.Instance(dependent=ON, name='plate', part=
+    mdb.models['guw_model'].parts['plate'])
+mdb.models['guw_model'].ExplicitDynamicsStep(description='', maxIncrement=5e-07
+    , name='load_case_0_impulse_piezo_0', nlgeom=OFF, previous='Initial', 
+    timePeriod=0.003)
+del mdb.models['guw_model'].fieldOutputRequests['F-Output-1']
+mdb.models['guw_model'].HistoryOutputRequest(createStepName=
+    'load_case_0_impulse_piezo_0', frequency=1, name='history_transducer_0', 
+    rebar=EXCLUDE, region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_01']
+    , sectionPoints=DEFAULT, variables=('U1', 'U2', 'U3'))
+mdb.models['guw_model'].HistoryOutputRequest(createStepName=
+    'load_case_0_impulse_piezo_0', frequency=1, name='history_transducer_1', 
+    rebar=EXCLUDE, region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_02']
+    , sectionPoints=DEFAULT, variables=('U1', 'U2', 'U3'))
+mdb.models['guw_model'].TabularAmplitude(data=((0, 1), (5e-09, 0)), name=
+    'piezo_0_DiracImpulse', smooth=SOLVER_DEFAULT, timeSpan=STEP)
+mdb.models['guw_model'].ConcentratedForce(amplitude='piezo_0_DiracImpulse', 
+    cf3=1.0, createStepName='load_case_0_impulse_piezo_0', distributionType=
+    UNIFORM, field='', localCsys=None, name='piezo_0_DiracImpulse', region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_01'])
+mdb.Job(atTime=None, contactPrint=OFF, description='', echoPrint=OFF, 
+    explicitPrecision=SINGLE, historyPrint=OFF, memory=90, memoryUnits=
+    PERCENTAGE, model='guw_model', modelPrint=OFF, name=
+    'load_case_0_impulse_piezo_0', nodalOutputPrecision=SINGLE, queue=None, 
+    resultsFormat=ODB, scratch='', type=ANALYSIS, userSubroutine='', waitHours=
+    0, waitMinutes=0)
+#* Learning Edition is restricted to 1,000 nodes
+#* Learning Edition is restricted to 1,000 nodes
