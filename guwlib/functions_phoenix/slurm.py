@@ -66,3 +66,30 @@ def generate_abaqus_job_script(output_file_path, partition, n_nodes, n_tasks_per
 
     with open(output_file_path, 'w', newline='\n') as file:
         file.write(content)
+
+
+def generate_python_job_script(output_file_path, partition, n_nodes, n_tasks_per_node, max_time_in_h, slurm_job_name,
+                               python_file, args, working_dir):
+
+    content = textwrap.dedent(f"""\
+        #!/bin/bash -l
+
+        #SBATCH --partition={partition}
+        #SBATCH --nodes={n_nodes}
+        #SBATCH --job-name={slurm_job_name}
+        #SBATCH --ntasks-per-node={n_tasks_per_node}
+        #SBATCH --time={int(max_time_in_h)}:00:00
+        #SBATCH -o bo-%j.log
+
+        module purge
+        module load software/abaqus/abaqus_2019
+        module load python/3.9.7
+
+        working_dir={working_dir}
+        cd $working_dir
+        python3.9 {python_file} {args}
+        
+    """)
+
+    with open(output_file_path, 'w', newline='\n') as file:
+        file.write(content)

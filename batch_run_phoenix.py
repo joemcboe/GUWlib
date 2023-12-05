@@ -2,11 +2,13 @@
 Pipeline to preprocess, setup, solve and post process user defined GUW models.
 """
 import os
+import sys
 import subprocess
 import textwrap
+import ast
 
 
-def submit_model_files(model_file_paths, ):
+def submit_model_files(model_file_paths, n_nodes, n_tasks_per_node):
     """
 
     :param model_file_paths:
@@ -33,10 +35,10 @@ def submit_model_files(model_file_paths, ):
                     # generate a SLURM job file
                     generate_abaqus_job_script(output_file_path=job_file_path + '.job',
                                                partition='standard',
-                                               n_nodes=1,
-                                               n_tasks_per_node=1,
-                                               max_time_in_h=1,
-                                               slurm_job_name=f'{i}',
+                                               n_nodes=n_nodes,
+                                               n_tasks_per_node=n_tasks_per_node,
+                                               max_time_in_h=8,
+                                               slurm_job_name=f'{k}_{i}',
                                                inp_file=file_name + '.inp',
                                                working_dir=root)
 
@@ -49,9 +51,8 @@ def submit_model_files(model_file_paths, ):
                     if proc.returncode == 0:
                         # Job submission successful, extract the job ID from the output
                         job_id = out.decode().strip().split()[-1]
-                        print(f"Job submitted successfully. Job ID: {job_id}")
+                        print(f"Submitted. JOB_ID={job_id}")
 
-                        # Now you can use job_id to monitor the log file
                     else:
                         print(f"Job submission failed. Error: {err.decode()}")
 
@@ -121,3 +122,28 @@ def generate_abaqus_job_script(output_file_path, partition, n_nodes, n_tasks_per
 
     with open(output_file_path, 'w', newline='\n') as file:
         file.write(content)
+
+
+if __name__ == "__main__":
+
+    """
+    Call this script like this:
+    
+        python batch_run_phoenix.py "['models/model_1.py', 'models/model_2.py']" 1 2
+        
+    """
+
+    script_name = sys.argv[0]
+    arguments = sys.argv[1:]
+
+    # Extracting specific arguments based on their positions in the list
+    model_file_paths_str = arguments[0] if arguments else "[]"
+    n_nodes = int(arguments[1]) if len(arguments) > 1 else 1
+    n_tasks_per_node = int(arguments[2]) if len(arguments) > 2 else 1
+
+    # Parsing the string representation of a list into an actual list
+    model_file_paths = ast.literal_eval(model_file_paths_str)
+
+    if model_file_paths is not None:
+        submit_model_files(model_file_paths=model_file_paths, n_nodes=n_nodes, n_tasks_per_node=n_tasks_per_node)
+

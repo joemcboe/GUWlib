@@ -9,11 +9,11 @@ import numpy as np
 PLATE_WIDTH = 0.5
 PLATE_THICKNESS = 3e-3
 PHASED_ARRAY_N_ELEMENTS = 2
-PHASED_ARRAY_RADIUS = 90e-3
+PHASED_ARRAY_RADIUS = 10e-3
 
 # basic simulation parameters ------------------------------------------------------------------------------------------
 model = FEModel()
-model.max_frequency = 100e3
+model.max_frequency = 20e3
 model.elements_per_wavelength = 10
 model.elements_in_thickness_direction = 2
 model.model_approach = 'point_force'
