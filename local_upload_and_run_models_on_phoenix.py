@@ -3,14 +3,33 @@ from guwlib.functions_phoenix.slurm import *
 
 # specify the model files to upload to the cluster
 model_files_local = [
-    os.path.join('models', 'phx_test.py')
+    # os.path.join('models/convergence_test', 'convergence_pristine_10_x_2.py'),
+    # os.path.join('models/convergence_test', 'convergence_pristine_10_x_4.py'),
+    # os.path.join('models/convergence_test', 'convergence_pristine_10_x_6.py'),
+    # os.path.join('models/convergence_test', 'convergence_pristine_10_x_8.py'),
+    # os.path.join('models/convergence_test', 'convergence_pristine_15_x_2.py'),
+    # os.path.join('models/convergence_test', 'convergence_pristine_15_x_4.py'),
+    # os.path.join('models/convergence_test', 'convergence_pristine_15_x_6.py'),
+    # os.path.join('models/convergence_test', 'convergence_pristine_15_x_8.py'),
+    # os.path.join('models/convergence_test', 'convergence_pristine_20_x_2.py'),
+    # os.path.join('models/convergence_test', 'convergence_pristine_20_x_4.py'),
+    # os.path.join('models/convergence_test', 'convergence_pristine_20_x_6.py'),
+    # os.path.join('models/convergence_test', 'convergence_pristine_20_x_8.py'),
+    # os.path.join('models/convergence_test', 'convergence_pristine_25_x_2.py'),
+    # os.path.join('models/convergence_test', 'convergence_pristine_25_x_4.py'),
+    # os.path.join('models/convergence_test', 'convergence_pristine_25_x_6.py'),
+    # os.path.join('models/convergence_test', 'convergence_pristine_25_x_8.py'),
+    os.path.join('models/convergence_test', 'convergence_pristine_30_x_2.py'),
+    os.path.join('models/convergence_test', 'convergence_pristine_30_x_4.py'),
+    # os.path.join('models/convergence_test', 'convergence_pristine_30_x_6.py'),
+    # os.path.join('models/convergence_test', 'convergence_pristine_30_x_8.py'),
 ]
 
 # nodes and tasks to use for the actual abaqus/explicit execution
-n_nodes = 4
-n_tasks_per_node = 5
-partition = 'testing'
-max_time = 1
+n_nodes = 1
+n_tasks_per_node = 10
+partition = 'shortrun_small'
+max_time = 2
 
 # ----------------------------------------------------------------------------------------------------------------------
 # copy the model files to the cluster
@@ -20,7 +39,7 @@ for model_file in model_files_local:
     copy_file_to_remote(model_file, remote_path, 'tubs_username', 'tubs_password')
     print(f'Copied {file_name} to Phoenix.')
 
-# generate a job file that can call the batch_run_phoenix.py on the cluster --------------------------------------------
+# generate a job file that can call the phoenix_process.py on the cluster --------------------------------------------
 model_files_remote = ('"[' +
                       ", ".join(["'models/{}'".format(os.path.basename(model_file))
                                  for model_file in model_files_local])
@@ -34,7 +53,7 @@ generate_python_job_script(output_file_path=job_file_name,
                            n_tasks_per_node=1,
                            max_time_in_h=2,
                            slurm_job_name='master',
-                           python_file='batch_run_phoenix.py',
+                           python_file='phoenix_process.py',
                            args=args,
                            working_dir=working_dir)
 

@@ -1,5 +1,16 @@
 """
-Pipeline to preprocess, setup, solve and post process user defined GUW models.
+This script is intended to be run on the Phoenix cluster to
+ - create *.INP-files from *.PY files using GUWLIB and ABAQUS/CAE
+ - submit the *.INP files as SLURM *.JOB files
+
+Call this script like this:
+
+    `python phoenix_process.py "['models/model_file_1.py', ...]" n_nodes n_tasks_per_node "partition"`
+
+Example usage:
+
+    `python phoenix_process.py "['models/my_model.py', ...]" 2 10 "shortrun_small"`
+
 """
 import os
 import sys
@@ -128,13 +139,6 @@ def generate_abaqus_job_script(output_file_path, partition, n_nodes, n_tasks_per
 
 
 if __name__ == "__main__":
-
-    """
-    Call this script like this:
-    
-        python batch_run_phoenix.py "['models/model_1.py', 'models/model_2.py']" 1 2 "shortrun_small"
-        
-    """
 
     script_name = sys.argv[0]
     arguments = sys.argv[1:]

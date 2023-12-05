@@ -29,7 +29,7 @@ def generate_abaqus_job_script(output_file_path, partition, n_nodes, n_tasks_per
         #SBATCH -o bo-%j.log
 
         module purge
-        module load software/abaqus/abaqus_2023
+        module load software/abaqus/abaqus_2019
 
 
         input_file={inp_file}
