@@ -28,7 +28,7 @@ model_files_local = [
     # os.path.join('models/convergence_test', 'convergence_pristine_30_x_8.py'),
 ]
 
-working_dir = '/work/y0106916/GitHub2/GUW/'
+working_dir = '/work/y0106916/GitHub/GUW/'
 
 # ----------------------------------------------------------------------------------------------------------------------
 

@@ -11,7 +11,7 @@ module purge
 module load software/abaqus/abaqus_2019
 module load python/3.9.7
 
-working_dir=/work/y0106916/GitHub2/GUW/
+working_dir=/work/y0106916/GitHub/GUW/
 cd $working_dir
 python3.9 phoenix_post_process.py "['results/convergence_pristine_10_x_2']"
 
