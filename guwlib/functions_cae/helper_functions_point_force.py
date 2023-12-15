@@ -2,6 +2,7 @@ import os
 
 from guwlib.guw_objects import *
 import math
+import numpy as np
 
 from abaqus import *
 from abaqusConstants import *
@@ -394,6 +395,14 @@ def mesh_part(element_size_in_plane, element_size_thickness, plate, transducers,
     if len(vertical_edge_indices) > 0:
         p.seedEdgeBySize(edges=[p.edges[i] for i in vertical_edge_indices], size=element_size_thickness)
 
+    # set the element type for the whole model
+    elemType1 = mesh.ElemType(elemCode=C3D8I, elemLibrary=EXPLICIT,
+                              secondOrderAccuracy=OFF, distortionControl=DEFAULT)
+    elemType2 = mesh.ElemType(elemCode=C3D6, elemLibrary=EXPLICIT)
+    elemType3 = mesh.ElemType(elemCode=C3D4, elemLibrary=EXPLICIT)
+    p.setElementType(regions=(p.cells, ), elemTypes=(elemType1, elemType2, elemType3))
+
+    # generate the mesh
     p.generateMesh()
     mesh_stats = p.getMeshStats()
     return mesh_stats.numNodes

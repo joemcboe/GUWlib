@@ -1,33 +1,61 @@
 """
-This script is intended to be run on the Phoenix cluster to
- - create *.INP-files from *.PY files using GUWLIB and ABAQUS/CAE
- - submit the *.INP files as SLURM *.JOB files
+Phoenix Process Script
 
-Call this script like this:
+This script is designed to be executed on the Phoenix cluster, facilitating the creation and submission
+of ABAQUS simulations. It automates the process of converting GUWLIB model files (.py) into input files
+(.INP) using ABAQUS/CAE, generating corresponding SLURM job scripts (.JOB), and submitting them for parallel
+execution. The SLURM job scripts (.JOB) include commands to run the ABAQUS solver on the created .INP files.
 
-    `python phoenix_process.py "['models/model_file_1.py', ...]" n_nodes n_tasks_per_node "partition"`
+Note: The script assumes a configured SLURM environment with ABAQUS and PYTHON installed for proper execution.
 
-Example usage:
+Usage:
+    python phoenix_process.py "<model_file_paths>" [n_nodes] [n_tasks_per_node] [partition] [max_time]
 
-    `python phoenix_process.py "['models/my_model.py', ...]" 2 10 "shortrun_small"`
+Arguments:
+    - model_file_paths (str): A string representation of a Python list containing paths to GUWLIB model
+      files (.py). Enclose the list in quotes, e.g., "['models/model_file_1.py', 'models/model_file_2.py']".
+    - n_nodes (int): Number of compute nodes to request for each job (default: 1).
+    - n_tasks_per_node (int): Number of tasks (CPUs) to allocate per node (default: 1).
+    - partition (str): Name of the SLURM partition to allocate resources from (default: 'standard').
+    - max_time (int): Maximum time in hours for each job to run (default: 12).
 
+Example:
+    python phoenix_process.py "['models/my_model.py', 'models/another_model.py']" 2 10 "shortrun_small" 24
 """
+
 import os
 import sys
 import subprocess
-import textwrap
 import ast
+from guwlib.functions_phoenix.slurm import generate_abaqus_job_script
 
 
 def submit_model_files(model_file_paths, n_nodes, n_tasks_per_node, partition, max_time):
     """
+    Submits ABAQUS simulations for a set of GUW model files (*.py) using SLURM job scripts. This function
+    is intended to be run on an environment with SLURM, ABAQUS and PYTHON installed (e.g. Phoenix Cluster).
 
-    :param model_file_paths:
-    :return:
+    :param List[str] model_file_paths: paths to GUWLIB model files (.py).
+    :param int n_nodes: number of compute nodes to request for each job.
+    :param int n_tasks_per_node: number of tasks (CPUs) to allocate per node.
+    :param str partition: name of the SLURM partition to allocate resources from.
+    :param int max_time: maximum time in hours for each job to run.
+
+    :return: None
+
+    The function takes a list of ABAQUS model files, runs ABAQUS/CAE to generate corresponding *.INP files,
+    creates SLURM job scripts for each generated *.INP file, and submits the jobs to the specified SLURM
+    partition. Each job is identified by a unique SLURM job name based on its position in the input list.
+
+    Example:
+    submit_model_files(
+        model_file_paths=['model1.py', 'model2.py'],
+        n_nodes=4,
+        n_tasks_per_node=8,
+        partition='shortrun_small',
+        max_time=24
+    )
     """
-
-    print(partition)
-    print(max_time)
 
     for k, model_file_path in enumerate(model_file_paths):
 
@@ -71,75 +99,8 @@ def submit_model_files(model_file_paths, n_nodes, n_tasks_per_node, partition, m
                         print(f"Job submission failed. Error: {err.decode()}")
 
 
-def generate_abaqus_job_script(output_file_path, partition, n_nodes, n_tasks_per_node, max_time_in_h, slurm_job_name,
-                               inp_file, working_dir):
-    """
-
-    Args:
-        output_file_path:
-        partition:
-        n_nodes:
-        n_tasks_per_node:
-        max_time_in_h:
-        slurm_job_name:
-        inp_file:
-        working_dir:
-
-    Returns:
-
-    """
-    content = textwrap.dedent(f"""\
-        #!/bin/bash -l
-
-        #SBATCH --partition={partition}
-        #SBATCH --nodes={n_nodes}
-        #SBATCH --job-name={slurm_job_name}
-        #SBATCH --ntasks-per-node={n_tasks_per_node}
-        #SBATCH --time={int(max_time_in_h)}:00:00
-        #SBATCH -o bo-%j.log
-
-        module purge
-        module load software/abaqus/abaqus_2019
-
-
-        input_file={inp_file}
-
-        working_dir={working_dir}
-        cd $working_dir
-
-        ### Create ABAQUS environment file for current job
-        env_file=custom_v6.env
-
-        ### Start writing the ABAQUS environment file
-        cat << EOF > ${{env_file}}
-        mp_file_system = (DETECT,DETECT)
-        EOF
-
-        ### Construct a list of hosts and their respective number of CPUs
-        node_list=$(scontrol show hostname ${{SLURM_NODELIST}} | sort -u)
-        mp_host_list="["
-        for host in ${{node_list}}; do
-            mp_host_list="${{mp_host_list}}['$host', ${{SLURM_CPUS_ON_NODE}}],"
-        done
-        mp_host_list=$(echo ${{mp_host_list}} | sed -e "s/,$/]/")
-
-        ### Write hostlist to ABAQUS environment file
-        echo "mp_host_list=${{mp_host_list}}"  >> ${{env_file}}
-
-
-        ### Set input file and job (file prefix) name here
-        job_name=${{SLURM_JOB_NAME}}   
-
-        ### Call ABAQUS parallel execution
-        abaqus job=${{job_name}} input=${{input_file}} cpus=${{SLURM_NTASKS}} mp_mode=mpi interactive
-    """)
-
-    with open(output_file_path, 'w', newline='\n') as file:
-        file.write(content)
-
-
 if __name__ == "__main__":
-
+    # Parsing command-line arguments
     script_name = sys.argv[0]
     arguments = sys.argv[1:]
 

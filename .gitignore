@@ -1,7 +1,0 @@
-# Default ignored files
-*.odb
-*.pyc
-results/*
-models/*
-
-models/phx_test.py

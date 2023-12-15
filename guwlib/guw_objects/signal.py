@@ -1,7 +1,4 @@
 import math
-import numpy as np
-
-PI = math.pi
 
 
 class Signal(object):
@@ -65,8 +62,8 @@ class Burst(Signal):
 
         if self.window == 'hanning':
             length = n_cycles * (1 / f)
-            y = math.cos(2 * PI * f * (t - dt))
-            hanning = math.sin(PI * (t - dt) / length) ** 2 if (dt <= t <= length + dt) else 0
+            y = math.cos(2 * math.pi * f * (t - dt))
+            hanning = math.sin(math.pi * (t - dt) / length) ** 2 if (dt <= t <= length + dt) else 0
             return y * hanning
         else:
             raise ValueError("Unsupported window type: {}".format(self.window))

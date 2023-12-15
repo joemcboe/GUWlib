@@ -1,12 +1,27 @@
 """
-This script is intended to be run on the Phoenix cluster to extract the history data from ODB files, written by the
-Abaqus Solver.
+This script is designed to be executed on the Phoenix cluster and intended for post-processing Abaqus
+simulation results  by extracting history data from output database (.ODB) files. It utilizes a helper
+script, 'abaqus_odb_history_export_helper.py', to perform the extraction. The script processes each output
+database (.ODB) file in the specified directories, extracts history data, and saves the processed data as
+compressed pickle files (.PKL.GZ).
 
-Call this script like this:
+If executed as a standalone script, it accepts a list of result directories as a command-line argument, performs
+the extraction, and prints the paths to the generated compressed pickle files.
 
-    `python phoenix_post_process.py "['results/my_model', ...]"
+Usage:
+    python abaqus_post_process.py "<results_dir_paths>"
 
+Arguments:
+    - results_dir_paths (str): A string representation of a Python list containing paths to directories
+      containing Abaqus simulation result files (.ODB). Enclose the list in quotes, e.g.,
+      "['/path/to/results/folder1', '/path/to/results/folder2']".
+
+Example:
+    python abaqus_post_process.py "['/path/to/results/folder1', '/path/to/results/folder2']"
+
+Note: ABAQUS software must be installed, and the script assumes a configured SLURM environment for proper execution.
 """
+
 import os
 import sys
 import subprocess
@@ -15,9 +30,18 @@ import ast
 
 def extract_history_from_output_databases(results_folders):
     """
+    Scans the specified results folders for ABAQUS output database files (.ODB), extracts the history data
+    and saves it as NumPy .NPZ files in the same directory as the .ODB file. The file paths to the .NPZ files
+    are returned.
 
-    :param results_folders:
-    :return:
+    :param List[str] results_folders: paths to directories containing Abaqus output database files (.ODB).
+    :return: List[str], paths to the extracted history data files in NumPy .NPZ format.
+
+    Example:
+    extract_history_from_output_databases(['/path/to/results/folder1', '/path/to/results/folder2'])
+
+    Note: ABAQUS software must be installed, and the helper script 'abaqus_odb_history_export_helper.py' is
+    expected to be located in the 'guwlib/functions_odb/' directory.
     """
 
     helper_script_name = os.path.join('guwlib', 'functions_odb', 'abaqus_odb_history_export_helper.py')
@@ -43,9 +67,14 @@ def extract_history_from_output_databases(results_folders):
 
 def find_odb_files(directory):
     """
+    Find all Abaqus output database files (.ODB) in the specified directory.
 
-    :param directory:
-    :return:
+    :param directory: str, path to the directory to search for .ODB files.
+    :return: List[str], paths to the located .ODB files.
+
+    Example:
+    find_odb_files('/path/to/results/folder')
+
     """
     odb_files = []
     for root, dirs, files in os.walk(directory):
@@ -68,5 +97,5 @@ if __name__ == "__main__":
 
     if results_dir_paths is not None:
         pkl_paths = extract_history_from_output_databases(results_folders=results_dir_paths)
-        print("PKL_PATHS=".format(pkl_paths))
+        print("PKL_PATHS={}".format(pkl_paths))
 
