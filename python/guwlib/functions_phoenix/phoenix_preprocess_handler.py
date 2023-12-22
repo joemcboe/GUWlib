@@ -14,8 +14,7 @@ import ast
 import subprocess
 
 
-def find_inp_files_generate_job_script(directory_to_search, job_base_name, partition, n_nodes,
-                                       n_tasks_per_node, max_time):
+def find_inp_files_generate_job_script(directory_to_search, partition, n_nodes, n_tasks_per_node, max_time):
     # iterate through all *.INP-files in the simulation directory and generate *.JOB file
     job_file_paths = []
     for root, dirs, files in os.walk(directory_to_search):
@@ -32,7 +31,7 @@ def find_inp_files_generate_job_script(directory_to_search, job_base_name, parti
                                            n_tasks_per_node=n_tasks_per_node,
                                            max_time=max_time,
                                            slurm_job_name=job_name,
-                                           working_dir=root,
+                                           working_dir=os.path.abspath(root),
                                            inp_file=file_name)
                 job_file_paths.append(job_file_path)
 
@@ -76,7 +75,6 @@ if __name__ == "__main__":
         # ABAQUS/CAE + GUWlib will write the *.INP files in the 'results' folder
         inp_file_dir = os.path.join('results', model_file_name)
         model_job_files = find_inp_files_generate_job_script(directory_to_search=inp_file_dir,
-                                                             job_base_name=model_file_name,
                                                              partition=solver_partition,
                                                              n_nodes=solver_n_nodes,
                                                              n_tasks_per_node=solver_n_tasks_per_node,
