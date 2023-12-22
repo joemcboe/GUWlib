@@ -2,4 +2,6 @@
 *.pyc
 __pycache__/
 python/results/*
-python/models/*
+*.log
+*.rec
+*.job
