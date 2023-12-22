@@ -16,6 +16,6 @@ model_file = os.path.join('models/examples', 'example_01.py')
 
 
 # run ABAQUS/CAE on the model.py file ----------------
-command = f"abaqus cae noGUI={model_file}"
+command = f"abaqus cae script={model_file}"
 proc = subprocess.Popen(command, shell=True)
 proc.wait()

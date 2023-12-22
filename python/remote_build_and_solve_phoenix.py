@@ -13,7 +13,7 @@ model_files_local = [
 ]
 
 # specify the directory on remote machine where GUWlib is located
-remote_guwlib_path = '/work/y0106916/GUW_Simulation/python'
+remote_guwlib_path = '/work/y0106916/GUW_Simulation/GUW/python'
 
 # resources to allocate for the ABAQUS/CAE execution (writing *.INP files)
 # acceptable time formats include "minutes", "minutes:seconds", "hours:minutes:seconds", "days-hours",

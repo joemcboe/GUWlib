@@ -109,7 +109,7 @@ def build_abaqus_model_point_force(model):
         remove_all_steps()
 
         # create new explicit step
-        step_name = 'load_case_{}_{}'.format(i, step.name)
+        step_name = 'lc_{}_{}'.format(i, step.name)
         create_step_dynamic_explicit(step_name=step_name,
                                      time_period=step.duration,
                                      max_increment=max_time_increment,
