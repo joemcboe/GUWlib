@@ -42,19 +42,19 @@ class SimpleModel(FEModel):
 
         # set up the time / loading information ------------------------------------------------------------------------
         burst = Burst(center_frequency=200e3, n_cycles=3)
-        transducer_signals = [burst] * len(self.transducers)
+        dirac = DiracImpulse()
+
+        transducer_signals_1 = [burst] * len(self.transducers)
+        transducer_signals_2 = [dirac] * len(self.transducers)
+
         self.load_cases = [LoadCase(name='burst_step',
                                     duration=2e-5,
-                                    transducer_signals=transducer_signals,
-                                    output_request='history')]
-        dirac = DiracImpulse()
-        transducer_signals = [dirac] * len(self.transducers)
-        self.load_cases = [LoadCase(name='dirac_step',
+                                    transducer_signals=transducer_signals_1,
+                                    output_request='history'),
+                           LoadCase(name='dirac_step',
                                     duration=2e-5,
-                                    transducer_signals=transducer_signals,
+                                    transducer_signals=transducer_signals_2,
                                     output_request='history')]
-
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 

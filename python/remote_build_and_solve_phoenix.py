@@ -9,8 +9,7 @@ from guwlib.functions_phoenix.slurm import *
 
 # specify the model files to upload to the cluster
 model_files_local = [
-    os.path.join('models', 'examples', 'example_01.py'),
-    os.path.join('models', 'examples', 'crack_test.py')
+    os.path.join('models', 'alu3a', 'alu3a_pristine_top.py'),
 ]
 
 # specify the directory on remote machine where GUWlib is located
@@ -23,13 +22,13 @@ remote_guwlib_path = '/work/y0106916/GUW_Simulation/GUW/python'
 cae_n_nodes = 1
 cae_n_tasks_per_node = 1
 cae_partition = 'standard'
-cae_max_time = "0:5:0"
+cae_max_time = "1:0:0"
 
 # resources to allocate for each solver run (ABAQUS/Explicit, ABAQUS/Standard)
 solver_n_nodes = 1
-solver_n_tasks_per_node = 20
-solver_partition = 'shortrun_small'
-solver_max_time = "24:0:0"
+solver_n_tasks_per_node = 10
+solver_partition = 'standard'
+solver_max_time = "2:0:0"
 
 # ----------------------------------------------------------------------------------------------------------------------
 # copy the model files to the cluster

@@ -568,7 +568,7 @@ def add_history_output_request_transducer_signals(transducers, create_step_name)
         for set_name, description in zip([transducer.on_plate_top_set_name, transducer.on_plate_bottom_set_name],
                                          ['top', 'bottom']):
             region_def = a.instances[PLATE_PART_NAME].sets[set_name]
-            mdb.models[MODEL_NAME].HistoryOutputRequest(name='history_transducer_{}_{}'.format(i, description),
+            mdb.models[MODEL_NAME].HistoryOutputRequest(name='history_transducer_{}_{}'.format(i+1, description),
                                                         createStepName=create_step_name,
                                                         variables=('U1', 'U2', 'U3'),
                                                         frequency=1,
