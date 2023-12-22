@@ -1,0 +1,2144 @@
+# -*- coding: mbcs -*-
+from part import *
+from material import *
+from section import *
+from assembly import *
+from interaction import *
+from load import *
+from mesh import *
+from optimization import *
+from job import *
+from sketch import *
+from visualization import *
+from step import *
+mdb.models.changeKey(fromName='Model-1', toName='guw_model')
+mdb.models['guw_model'].ConstrainedSketch(name='__profile__', sheetSize=2.0)
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(0, 0), 
+    point2=(0.2, 0.2))
+mdb.models['guw_model'].Part(dimensionality=THREE_D, name='plate', type=
+    DEFORMABLE_BODY)
+mdb.models['guw_model'].parts['plate'].BaseSolidExtrude(depth=0.003, sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].parts['plate'].DatumPlaneByPrincipalPlane(offset=0.003, 
+    principalPlane=XYPLANE)
+mdb.models['guw_model'].parts['plate'].DatumAxisByTwoPoint(point1=(0, 0, 0.003)
+    , point2=(0, 1, 0.003))
+mdb.models['guw_model'].parts['plate'].DatumAxisByTwoPoint(point1=(0, 0, 0), 
+    point2=(0, 0, 0.003))
+mdb.models['guw_model'].parts['plate'].Set(cells=
+    mdb.models['guw_model'].parts['plate'].cells, name='plate')
+mdb.models['guw_model'].parts['plate'].Set(cells=
+    mdb.models['guw_model'].parts['plate'].cells, faces=
+    mdb.models['guw_model'].parts['plate'].faces, name='plate-material')
+mdb.models['guw_model'].parts['plate'].Set(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#10 ]', ), ), name='plate-top-surface')
+mdb.models['guw_model'].parts['plate'].Set(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#10 ]', ), ), name='plate-field-output')
+mdb.models['guw_model'].ConstrainedSketch(name='__profile__', sheetSize=2.0)
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(0, 0), 
+    point2=(0.2, 0.2))
+mdb.models['guw_model'].Part(dimensionality=TWO_D_PLANAR, name=
+    'reference_plate', type=DEFORMABLE_BODY)
+mdb.models['guw_model'].parts['reference_plate'].BaseShell(sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].parts['reference_plate'].setMeshControls(regions=
+    mdb.models['guw_model'].parts['reference_plate'].cells, technique=
+    STRUCTURED)
+mdb.models['guw_model'].parts['reference_plate'].seedPart(deviationFactor=0.1, 
+    minSizeFactor=0.1, size=0.00062428554099148938)
+mdb.models['guw_model'].parts['reference_plate'].generateMesh()
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.0125000001862645, 0.0324999988079071), point2=(0.0274999998509884, 
+    0.0474999994039536))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[4], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#1 ]', ), ), edges=[mdb.models['guw_model'].parts['plate'].edges[4], 
+    mdb.models['guw_model'].parts['plate'].edges[5], 
+    mdb.models['guw_model'].parts['plate'].edges[6], 
+    mdb.models['guw_model'].parts['plate'].edges[7]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].parts['plate'].Set(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#20 ]', ), ), name='plate-top-surface')
+mdb.models['guw_model'].parts['plate'].Set(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#2 ]', ), ), name='crack_01_bound_box')
+mdb.models['guw_model'].parts['plate'].SetByBoolean(name='plate', operation=
+    DIFFERENCE, sets=[mdb.models['guw_model'].parts['plate'].sets['plate'], 
+    mdb.models['guw_model'].parts['plate'].sets['crack_01_bound_box']])
+mdb.models['guw_model'].parts['plate'].DatumPointByCoordinate(coords=(
+    0.018289899283371658, 0.044698463103929539, 0.003))
+mdb.models['guw_model'].parts['plate'].DatumPointByCoordinate(coords=(
+    0.018289899283371658, 0.044698463103929539, 0))
+mdb.models['guw_model'].parts['plate'].DatumPointByCoordinate(coords=(
+    0.021710100716628343, 0.035301536896070462, 0.003))
+mdb.models['guw_model'].parts['plate'].DatumPointByCoordinate(coords=(
+    0.021710100716628343, 0.035301536896070462, 0))
+mdb.models['guw_model'].ConstrainedSketch(name='__profile__', sheetSize=3.25, 
+    transform=mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.018289899283371658, 0.0474999994039536), point2=(0.018289899283371658, 
+    0.044698463103929539))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.018289899283371658, 0.044698463103929539), point2=(0.021710100716628343, 
+    0.035301536896070462))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.021710100716628343, 0.035301536896070462), point2=(0.021710100716628343, 
+    0.0324999988079071))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketchThruAll(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#400 ]', ), ), sketch=mdb.models['guw_model'].sketches['__profile__'], 
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, sketchUpEdge=
+    mdb.models['guw_model'].parts['plate'].datums[3])
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#2 ]', ), ), edges=[mdb.models['guw_model'].parts['plate'].edges[0], 
+    mdb.models['guw_model'].parts['plate'].edges[1], 
+    mdb.models['guw_model'].parts['plate'].edges[2], 
+    mdb.models['guw_model'].parts['plate'].edges[8], 
+    mdb.models['guw_model'].parts['plate'].edges[12], 
+    mdb.models['guw_model'].parts['plate'].edges[16]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].parts['plate'].Set(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#1 ]', ), ), name='crack_01_seam')
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].sketches['__profile__'].CircleByCenterPerimeter(center=
+    (0.15, 0.03), point1=(0.156, 0.03))
+mdb.models['guw_model'].parts['plate'].CutExtrude(flipExtrudeDirection=OFF, 
+    sketch=mdb.models['guw_model'].sketches['__profile__'], sketchOrientation=
+    RIGHT, sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, sketchUpEdge=
+    mdb.models['guw_model'].parts['plate'].datums[3])
+del mdb.models['guw_model'].sketches['__profile__']
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.135000005364418, 0.0149999996647239), point2=(0.165000006556511, 
+    0.0450000017881393))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[13], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#2 ]', ), ), edges=[mdb.models['guw_model'].parts['plate'].edges[10], 
+    mdb.models['guw_model'].parts['plate'].edges[11], 
+    mdb.models['guw_model'].parts['plate'].edges[12], 
+    mdb.models['guw_model'].parts['plate'].edges[13]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].parts['plate'].Set(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#20 ]', ), ), name='plate-top-surface')
+mdb.models['guw_model'].parts['plate'].Set(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#4 ]', ), ), name='hole_02_bound_box')
+mdb.models['guw_model'].parts['plate'].SetByBoolean(name='plate', operation=
+    DIFFERENCE, sets=[mdb.models['guw_model'].parts['plate'].sets['plate'], 
+    mdb.models['guw_model'].parts['plate'].sets['hole_02_bound_box']])
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.04, name='__profile__', 
+    sheetSize=1.84, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(0.135000005364418, 
+    0.0299999993294477), point2=(0.144, 0.03))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(0.156, 0.03), 
+    point2=(0.165000006556511, 0.0299999993294477))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(0.150000005960464, 
+    0.0149999996647239), point2=(0.15, 0.024))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(0.15, 0.036), 
+    point2=(0.150000005960464, 0.0450000017881393))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#80000 ]', ), ), sketch=mdb.models['guw_model'].sketches['__profile__'], 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3])
+del mdb.models['guw_model'].sketches['__profile__']
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#4 ]', ), ), edges=[mdb.models['guw_model'].parts['plate'].edges[0], 
+    mdb.models['guw_model'].parts['plate'].edges[1], 
+    mdb.models['guw_model'].parts['plate'].edges[2], 
+    mdb.models['guw_model'].parts['plate'].edges[3], 
+    mdb.models['guw_model'].parts['plate'].edges[4]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#9 ]', ), ), edges=[mdb.models['guw_model'].parts['plate'].edges[6], 
+    mdb.models['guw_model'].parts['plate'].edges[16], 
+    mdb.models['guw_model'].parts['plate'].edges[22], 
+    mdb.models['guw_model'].parts['plate'].edges[23], 
+    mdb.models['guw_model'].parts['plate'].edges[24]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#13 ]', ), ), edges=[mdb.models['guw_model'].parts['plate'].edges[2], 
+    mdb.models['guw_model'].parts['plate'].edges[4], 
+    mdb.models['guw_model'].parts['plate'].edges[32], 
+    mdb.models['guw_model'].parts['plate'].edges[36], 
+    mdb.models['guw_model'].parts['plate'].edges[38]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.141874998807907, 0.0918750017881393), point2=(0.158124998211861, 
+    0.108125001192093))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[22], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#8 ]', ), ), edges=[mdb.models['guw_model'].parts['plate'].edges[18], 
+    mdb.models['guw_model'].parts['plate'].edges[19], 
+    mdb.models['guw_model'].parts['plate'].edges[20], 
+    mdb.models['guw_model'].parts['plate'].edges[21]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].parts['plate'].Set(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#20 ]', ), ), name='plate-top-surface')
+mdb.models['guw_model'].parts['plate'].Set(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#10 ]', ), ), name='transducer_01_bound_box')
+mdb.models['guw_model'].parts['plate'].SetByBoolean(name='plate', operation=
+    DIFFERENCE, sets=[mdb.models['guw_model'].parts['plate'].sets['plate'], 
+    mdb.models['guw_model'].parts['plate'].sets['transducer_01_bound_box']])
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(0.141874998807907, 
+    0.100000001490116), point2=(0.15000000000000002, 0.10000000000000001))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.15000000000000002, 0.10000000000000001), point2=(0.158124998211861, 
+    0.100000001490116))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(0.150000005960464, 
+    0.0918750017881393), point2=(0.15000000000000002, 0.10000000000000001))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.15000000000000002, 0.10000000000000001), point2=(0.150000005960464, 
+    0.108125001192093))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketchThruAll(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#10000010 ]', ), ), sketch=
+    mdb.models['guw_model'].sketches['__profile__'], sketchPlane=
+    mdb.models['guw_model'].parts['plate'].datums[2], sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3])
+mdb.models['guw_model'].parts['plate'].Set(name='transducer_01_top', vertices=
+    mdb.models['guw_model'].parts['plate'].vertices.getSequenceFromMask(mask=(
+    '[#100 ]', ), ))
+mdb.models['guw_model'].parts['plate'].Set(name='transducer_01_bottom', 
+    vertices=
+    mdb.models['guw_model'].parts['plate'].vertices.getSequenceFromMask(mask=(
+    '[#2 ]', ), ))
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.116875000298023, 0.135000005364418), point2=(0.133125007152557, 
+    0.151250004768372))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[11], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#1 ]', ), ), edges=[mdb.models['guw_model'].parts['plate'].edges[26], 
+    mdb.models['guw_model'].parts['plate'].edges[27], 
+    mdb.models['guw_model'].parts['plate'].edges[28], 
+    mdb.models['guw_model'].parts['plate'].edges[29]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].parts['plate'].Set(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#20 ]', ), ), name='plate-top-surface')
+mdb.models['guw_model'].parts['plate'].Set(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#2 ]', ), ), name='transducer_02_bound_box')
+mdb.models['guw_model'].parts['plate'].SetByBoolean(name='plate', operation=
+    DIFFERENCE, sets=[mdb.models['guw_model'].parts['plate'].sets['plate'], 
+    mdb.models['guw_model'].parts['plate'].sets['transducer_02_bound_box']])
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(0.116875000298023, 
+    0.143124997615814), point2=(0.125, 0.14330127018922195))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(0.125, 
+    0.14330127018922195), point2=(0.133125007152557, 0.143124997615814))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(0.125, 
+    0.135000005364418), point2=(0.125, 0.14330127018922195))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(0.125, 
+    0.14330127018922195), point2=(0.125, 0.151250004768372))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketchThruAll(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#20010 ]', ), ), sketch=mdb.models['guw_model'].sketches['__profile__'], 
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, sketchUpEdge=
+    mdb.models['guw_model'].parts['plate'].datums[3])
+mdb.models['guw_model'].parts['plate'].Set(name='transducer_02_top', vertices=
+    mdb.models['guw_model'].parts['plate'].vertices.getSequenceFromMask(mask=(
+    '[#100 ]', ), ))
+mdb.models['guw_model'].parts['plate'].Set(name='transducer_02_bottom', 
+    vertices=
+    mdb.models['guw_model'].parts['plate'].vertices.getSequenceFromMask(mask=(
+    '[#2 ]', ), ))
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.0668750032782555, 0.135000005364418), point2=(0.083125002682209, 
+    0.151250004768372))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[11], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#1 ]', ), ), edges=[mdb.models['guw_model'].parts['plate'].edges[34], 
+    mdb.models['guw_model'].parts['plate'].edges[35], 
+    mdb.models['guw_model'].parts['plate'].edges[36], 
+    mdb.models['guw_model'].parts['plate'].edges[37]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].parts['plate'].Set(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#20 ]', ), ), name='plate-top-surface')
+mdb.models['guw_model'].parts['plate'].Set(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#2 ]', ), ), name='transducer_03_bound_box')
+mdb.models['guw_model'].parts['plate'].SetByBoolean(name='plate', operation=
+    DIFFERENCE, sets=[mdb.models['guw_model'].parts['plate'].sets['plate'], 
+    mdb.models['guw_model'].parts['plate'].sets['transducer_03_bound_box']])
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.0668750032782555, 0.143124997615814), point2=(0.075000000000000011, 
+    0.14330127018922195))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.075000000000000011, 0.14330127018922195), point2=(0.083125002682209, 
+    0.143124997615814))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.0750000029802322, 0.135000005364418), point2=(0.075000000000000011, 
+    0.14330127018922195))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.075000000000000011, 0.14330127018922195), point2=(0.0750000029802322, 
+    0.151250004768372))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketchThruAll(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#20010 ]', ), ), sketch=mdb.models['guw_model'].sketches['__profile__'], 
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, sketchUpEdge=
+    mdb.models['guw_model'].parts['plate'].datums[3])
+mdb.models['guw_model'].parts['plate'].Set(name='transducer_03_top', vertices=
+    mdb.models['guw_model'].parts['plate'].vertices.getSequenceFromMask(mask=(
+    '[#100 ]', ), ))
+mdb.models['guw_model'].parts['plate'].Set(name='transducer_03_bottom', 
+    vertices=
+    mdb.models['guw_model'].parts['plate'].vertices.getSequenceFromMask(mask=(
+    '[#2 ]', ), ))
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.0418750010430813, 0.0918750017881393), point2=(0.0581250004470348, 
+    0.108125001192093))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[11], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#1 ]', ), ), edges=[mdb.models['guw_model'].parts['plate'].edges[42], 
+    mdb.models['guw_model'].parts['plate'].edges[43], 
+    mdb.models['guw_model'].parts['plate'].edges[44], 
+    mdb.models['guw_model'].parts['plate'].edges[45]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].parts['plate'].Set(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#20 ]', ), ), name='plate-top-surface')
+mdb.models['guw_model'].parts['plate'].Set(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#2 ]', ), ), name='transducer_04_bound_box')
+mdb.models['guw_model'].parts['plate'].SetByBoolean(name='plate', operation=
+    DIFFERENCE, sets=[mdb.models['guw_model'].parts['plate'].sets['plate'], 
+    mdb.models['guw_model'].parts['plate'].sets['transducer_04_bound_box']])
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.0418750010430813, 0.100000001490116), point2=(0.050000000000000003, 
+    0.10000000000000001))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.050000000000000003, 0.10000000000000001), point2=(0.0581250004470348, 
+    0.100000001490116))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.0500000007450581, 0.0918750017881393), point2=(0.050000000000000003, 
+    0.10000000000000001))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.050000000000000003, 0.10000000000000001), point2=(0.0500000007450581, 
+    0.108125001192093))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketchThruAll(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#20010 ]', ), ), sketch=mdb.models['guw_model'].sketches['__profile__'], 
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, sketchUpEdge=
+    mdb.models['guw_model'].parts['plate'].datums[3])
+mdb.models['guw_model'].parts['plate'].Set(name='transducer_04_top', vertices=
+    mdb.models['guw_model'].parts['plate'].vertices.getSequenceFromMask(mask=(
+    '[#100 ]', ), ))
+mdb.models['guw_model'].parts['plate'].Set(name='transducer_04_bottom', 
+    vertices=
+    mdb.models['guw_model'].parts['plate'].vertices.getSequenceFromMask(mask=(
+    '[#2 ]', ), ))
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.0668750032782555, 0.0487499982118607), point2=(0.083125002682209, 
+    0.0649999976158142))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[11], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#1 ]', ), ), edges=[mdb.models['guw_model'].parts['plate'].edges[50], 
+    mdb.models['guw_model'].parts['plate'].edges[51], 
+    mdb.models['guw_model'].parts['plate'].edges[52], 
+    mdb.models['guw_model'].parts['plate'].edges[53]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].parts['plate'].Set(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#20 ]', ), ), name='plate-top-surface')
+mdb.models['guw_model'].parts['plate'].Set(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#2 ]', ), ), name='transducer_05_bound_box')
+mdb.models['guw_model'].parts['plate'].SetByBoolean(name='plate', operation=
+    DIFFERENCE, sets=[mdb.models['guw_model'].parts['plate'].sets['plate'], 
+    mdb.models['guw_model'].parts['plate'].sets['transducer_05_bound_box']])
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.0668750032782555, 0.0568750016391277), point2=(0.074999999999999983, 
+    0.056698729810778087))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.074999999999999983, 0.056698729810778087), point2=(0.083125002682209, 
+    0.0568750016391277))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.0750000029802322, 0.0487499982118607), point2=(0.074999999999999983, 
+    0.056698729810778087))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.074999999999999983, 0.056698729810778087), point2=(0.0750000029802322, 
+    0.0649999976158142))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketchThruAll(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#20010 ]', ), ), sketch=mdb.models['guw_model'].sketches['__profile__'], 
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, sketchUpEdge=
+    mdb.models['guw_model'].parts['plate'].datums[3])
+mdb.models['guw_model'].parts['plate'].Set(name='transducer_05_top', vertices=
+    mdb.models['guw_model'].parts['plate'].vertices.getSequenceFromMask(mask=(
+    '[#100 ]', ), ))
+mdb.models['guw_model'].parts['plate'].Set(name='transducer_05_bottom', 
+    vertices=
+    mdb.models['guw_model'].parts['plate'].vertices.getSequenceFromMask(mask=(
+    '[#2 ]', ), ))
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.116875000298023, 0.0487499982118607), point2=(0.133125007152557, 
+    0.0649999976158142))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[11], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#1 ]', ), ), edges=[mdb.models['guw_model'].parts['plate'].edges[58], 
+    mdb.models['guw_model'].parts['plate'].edges[59], 
+    mdb.models['guw_model'].parts['plate'].edges[60], 
+    mdb.models['guw_model'].parts['plate'].edges[61]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].parts['plate'].Set(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#20 ]', ), ), name='plate-top-surface')
+mdb.models['guw_model'].parts['plate'].Set(cells=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#2 ]', ), ), name='transducer_06_bound_box')
+mdb.models['guw_model'].parts['plate'].SetByBoolean(name='plate', operation=
+    DIFFERENCE, sets=[mdb.models['guw_model'].parts['plate'].sets['plate'], 
+    mdb.models['guw_model'].parts['plate'].sets['transducer_06_bound_box']])
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(0.116875000298023, 
+    0.0568750016391277), point2=(0.12499999999999997, 0.056698729810778052))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.12499999999999997, 0.056698729810778052), point2=(0.133125007152557, 
+    0.0568750016391277))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(0.125, 
+    0.0487499982118607), point2=(0.12499999999999997, 0.056698729810778052))
+mdb.models['guw_model'].sketches['__profile__'].Line(point1=(
+    0.12499999999999997, 0.056698729810778052), point2=(0.125, 
+    0.0649999976158142))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketchThruAll(faces=
+    mdb.models['guw_model'].parts['plate'].faces.getSequenceFromMask(mask=(
+    '[#20010 ]', ), ), sketch=mdb.models['guw_model'].sketches['__profile__'], 
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, sketchUpEdge=
+    mdb.models['guw_model'].parts['plate'].datums[3])
+mdb.models['guw_model'].parts['plate'].Set(name='transducer_06_top', vertices=
+    mdb.models['guw_model'].parts['plate'].vertices.getSequenceFromMask(mask=(
+    '[#100 ]', ), ))
+mdb.models['guw_model'].parts['plate'].Set(name='transducer_06_bottom', 
+    vertices=
+    mdb.models['guw_model'].parts['plate'].vertices.getSequenceFromMask(mask=(
+    '[#2 ]', ), ))
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(0, 
+    0.151250004768372), point2=(0.2, 0.2))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[11], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+del mdb.models['guw_model'].sketches['__profile__']
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells[0], edges=
+    [mdb.models['guw_model'].parts['plate'].edges[24], 
+    mdb.models['guw_model'].parts['plate'].edges[31], 
+    mdb.models['guw_model'].parts['plate'].edges[35], 
+    mdb.models['guw_model'].parts['plate'].edges[84], 
+    mdb.models['guw_model'].parts['plate'].edges[85], 
+    mdb.models['guw_model'].parts['plate'].edges[86], 
+    mdb.models['guw_model'].parts['plate'].edges[87], 
+    mdb.models['guw_model'].parts['plate'].edges[88], 
+    mdb.models['guw_model'].parts['plate'].edges[89], 
+    mdb.models['guw_model'].parts['plate'].edges[90]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.0581250004470348, 0.0649999976158142), point2=(0.141874998807907, 
+    0.135000005364418))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[6], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+del mdb.models['guw_model'].sketches['__profile__']
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells[0], edges=
+    [mdb.models['guw_model'].parts['plate'].edges[0], 
+    mdb.models['guw_model'].parts['plate'].edges[20], 
+    mdb.models['guw_model'].parts['plate'].edges[21], 
+    mdb.models['guw_model'].parts['plate'].edges[31], 
+    mdb.models['guw_model'].parts['plate'].edges[32], 
+    mdb.models['guw_model'].parts['plate'].edges[39], 
+    mdb.models['guw_model'].parts['plate'].edges[40], 
+    mdb.models['guw_model'].parts['plate'].edges[47], 
+    mdb.models['guw_model'].parts['plate'].edges[54], 
+    mdb.models['guw_model'].parts['plate'].edges[55], 
+    mdb.models['guw_model'].parts['plate'].edges[136], 
+    mdb.models['guw_model'].parts['plate'].edges[137], 
+    mdb.models['guw_model'].parts['plate'].edges[138], 
+    mdb.models['guw_model'].parts['plate'].edges[139], 
+    mdb.models['guw_model'].parts['plate'].edges[140], 
+    mdb.models['guw_model'].parts['plate'].edges[141], 
+    mdb.models['guw_model'].parts['plate'].edges[142], 
+    mdb.models['guw_model'].parts['plate'].edges[143], 
+    mdb.models['guw_model'].parts['plate'].edges[144], 
+    mdb.models['guw_model'].parts['plate'].edges[145], 
+    mdb.models['guw_model'].parts['plate'].edges[146], 
+    mdb.models['guw_model'].parts['plate'].edges[147]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.0274999998509884, 0), point2=(0.135000005364418, 0.0487499982118607))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[13], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+del mdb.models['guw_model'].sketches['__profile__']
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells[1], edges=
+    [mdb.models['guw_model'].parts['plate'].edges[0], 
+    mdb.models['guw_model'].parts['plate'].edges[1], 
+    mdb.models['guw_model'].parts['plate'].edges[8], 
+    mdb.models['guw_model'].parts['plate'].edges[26], 
+    mdb.models['guw_model'].parts['plate'].edges[44], 
+    mdb.models['guw_model'].parts['plate'].edges[50], 
+    mdb.models['guw_model'].parts['plate'].edges[51], 
+    mdb.models['guw_model'].parts['plate'].edges[141], 
+    mdb.models['guw_model'].parts['plate'].edges[142], 
+    mdb.models['guw_model'].parts['plate'].edges[143], 
+    mdb.models['guw_model'].parts['plate'].edges[144], 
+    mdb.models['guw_model'].parts['plate'].edges[145], 
+    mdb.models['guw_model'].parts['plate'].edges[146], 
+    mdb.models['guw_model'].parts['plate'].edges[147], 
+    mdb.models['guw_model'].parts['plate'].edges[148]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.165000006556511, 0), point2=(0.2, 0.151250004768372))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[12], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+del mdb.models['guw_model'].sketches['__profile__']
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells[4], edges=
+    [mdb.models['guw_model'].parts['plate'].edges[0], 
+    mdb.models['guw_model'].parts['plate'].edges[20], 
+    mdb.models['guw_model'].parts['plate'].edges[50], 
+    mdb.models['guw_model'].parts['plate'].edges[102], 
+    mdb.models['guw_model'].parts['plate'].edges[103], 
+    mdb.models['guw_model'].parts['plate'].edges[104], 
+    mdb.models['guw_model'].parts['plate'].edges[105]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(0, 
+    0.0487499982118607), point2=(0.0418750010430813, 0.151250004768372))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[21], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+del mdb.models['guw_model'].sketches['__profile__']
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells[4], edges=
+    [mdb.models['guw_model'].parts['plate'].edges[0], 
+    mdb.models['guw_model'].parts['plate'].edges[8], 
+    mdb.models['guw_model'].parts['plate'].edges[18], 
+    mdb.models['guw_model'].parts['plate'].edges[82], 
+    mdb.models['guw_model'].parts['plate'].edges[138], 
+    mdb.models['guw_model'].parts['plate'].edges[139], 
+    mdb.models['guw_model'].parts['plate'].edges[140], 
+    mdb.models['guw_model'].parts['plate'].edges[141]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.141874998807907, 0.0450000017881393), point2=(0.165000006556511, 
+    0.0918750017881393))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[18], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+del mdb.models['guw_model'].sketches['__profile__']
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells[3], edges=
+    [mdb.models['guw_model'].parts['plate'].edges[0], 
+    mdb.models['guw_model'].parts['plate'].edges[11], 
+    mdb.models['guw_model'].parts['plate'].edges[12], 
+    mdb.models['guw_model'].parts['plate'].edges[13], 
+    mdb.models['guw_model'].parts['plate'].edges[14], 
+    mdb.models['guw_model'].parts['plate'].edges[15], 
+    mdb.models['guw_model'].parts['plate'].edges[16], 
+    mdb.models['guw_model'].parts['plate'].edges[17]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.141874998807907, 0.108125001192093), point2=(0.165000006556511, 
+    0.151250004768372))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[6], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+del mdb.models['guw_model'].sketches['__profile__']
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells[0], edges=
+    [mdb.models['guw_model'].parts['plate'].edges[0], 
+    mdb.models['guw_model'].parts['plate'].edges[5], 
+    mdb.models['guw_model'].parts['plate'].edges[6], 
+    mdb.models['guw_model'].parts['plate'].edges[7], 
+    mdb.models['guw_model'].parts['plate'].edges[8], 
+    mdb.models['guw_model'].parts['plate'].edges[9], 
+    mdb.models['guw_model'].parts['plate'].edges[10]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(0, 0), 
+    point2=(0.0274999998509884, 0.0324999988079071))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[26], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+del mdb.models['guw_model'].sketches['__profile__']
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells[4], edges=
+    [mdb.models['guw_model'].parts['plate'].edges[0], 
+    mdb.models['guw_model'].parts['plate'].edges[111], 
+    mdb.models['guw_model'].parts['plate'].edges[112], 
+    mdb.models['guw_model'].parts['plate'].edges[113], 
+    mdb.models['guw_model'].parts['plate'].edges[114], 
+    mdb.models['guw_model'].parts['plate'].edges[115]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.0418750010430813, 0.0487499982118607), point2=(0.0581250004470348, 
+    0.0918750017881393))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[29], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+del mdb.models['guw_model'].sketches['__profile__']
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells[7], edges=
+    [mdb.models['guw_model'].parts['plate'].edges[0], 
+    mdb.models['guw_model'].parts['plate'].edges[88], 
+    mdb.models['guw_model'].parts['plate'].edges[91], 
+    mdb.models['guw_model'].parts['plate'].edges[114], 
+    mdb.models['guw_model'].parts['plate'].edges[115], 
+    mdb.models['guw_model'].parts['plate'].edges[116]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.0418750010430813, 0.108125001192093), point2=(0.0581250004470348, 
+    0.151250004768372))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[35], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+del mdb.models['guw_model'].sketches['__profile__']
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells[13], edges=
+    [mdb.models['guw_model'].parts['plate'].edges[0], 
+    mdb.models['guw_model'].parts['plate'].edges[100], 
+    mdb.models['guw_model'].parts['plate'].edges[134], 
+    mdb.models['guw_model'].parts['plate'].edges[135], 
+    mdb.models['guw_model'].parts['plate'].edges[136], 
+    mdb.models['guw_model'].parts['plate'].edges[137]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.083125002682209, 0.0487499982118607), point2=(0.116875000298023, 
+    0.0649999976158142))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[62], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+#* Feature creation failed.
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.083125002682209, 0.135000005364418), point2=(0.116875000298023, 
+    0.151250004768372))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[75], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+#* Feature creation failed.
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.135000005364418, 0), point2=(0.165000006556511, 0.0149999996647239))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[47], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+#* Feature creation failed.
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(0, 
+    0.0324999988079071), point2=(0.0125000001862645, 0.0487499982118607))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[11], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+del mdb.models['guw_model'].sketches['__profile__']
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells[2], edges=
+    [mdb.models['guw_model'].parts['plate'].edges[0], 
+    mdb.models['guw_model'].parts['plate'].edges[37], 
+    mdb.models['guw_model'].parts['plate'].edges[45], 
+    mdb.models['guw_model'].parts['plate'].edges[47], 
+    mdb.models['guw_model'].parts['plate'].edges[48]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.0581250004470348, 0.0487499982118607), point2=(0.0668750032782555, 
+    0.0649999976158142))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[11], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+#* Feature creation failed.
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.0581250004470348, 0.135000005364418), point2=(0.0668750032782555, 
+    0.151250004768372))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[7], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+#* Feature creation failed.
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.133125007152557, 0.0487499982118607), point2=(0.141874998807907, 
+    0.0649999976158142))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[50], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+del mdb.models['guw_model'].sketches['__profile__']
+mdb.models['guw_model'].parts['plate'].PartitionCellByExtrudeEdge(cells=
+    mdb.models['guw_model'].parts['plate'].cells[11], edges=
+    [mdb.models['guw_model'].parts['plate'].edges[0], 
+    mdb.models['guw_model'].parts['plate'].edges[89], 
+    mdb.models['guw_model'].parts['plate'].edges[166], 
+    mdb.models['guw_model'].parts['plate'].edges[167], 
+    mdb.models['guw_model'].parts['plate'].edges[168], 
+    mdb.models['guw_model'].parts['plate'].edges[169]], line=
+    mdb.models['guw_model'].parts['plate'].datums[4], sense=REVERSE)
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.133125007152557, 0.135000005364418), point2=(0.141874998807907, 
+    0.151250004768372))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[26], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+#* Feature creation failed.
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.158124998211861, 0.0918750017881393), point2=(0.165000006556511, 
+    0.108125001192093))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[34], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+#* Feature creation failed.
+mdb.models['guw_model'].ConstrainedSketch(gridSpacing=0.08, name='__profile__', 
+    sheetSize=3.25, transform=
+    mdb.models['guw_model'].parts['plate'].MakeSketchTransform(
+    sketchPlane=mdb.models['guw_model'].parts['plate'].datums[2], 
+    sketchPlaneSide=SIDE1, 
+    sketchUpEdge=mdb.models['guw_model'].parts['plate'].datums[3], 
+    sketchOrientation=RIGHT, origin=(0.0, 0.0, 0.0)))
+mdb.models['guw_model'].parts['plate'].projectReferencesOntoSketch(filter=
+    COPLANAR_EDGES, sketch=mdb.models['guw_model'].sketches['__profile__'])
+mdb.models['guw_model'].sketches['__profile__'].rectangle(point1=(
+    0.135000005364418, 0.0450000017881393), point2=(0.141874998807907, 
+    0.0487499982118607))
+mdb.models['guw_model'].parts['plate'].PartitionFaceBySketch(faces=
+    mdb.models['guw_model'].parts['plate'].faces[3], sketch=
+    mdb.models['guw_model'].sketches['__profile__'])
+#* Feature creation failed.
+mdb.models['guw_model'].Material(name='AluminumAlloy1100')
+mdb.models['guw_model'].materials['AluminumAlloy1100'].Density(table=((2710.0, 
+    ), ))
+mdb.models['guw_model'].materials['AluminumAlloy1100'].Elastic(table=((
+    69000000000.0, 0.33), ))
+mdb.models['guw_model'].HomogeneousSolidSection(material='AluminumAlloy1100', 
+    name='plate-material_continuum_section_homogenous_AluminumAlloy1100', 
+    thickness=None)
+mdb.models['guw_model'].parts['plate'].SectionAssignment(offset=0.0, 
+    offsetField='', offsetType=MIDDLE_SURFACE, region=
+    mdb.models['guw_model'].parts['plate'].sets['plate-material'], sectionName=
+    'plate-material_continuum_section_homogenous_AluminumAlloy1100', 
+    thicknessAssignment=FROM_SECTION)
+mdb.models['guw_model'].parts['plate'].setMeshControls(regions=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#1fffff ]', ), ), technique=STRUCTURED)
+mdb.models['guw_model'].parts['plate'].setMeshControls(algorithm=MEDIAL_AXIS, 
+    regions=mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(
+    mask=('[#20000000 ]', ), ))
+mdb.models['guw_model'].parts['plate'].setMeshControls(algorithm=MEDIAL_AXIS, 
+    regions=mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(
+    mask=('[#2000000 ]', ), ))
+mdb.models['guw_model'].parts['plate'].setMeshControls(algorithm=MEDIAL_AXIS, 
+    regions=mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(
+    mask=('[#1000000 ]', ), ))
+mdb.models['guw_model'].parts['plate'].setMeshControls(algorithm=MEDIAL_AXIS, 
+    regions=mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(
+    mask=('[#800000 ]', ), ))
+mdb.models['guw_model'].parts['plate'].setMeshControls(algorithm=MEDIAL_AXIS, 
+    regions=mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(
+    mask=('[#400000 ]', ), ))
+mdb.models['guw_model'].parts['plate'].setMeshControls(algorithm=MEDIAL_AXIS, 
+    regions=mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(
+    mask=('[#200000 ]', ), ))
+mdb.models['guw_model'].parts['plate'].setMeshControls(algorithm=
+    ADVANCING_FRONT, regions=
+    mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(mask=(
+    '[#40000000 #1 ]', ), ), technique=SWEEP)
+mdb.models['guw_model'].parts['plate'].setMeshControls(algorithm=MEDIAL_AXIS, 
+    regions=mdb.models['guw_model'].parts['plate'].cells.getSequenceFromMask(
+    mask=('[#9c000000 ]', ), ), technique=SWEEP)
+mdb.models['guw_model'].parts['plate'].seedPart(deviationFactor=0.1, 
+    minSizeFactor=0.1, size=0.00062428554099148938)
+mdb.models['guw_model'].parts['plate'].seedEdgeBySize(edges=
+    [mdb.models['guw_model'].parts['plate'].edges[1], 
+    mdb.models['guw_model'].parts['plate'].edges[3], 
+    mdb.models['guw_model'].parts['plate'].edges[5], 
+    mdb.models['guw_model'].parts['plate'].edges[15], 
+    mdb.models['guw_model'].parts['plate'].edges[17], 
+    mdb.models['guw_model'].parts['plate'].edges[23], 
+    mdb.models['guw_model'].parts['plate'].edges[29], 
+    mdb.models['guw_model'].parts['plate'].edges[31], 
+    mdb.models['guw_model'].parts['plate'].edges[38], 
+    mdb.models['guw_model'].parts['plate'].edges[43], 
+    mdb.models['guw_model'].parts['plate'].edges[45], 
+    mdb.models['guw_model'].parts['plate'].edges[53], 
+    mdb.models['guw_model'].parts['plate'].edges[58], 
+    mdb.models['guw_model'].parts['plate'].edges[60], 
+    mdb.models['guw_model'].parts['plate'].edges[67], 
+    mdb.models['guw_model'].parts['plate'].edges[69], 
+    mdb.models['guw_model'].parts['plate'].edges[71], 
+    mdb.models['guw_model'].parts['plate'].edges[73], 
+    mdb.models['guw_model'].parts['plate'].edges[85], 
+    mdb.models['guw_model'].parts['plate'].edges[88], 
+    mdb.models['guw_model'].parts['plate'].edges[97], 
+    mdb.models['guw_model'].parts['plate'].edges[98], 
+    mdb.models['guw_model'].parts['plate'].edges[100], 
+    mdb.models['guw_model'].parts['plate'].edges[102], 
+    mdb.models['guw_model'].parts['plate'].edges[111], 
+    mdb.models['guw_model'].parts['plate'].edges[120], 
+    mdb.models['guw_model'].parts['plate'].edges[122], 
+    mdb.models['guw_model'].parts['plate'].edges[124], 
+    mdb.models['guw_model'].parts['plate'].edges[125], 
+    mdb.models['guw_model'].parts['plate'].edges[142], 
+    mdb.models['guw_model'].parts['plate'].edges[155], 
+    mdb.models['guw_model'].parts['plate'].edges[157], 
+    mdb.models['guw_model'].parts['plate'].edges[169], 
+    mdb.models['guw_model'].parts['plate'].edges[177], 
+    mdb.models['guw_model'].parts['plate'].edges[178], 
+    mdb.models['guw_model'].parts['plate'].edges[179], 
+    mdb.models['guw_model'].parts['plate'].edges[181], 
+    mdb.models['guw_model'].parts['plate'].edges[184], 
+    mdb.models['guw_model'].parts['plate'].edges[185], 
+    mdb.models['guw_model'].parts['plate'].edges[186], 
+    mdb.models['guw_model'].parts['plate'].edges[187], 
+    mdb.models['guw_model'].parts['plate'].edges[189], 
+    mdb.models['guw_model'].parts['plate'].edges[212], 
+    mdb.models['guw_model'].parts['plate'].edges[213], 
+    mdb.models['guw_model'].parts['plate'].edges[214], 
+    mdb.models['guw_model'].parts['plate'].edges[215], 
+    mdb.models['guw_model'].parts['plate'].edges[217], 
+    mdb.models['guw_model'].parts['plate'].edges[219], 
+    mdb.models['guw_model'].parts['plate'].edges[220], 
+    mdb.models['guw_model'].parts['plate'].edges[221], 
+    mdb.models['guw_model'].parts['plate'].edges[222], 
+    mdb.models['guw_model'].parts['plate'].edges[223], 
+    mdb.models['guw_model'].parts['plate'].edges[224], 
+    mdb.models['guw_model'].parts['plate'].edges[225], 
+    mdb.models['guw_model'].parts['plate'].edges[252], 
+    mdb.models['guw_model'].parts['plate'].edges[253], 
+    mdb.models['guw_model'].parts['plate'].edges[254], 
+    mdb.models['guw_model'].parts['plate'].edges[255], 
+    mdb.models['guw_model'].parts['plate'].edges[257], 
+    mdb.models['guw_model'].parts['plate'].edges[342], 
+    mdb.models['guw_model'].parts['plate'].edges[344], 
+    mdb.models['guw_model'].parts['plate'].edges[348], 
+    mdb.models['guw_model'].parts['plate'].edges[350], 
+    mdb.models['guw_model'].parts['plate'].edges[352], 
+    mdb.models['guw_model'].parts['plate'].edges[358], 
+    mdb.models['guw_model'].parts['plate'].edges[359], 
+    mdb.models['guw_model'].parts['plate'].edges[361], 
+    mdb.models['guw_model'].parts['plate'].edges[366], 
+    mdb.models['guw_model'].parts['plate'].edges[368], 
+    mdb.models['guw_model'].parts['plate'].edges[370], 
+    mdb.models['guw_model'].parts['plate'].edges[374], 
+    mdb.models['guw_model'].parts['plate'].edges[375]], size=0.00075)
+mdb.models['guw_model'].parts['plate'].setElementType(elemTypes=(ElemType(
+    elemCode=C3D8R, elemLibrary=EXPLICIT, secondOrderAccuracy=OFF, 
+    distortionControl=DEFAULT), ElemType(elemCode=C3D6, elemLibrary=EXPLICIT), 
+    ElemType(elemCode=C3D4, elemLibrary=EXPLICIT)), regions=(
+    mdb.models['guw_model'].parts['plate'].cells, ))
+mdb.models['guw_model'].parts['plate'].generateMesh()
+del mdb.models['guw_model'].parts['reference_plate']
+mdb.models['guw_model'].rootAssembly.DatumCsysByDefault(CARTESIAN)
+mdb.models['guw_model'].rootAssembly.Instance(dependent=ON, name='plate', part=
+    mdb.models['guw_model'].parts['plate'])
+mdb.models['guw_model'].ExplicitDynamicsStep(description='', maxIncrement=
+    1.38888888888889e-07, name='load_case_0_control_step', nlgeom=OFF, 
+    previous='Initial', timePeriod=0.00025)
+del mdb.models['guw_model'].fieldOutputRequests['F-Output-1']
+mdb.models['guw_model'].HistoryOutputRequest(createStepName=
+    'load_case_0_control_step', frequency=1, name='history_transducer_0_top', 
+    rebar=EXCLUDE, region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_01_top']
+    , sectionPoints=DEFAULT, variables=('U1', 'U2', 'U3'))
+mdb.models['guw_model'].HistoryOutputRequest(createStepName=
+    'load_case_0_control_step', frequency=1, name='history_transducer_0_bottom'
+    , rebar=EXCLUDE, region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_01_bottom']
+    , sectionPoints=DEFAULT, variables=('U1', 'U2', 'U3'))
+mdb.models['guw_model'].HistoryOutputRequest(createStepName=
+    'load_case_0_control_step', frequency=1, name='history_transducer_1_top', 
+    rebar=EXCLUDE, region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_02_top']
+    , sectionPoints=DEFAULT, variables=('U1', 'U2', 'U3'))
+mdb.models['guw_model'].HistoryOutputRequest(createStepName=
+    'load_case_0_control_step', frequency=1, name='history_transducer_1_bottom'
+    , rebar=EXCLUDE, region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_02_bottom']
+    , sectionPoints=DEFAULT, variables=('U1', 'U2', 'U3'))
+mdb.models['guw_model'].HistoryOutputRequest(createStepName=
+    'load_case_0_control_step', frequency=1, name='history_transducer_2_top', 
+    rebar=EXCLUDE, region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_03_top']
+    , sectionPoints=DEFAULT, variables=('U1', 'U2', 'U3'))
+mdb.models['guw_model'].HistoryOutputRequest(createStepName=
+    'load_case_0_control_step', frequency=1, name='history_transducer_2_bottom'
+    , rebar=EXCLUDE, region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_03_bottom']
+    , sectionPoints=DEFAULT, variables=('U1', 'U2', 'U3'))
+mdb.models['guw_model'].HistoryOutputRequest(createStepName=
+    'load_case_0_control_step', frequency=1, name='history_transducer_3_top', 
+    rebar=EXCLUDE, region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_04_top']
+    , sectionPoints=DEFAULT, variables=('U1', 'U2', 'U3'))
+mdb.models['guw_model'].HistoryOutputRequest(createStepName=
+    'load_case_0_control_step', frequency=1, name='history_transducer_3_bottom'
+    , rebar=EXCLUDE, region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_04_bottom']
+    , sectionPoints=DEFAULT, variables=('U1', 'U2', 'U3'))
+mdb.models['guw_model'].HistoryOutputRequest(createStepName=
+    'load_case_0_control_step', frequency=1, name='history_transducer_4_top', 
+    rebar=EXCLUDE, region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_05_top']
+    , sectionPoints=DEFAULT, variables=('U1', 'U2', 'U3'))
+mdb.models['guw_model'].HistoryOutputRequest(createStepName=
+    'load_case_0_control_step', frequency=1, name='history_transducer_4_bottom'
+    , rebar=EXCLUDE, region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_05_bottom']
+    , sectionPoints=DEFAULT, variables=('U1', 'U2', 'U3'))
+mdb.models['guw_model'].HistoryOutputRequest(createStepName=
+    'load_case_0_control_step', frequency=1, name='history_transducer_5_top', 
+    rebar=EXCLUDE, region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_06_top']
+    , sectionPoints=DEFAULT, variables=('U1', 'U2', 'U3'))
+mdb.models['guw_model'].HistoryOutputRequest(createStepName=
+    'load_case_0_control_step', frequency=1, name='history_transducer_5_bottom'
+    , rebar=EXCLUDE, region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_06_bottom']
+    , sectionPoints=DEFAULT, variables=('U1', 'U2', 'U3'))
+mdb.models['guw_model'].TabularAmplitude(data=((0.0, 0.0), (
+    6.944444444444444e-08, 0.000210720042569967), (1.3888888888888888e-07, 
+    0.000833069425662322), (2.0833333333333333e-07, 0.00183781969500503), (
+    2.7777777777777776e-07, 0.00317693266714517), (3.4722222222222219e-07, 
+    0.00478456258621865), (4.1666666666666667e-07, 0.00657843591599772), (
+    4.8611111111111109e-07, 0.00846158595724399), (5.5555555555555552e-07, 
+    0.0103244135529394), (6.2499999999999995e-07, 0.0120470396471641), (
+    6.9444444444444437e-07, 0.0135019104802463), (7.638888888888888e-07, 
+    0.0145566118089895), (8.3333333333333333e-07, 0.0150768448035229), (
+    9.0277777777777776e-07, 0.0149295132494686), (9.7222222222222218e-07, 
+    0.0139858694232699), (1.0416666666666665e-06, 0.0121246645463581), (
+    1.111111111111111e-06, 0.00923524908554121), (1.1805555555555556e-06, 
+    0.00522056836591679), (1.2499999999999999e-06, 1.89759571538986e-17), (
+    1.3194444444444444e-06, -0.00648801849824808), (1.3888888888888887e-06, 
+    -0.014283620876071), (1.4583333333333333e-06, -0.023403447602933), (
+    1.5277777777777776e-06, -0.0338389269873728), (1.5972222222222221e-06, 
+    -0.0455549384751067), (1.6666666666666667e-06, -0.0584888892202554), (
+    1.736111111111111e-06, -0.0725502290618746), (1.8055555555555555e-06, 
+    -0.0876204226354028), (1.8749999999999998e-06, -0.103553390593274), (
+    1.9444444444444444e-06, -0.120176424896384), (2.0138888888888889e-06, 
+    -0.137291575968232), (2.083333333333333e-06, -0.154677502279009), (
+    2.1527777777777775e-06, -0.172091765751862), (2.2222222222222221e-06, 
+    -0.189273549361947), (2.2916666666666666e-06, -0.205946766533372), (
+    2.3611111111111111e-06, -0.221823525529131), (2.4305555555555552e-06, 
+    -0.236607906070061), (2.4999999999999998e-06, -0.25), (
+    2.5694444444444443e-06, -0.261700163018382), (2.6388888888888888e-06, 
+    -0.271413420402635), (2.708333333333333e-06, -0.278853966306167), (
+    2.7777777777777775e-06, -0.283749693698152), (2.847222222222222e-06, 
+    -0.285846690352682), (2.9166666666666666e-06, -0.284913635529207), (
+    2.9861111111111111e-06, -0.280746032133507), (3.0555555555555552e-06, 
+    -0.273170210216044), (3.1249999999999997e-06, -0.262047039647164), (
+    3.1944444444444443e-06, -0.247275292688113), (3.2638888888888888e-06, 
+    -0.228794600922638), (3.3333333333333333e-06, -0.206587955583268), (
+    3.4027777777777774e-06, -0.180683705644712), (3.472222222222222e-06, 
+    -0.151157014098732), (3.5416666666666665e-06, -0.118130739494686), (
+    3.611111111111111e-06, -0.0817757170429358), (3.6805555555555551e-06, 
+    -0.0423104212414982), (3.7499999999999997e-06, -5.35937719786114e-16), (
+    3.8194444444444442e-06, 0.0448453215061598), (3.8888888888888887e-06, 
+    0.0918724606239947), (3.9583333333333333e-06, 0.140688305607835), (
+    4.0277777777777778e-06, 0.190863129226937), (4.0972222222222223e-06, 
+    0.241934556095987), (4.166666666666666e-06, 0.293412044416732), (
+    4.2361111111111106e-06, 0.344781835428408), (4.3055555555555551e-06, 
+    0.395512316998426), (4.3749999999999996e-06, 0.445059741539383), (
+    4.4444444444444441e-06, 0.492874232902933), (4.5138888888888887e-06, 
+    0.538406012155484), (4.5833333333333332e-06, 0.581111768255231), (
+    4.6527777777777777e-06, 0.620461096683968), (4.7222222222222223e-06, 
+    0.655942927087756), (4.791666666666666e-06, 0.687071859982901), (
+    4.8611111111111105e-06, 0.713394332609573), (4.930555555555555e-06, 
+    0.734494535073363), (4.9999999999999996e-06, 0.75), (
+    5.0694444444444441e-06, 0.759586792021685), (5.1388888888888886e-06, 
+    0.762984227483076), (5.2083333333333332e-06, 0.759979059755696), (
+    5.2777777777777777e-06, 0.750419071423961), (5.3472222222222222e-06, 
+    0.734216021284788), (5.4166666666666659e-06, 0.711347901505429), (
+    5.4861111111111104e-06, 0.68186046832076), (5.555555555555555e-06, 
+    0.645868018222594), (5.6249999999999995e-06, 0.603553390593274), (
+    5.694444444444444e-06, 0.555167187051137), (5.7638888888888886e-06, 
+    0.501026207289172), (5.8333333333333331e-06, 0.441511110779745), (
+    5.9027777777777776e-06, 0.377063323265593), (5.9722222222222222e-06, 
+    0.308181216338297), (6.0416666666666659e-06, 0.235415597499589), (
+    6.1111111111111104e-06, 0.159364556790861), (6.1805555555555549e-06, 
+    0.0806677242494119), (6.2499999999999995e-06, 1.11433450186081e-15), (
+    6.319444444444444e-06, -0.0819351743817402), (6.3888888888888885e-06, 
+    -0.164412928581389), (6.458333333333333e-06, -0.246694380556162), (
+    6.5277777777777776e-06, -0.328034273902398), (6.5972222222222221e-06, 
+    -0.40768874849123), (6.6666666666666666e-06, -0.484923155196476), (
+    6.7361111111111103e-06, -0.559019824542056), (6.8055555555555549e-06, 
+    -0.629285699206292), (6.8749999999999994e-06, -0.695059741539383), (
+    6.9444444444444439e-06, -0.755720029566038), (7.0138888888888885e-06, 
+    -0.810690458331747), (7.083333333333333e-06, -0.85944696786844), (
+    7.1527777777777775e-06, -0.901523224450431), (7.2222222222222221e-06, 
+    -0.936515688118763), (7.2916666666666666e-06, -0.964088006594063), (
+    7.3611111111111103e-06, -0.983974683586545), (7.4305555555555548e-06, 
+    -0.995983978049175), (7.4999999999999993e-06, -1.0), (
+    7.5694444444444439e-06, -0.995983978049176), (7.6388888888888884e-06, 
+    -0.983974683586546), (7.7083333333333321e-06, -0.964088006594064), (
+    7.7777777777777775e-06, -0.936515688118763), (7.8472222222222212e-06, 
+    -0.901523224450433), (7.9166666666666665e-06, -0.859446967868441), (
+    7.9861111111111102e-06, -0.810690458331749), (8.0555555555555556e-06, 
+    -0.755720029566039), (8.1249999999999993e-06, -0.695059741539384), (
+    8.1944444444444447e-06, -0.629285699206294), (8.2638888888888884e-06, 
+    -0.559019824542058), (8.333333333333332e-06, -0.48492315519648), (
+    8.4027777777777774e-06, -0.407688748491232), (8.4722222222222211e-06, 
+    -0.3280342739024), (8.5416666666666665e-06, -0.246694380556164), (
+    8.6111111111111102e-06, -0.164412928581391), (8.6805555555555555e-06, 
+    -0.0819351743817417), (8.7499999999999992e-06, -2.0572773508812e-15), (
+    8.8194444444444446e-06, 0.0806677242494096), (8.8888888888888883e-06, 
+    0.159364556790857), (8.958333333333332e-06, 0.235415597499586), (
+    9.0277777777777774e-06, 0.308181216338294), (9.097222222222221e-06, 
+    0.377063323265591), (9.1666666666666664e-06, 0.441511110779744), (
+    9.2361111111111101e-06, 0.50102620728917), (9.3055555555555555e-06, 
+    0.555167187051136), (9.3749999999999992e-06, 0.603553390593272), (
+    9.4444444444444446e-06, 0.645868018222593), (9.5138888888888882e-06, 
+    0.681860468320759), (9.5833333333333319e-06, 0.711347901505428), (
+    9.6527777777777773e-06, 0.734216021284788), (9.722222222222221e-06, 
+    0.75041907142396), (9.7916666666666664e-06, 0.759979059755696), (
+    9.8611111111111101e-06, 0.762984227483077), (9.9305555555555554e-06, 
+    0.759586792021685), (9.9999999999999991e-06, 0.75), (
+    1.0069444444444445e-05, 0.734494535073364), (1.0138888888888888e-05, 
+    0.713394332609574), (1.0208333333333332e-05, 0.687071859982903), (
+    1.0277777777777777e-05, 0.655942927087758), (1.0347222222222221e-05, 
+    0.62046109668397), (1.0416666666666666e-05, 0.581111768255232), (
+    1.048611111111111e-05, 0.538406012155486), (1.0555555555555555e-05, 
+    0.492874232902935), (1.0624999999999999e-05, 0.445059741539385), (
+    1.0694444444444444e-05, 0.395512316998427), (1.0763888888888888e-05, 
+    0.344781835428409), (1.0833333333333332e-05, 0.293412044416735), (
+    1.0902777777777777e-05, 0.241934556095989), (1.0972222222222221e-05, 
+    0.190863129226939), (1.1041666666666666e-05, 0.140688305607837), (
+    1.111111111111111e-05, 0.0918724606239962), (1.1180555555555555e-05, 
+    0.0448453215061616), (1.1249999999999999e-05, 1.16372394950828e-15), (
+    1.1319444444444444e-05, -0.0423104212414966), (1.1388888888888888e-05, 
+    -0.0817757170429343), (1.1458333333333332e-05, -0.118130739494684), (
+    1.1527777777777777e-05, -0.151157014098731), (1.1597222222222221e-05, 
+    -0.180683705644711), (1.1666666666666666e-05, -0.206587955583267), (
+    1.173611111111111e-05, -0.228794600922637), (1.1805555555555555e-05, 
+    -0.247275292688113), (1.1874999999999999e-05, -0.262047039647164), (
+    1.1944444444444444e-05, -0.273170210216044), (1.2013888888888888e-05, 
+    -0.280746032133508), (1.2083333333333332e-05, -0.284913635529207), (
+    1.2152777777777777e-05, -0.285846690352682), (1.2222222222222221e-05, 
+    -0.283749693698152), (1.2291666666666666e-05, -0.278853966306167), (
+    1.236111111111111e-05, -0.271413420402635), (1.2430555555555555e-05, 
+    -0.261700163018382), (1.2499999999999999e-05, -0.25), (
+    1.2569444444444444e-05, -0.236607906070061), (1.2638888888888888e-05, 
+    -0.221823525529132), (1.2708333333333332e-05, -0.205946766533373), (
+    1.2777777777777777e-05, -0.189273549361948), (1.2847222222222221e-05, 
+    -0.172091765751863), (1.2916666666666666e-05, -0.15467750227901), (
+    1.298611111111111e-05, -0.137291575968233), (1.3055555555555555e-05, 
+    -0.120176424896385), (1.3124999999999999e-05, -0.103553390593275), (
+    1.3194444444444444e-05, -0.0876204226354034), (1.3263888888888888e-05, 
+    -0.0725502290618753), (1.3333333333333333e-05, -0.0584888892202559), (
+    1.3402777777777777e-05, -0.0455549384751073), (1.3472222222222221e-05, 
+    -0.0338389269873732), (1.3541666666666666e-05, -0.0234034476029335), (
+    1.361111111111111e-05, -0.0142836208760712), (1.3680555555555555e-05, 
+    -0.00648801849824842), (1.3749999999999999e-05, -1.64113024262873e-16), (
+    1.3819444444444444e-05, 0.00522056836591676), (1.3888888888888888e-05, 
+    0.0092352490855411), (1.3958333333333333e-05, 0.0121246645463581), (
+    1.4027777777777777e-05, 0.0139858694232699), (1.4097222222222221e-05, 
+    0.0149295132494685), (1.4166666666666666e-05, 0.015076844803523), (
+    1.423611111111111e-05, 0.0145566118089896), (1.4305555555555555e-05, 
+    0.0135019104802464), (1.4374999999999999e-05, 0.0120470396471642), (
+    1.4444444444444444e-05, 0.0103244135529395), (1.4513888888888888e-05, 
+    0.00846158595724411), (1.4583333333333333e-05, 0.00657843591599777), (
+    1.4652777777777777e-05, 0.00478456258621874), (1.4722222222222221e-05, 
+    0.00317693266714525), (1.4791666666666666e-05, 0.00183781969500511), (
+    1.486111111111111e-05, 0.000833069425662387), (1.4930555555555555e-05, 
+    0.000210720042569991), (1.4999999999999999e-05, 1.02139947479913e-30), (
+    1.5069444444444444e-05, 0.0), (1.5138888888888888e-05, 0.0)), name=
+    'transducer_transducer_01_Burst', smooth=SOLVER_DEFAULT, timeSpan=STEP)
+mdb.models['guw_model'].ConcentratedForce(amplitude=
+    'transducer_transducer_01_Burst', cf3=1.0, createStepName=
+    'load_case_0_control_step', distributionType=UNIFORM, field='', localCsys=
+    None, name='transducer_01_top_Burst', region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_01_top'])
+mdb.models['guw_model'].TabularAmplitude(data=((0.0, 0.0), (
+    6.944444444444444e-08, 0.000210720042569967), (1.3888888888888888e-07, 
+    0.000833069425662322), (2.0833333333333333e-07, 0.00183781969500503), (
+    2.7777777777777776e-07, 0.00317693266714517), (3.4722222222222219e-07, 
+    0.00478456258621865), (4.1666666666666667e-07, 0.00657843591599772), (
+    4.8611111111111109e-07, 0.00846158595724399), (5.5555555555555552e-07, 
+    0.0103244135529394), (6.2499999999999995e-07, 0.0120470396471641), (
+    6.9444444444444437e-07, 0.0135019104802463), (7.638888888888888e-07, 
+    0.0145566118089895), (8.3333333333333333e-07, 0.0150768448035229), (
+    9.0277777777777776e-07, 0.0149295132494686), (9.7222222222222218e-07, 
+    0.0139858694232699), (1.0416666666666665e-06, 0.0121246645463581), (
+    1.111111111111111e-06, 0.00923524908554121), (1.1805555555555556e-06, 
+    0.00522056836591679), (1.2499999999999999e-06, 1.89759571538986e-17), (
+    1.3194444444444444e-06, -0.00648801849824808), (1.3888888888888887e-06, 
+    -0.014283620876071), (1.4583333333333333e-06, -0.023403447602933), (
+    1.5277777777777776e-06, -0.0338389269873728), (1.5972222222222221e-06, 
+    -0.0455549384751067), (1.6666666666666667e-06, -0.0584888892202554), (
+    1.736111111111111e-06, -0.0725502290618746), (1.8055555555555555e-06, 
+    -0.0876204226354028), (1.8749999999999998e-06, -0.103553390593274), (
+    1.9444444444444444e-06, -0.120176424896384), (2.0138888888888889e-06, 
+    -0.137291575968232), (2.083333333333333e-06, -0.154677502279009), (
+    2.1527777777777775e-06, -0.172091765751862), (2.2222222222222221e-06, 
+    -0.189273549361947), (2.2916666666666666e-06, -0.205946766533372), (
+    2.3611111111111111e-06, -0.221823525529131), (2.4305555555555552e-06, 
+    -0.236607906070061), (2.4999999999999998e-06, -0.25), (
+    2.5694444444444443e-06, -0.261700163018382), (2.6388888888888888e-06, 
+    -0.271413420402635), (2.708333333333333e-06, -0.278853966306167), (
+    2.7777777777777775e-06, -0.283749693698152), (2.847222222222222e-06, 
+    -0.285846690352682), (2.9166666666666666e-06, -0.284913635529207), (
+    2.9861111111111111e-06, -0.280746032133507), (3.0555555555555552e-06, 
+    -0.273170210216044), (3.1249999999999997e-06, -0.262047039647164), (
+    3.1944444444444443e-06, -0.247275292688113), (3.2638888888888888e-06, 
+    -0.228794600922638), (3.3333333333333333e-06, -0.206587955583268), (
+    3.4027777777777774e-06, -0.180683705644712), (3.472222222222222e-06, 
+    -0.151157014098732), (3.5416666666666665e-06, -0.118130739494686), (
+    3.611111111111111e-06, -0.0817757170429358), (3.6805555555555551e-06, 
+    -0.0423104212414982), (3.7499999999999997e-06, -5.35937719786114e-16), (
+    3.8194444444444442e-06, 0.0448453215061598), (3.8888888888888887e-06, 
+    0.0918724606239947), (3.9583333333333333e-06, 0.140688305607835), (
+    4.0277777777777778e-06, 0.190863129226937), (4.0972222222222223e-06, 
+    0.241934556095987), (4.166666666666666e-06, 0.293412044416732), (
+    4.2361111111111106e-06, 0.344781835428408), (4.3055555555555551e-06, 
+    0.395512316998426), (4.3749999999999996e-06, 0.445059741539383), (
+    4.4444444444444441e-06, 0.492874232902933), (4.5138888888888887e-06, 
+    0.538406012155484), (4.5833333333333332e-06, 0.581111768255231), (
+    4.6527777777777777e-06, 0.620461096683968), (4.7222222222222223e-06, 
+    0.655942927087756), (4.791666666666666e-06, 0.687071859982901), (
+    4.8611111111111105e-06, 0.713394332609573), (4.930555555555555e-06, 
+    0.734494535073363), (4.9999999999999996e-06, 0.75), (
+    5.0694444444444441e-06, 0.759586792021685), (5.1388888888888886e-06, 
+    0.762984227483076), (5.2083333333333332e-06, 0.759979059755696), (
+    5.2777777777777777e-06, 0.750419071423961), (5.3472222222222222e-06, 
+    0.734216021284788), (5.4166666666666659e-06, 0.711347901505429), (
+    5.4861111111111104e-06, 0.68186046832076), (5.555555555555555e-06, 
+    0.645868018222594), (5.6249999999999995e-06, 0.603553390593274), (
+    5.694444444444444e-06, 0.555167187051137), (5.7638888888888886e-06, 
+    0.501026207289172), (5.8333333333333331e-06, 0.441511110779745), (
+    5.9027777777777776e-06, 0.377063323265593), (5.9722222222222222e-06, 
+    0.308181216338297), (6.0416666666666659e-06, 0.235415597499589), (
+    6.1111111111111104e-06, 0.159364556790861), (6.1805555555555549e-06, 
+    0.0806677242494119), (6.2499999999999995e-06, 1.11433450186081e-15), (
+    6.319444444444444e-06, -0.0819351743817402), (6.3888888888888885e-06, 
+    -0.164412928581389), (6.458333333333333e-06, -0.246694380556162), (
+    6.5277777777777776e-06, -0.328034273902398), (6.5972222222222221e-06, 
+    -0.40768874849123), (6.6666666666666666e-06, -0.484923155196476), (
+    6.7361111111111103e-06, -0.559019824542056), (6.8055555555555549e-06, 
+    -0.629285699206292), (6.8749999999999994e-06, -0.695059741539383), (
+    6.9444444444444439e-06, -0.755720029566038), (7.0138888888888885e-06, 
+    -0.810690458331747), (7.083333333333333e-06, -0.85944696786844), (
+    7.1527777777777775e-06, -0.901523224450431), (7.2222222222222221e-06, 
+    -0.936515688118763), (7.2916666666666666e-06, -0.964088006594063), (
+    7.3611111111111103e-06, -0.983974683586545), (7.4305555555555548e-06, 
+    -0.995983978049175), (7.4999999999999993e-06, -1.0), (
+    7.5694444444444439e-06, -0.995983978049176), (7.6388888888888884e-06, 
+    -0.983974683586546), (7.7083333333333321e-06, -0.964088006594064), (
+    7.7777777777777775e-06, -0.936515688118763), (7.8472222222222212e-06, 
+    -0.901523224450433), (7.9166666666666665e-06, -0.859446967868441), (
+    7.9861111111111102e-06, -0.810690458331749), (8.0555555555555556e-06, 
+    -0.755720029566039), (8.1249999999999993e-06, -0.695059741539384), (
+    8.1944444444444447e-06, -0.629285699206294), (8.2638888888888884e-06, 
+    -0.559019824542058), (8.333333333333332e-06, -0.48492315519648), (
+    8.4027777777777774e-06, -0.407688748491232), (8.4722222222222211e-06, 
+    -0.3280342739024), (8.5416666666666665e-06, -0.246694380556164), (
+    8.6111111111111102e-06, -0.164412928581391), (8.6805555555555555e-06, 
+    -0.0819351743817417), (8.7499999999999992e-06, -2.0572773508812e-15), (
+    8.8194444444444446e-06, 0.0806677242494096), (8.8888888888888883e-06, 
+    0.159364556790857), (8.958333333333332e-06, 0.235415597499586), (
+    9.0277777777777774e-06, 0.308181216338294), (9.097222222222221e-06, 
+    0.377063323265591), (9.1666666666666664e-06, 0.441511110779744), (
+    9.2361111111111101e-06, 0.50102620728917), (9.3055555555555555e-06, 
+    0.555167187051136), (9.3749999999999992e-06, 0.603553390593272), (
+    9.4444444444444446e-06, 0.645868018222593), (9.5138888888888882e-06, 
+    0.681860468320759), (9.5833333333333319e-06, 0.711347901505428), (
+    9.6527777777777773e-06, 0.734216021284788), (9.722222222222221e-06, 
+    0.75041907142396), (9.7916666666666664e-06, 0.759979059755696), (
+    9.8611111111111101e-06, 0.762984227483077), (9.9305555555555554e-06, 
+    0.759586792021685), (9.9999999999999991e-06, 0.75), (
+    1.0069444444444445e-05, 0.734494535073364), (1.0138888888888888e-05, 
+    0.713394332609574), (1.0208333333333332e-05, 0.687071859982903), (
+    1.0277777777777777e-05, 0.655942927087758), (1.0347222222222221e-05, 
+    0.62046109668397), (1.0416666666666666e-05, 0.581111768255232), (
+    1.048611111111111e-05, 0.538406012155486), (1.0555555555555555e-05, 
+    0.492874232902935), (1.0624999999999999e-05, 0.445059741539385), (
+    1.0694444444444444e-05, 0.395512316998427), (1.0763888888888888e-05, 
+    0.344781835428409), (1.0833333333333332e-05, 0.293412044416735), (
+    1.0902777777777777e-05, 0.241934556095989), (1.0972222222222221e-05, 
+    0.190863129226939), (1.1041666666666666e-05, 0.140688305607837), (
+    1.111111111111111e-05, 0.0918724606239962), (1.1180555555555555e-05, 
+    0.0448453215061616), (1.1249999999999999e-05, 1.16372394950828e-15), (
+    1.1319444444444444e-05, -0.0423104212414966), (1.1388888888888888e-05, 
+    -0.0817757170429343), (1.1458333333333332e-05, -0.118130739494684), (
+    1.1527777777777777e-05, -0.151157014098731), (1.1597222222222221e-05, 
+    -0.180683705644711), (1.1666666666666666e-05, -0.206587955583267), (
+    1.173611111111111e-05, -0.228794600922637), (1.1805555555555555e-05, 
+    -0.247275292688113), (1.1874999999999999e-05, -0.262047039647164), (
+    1.1944444444444444e-05, -0.273170210216044), (1.2013888888888888e-05, 
+    -0.280746032133508), (1.2083333333333332e-05, -0.284913635529207), (
+    1.2152777777777777e-05, -0.285846690352682), (1.2222222222222221e-05, 
+    -0.283749693698152), (1.2291666666666666e-05, -0.278853966306167), (
+    1.236111111111111e-05, -0.271413420402635), (1.2430555555555555e-05, 
+    -0.261700163018382), (1.2499999999999999e-05, -0.25), (
+    1.2569444444444444e-05, -0.236607906070061), (1.2638888888888888e-05, 
+    -0.221823525529132), (1.2708333333333332e-05, -0.205946766533373), (
+    1.2777777777777777e-05, -0.189273549361948), (1.2847222222222221e-05, 
+    -0.172091765751863), (1.2916666666666666e-05, -0.15467750227901), (
+    1.298611111111111e-05, -0.137291575968233), (1.3055555555555555e-05, 
+    -0.120176424896385), (1.3124999999999999e-05, -0.103553390593275), (
+    1.3194444444444444e-05, -0.0876204226354034), (1.3263888888888888e-05, 
+    -0.0725502290618753), (1.3333333333333333e-05, -0.0584888892202559), (
+    1.3402777777777777e-05, -0.0455549384751073), (1.3472222222222221e-05, 
+    -0.0338389269873732), (1.3541666666666666e-05, -0.0234034476029335), (
+    1.361111111111111e-05, -0.0142836208760712), (1.3680555555555555e-05, 
+    -0.00648801849824842), (1.3749999999999999e-05, -1.64113024262873e-16), (
+    1.3819444444444444e-05, 0.00522056836591676), (1.3888888888888888e-05, 
+    0.0092352490855411), (1.3958333333333333e-05, 0.0121246645463581), (
+    1.4027777777777777e-05, 0.0139858694232699), (1.4097222222222221e-05, 
+    0.0149295132494685), (1.4166666666666666e-05, 0.015076844803523), (
+    1.423611111111111e-05, 0.0145566118089896), (1.4305555555555555e-05, 
+    0.0135019104802464), (1.4374999999999999e-05, 0.0120470396471642), (
+    1.4444444444444444e-05, 0.0103244135529395), (1.4513888888888888e-05, 
+    0.00846158595724411), (1.4583333333333333e-05, 0.00657843591599777), (
+    1.4652777777777777e-05, 0.00478456258621874), (1.4722222222222221e-05, 
+    0.00317693266714525), (1.4791666666666666e-05, 0.00183781969500511), (
+    1.486111111111111e-05, 0.000833069425662387), (1.4930555555555555e-05, 
+    0.000210720042569991), (1.4999999999999999e-05, 1.02139947479913e-30), (
+    1.5069444444444444e-05, 0.0), (1.5138888888888888e-05, 0.0)), name=
+    'transducer_transducer_02_Burst', smooth=SOLVER_DEFAULT, timeSpan=STEP)
+mdb.models['guw_model'].ConcentratedForce(amplitude=
+    'transducer_transducer_02_Burst', cf3=-1.0, createStepName=
+    'load_case_0_control_step', distributionType=UNIFORM, field='', localCsys=
+    None, name='transducer_02_bottom_Burst', region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_02_bottom'])
+mdb.models['guw_model'].TabularAmplitude(data=((0.0, 0.0), (
+    6.944444444444444e-08, 0.000210720042569967), (1.3888888888888888e-07, 
+    0.000833069425662322), (2.0833333333333333e-07, 0.00183781969500503), (
+    2.7777777777777776e-07, 0.00317693266714517), (3.4722222222222219e-07, 
+    0.00478456258621865), (4.1666666666666667e-07, 0.00657843591599772), (
+    4.8611111111111109e-07, 0.00846158595724399), (5.5555555555555552e-07, 
+    0.0103244135529394), (6.2499999999999995e-07, 0.0120470396471641), (
+    6.9444444444444437e-07, 0.0135019104802463), (7.638888888888888e-07, 
+    0.0145566118089895), (8.3333333333333333e-07, 0.0150768448035229), (
+    9.0277777777777776e-07, 0.0149295132494686), (9.7222222222222218e-07, 
+    0.0139858694232699), (1.0416666666666665e-06, 0.0121246645463581), (
+    1.111111111111111e-06, 0.00923524908554121), (1.1805555555555556e-06, 
+    0.00522056836591679), (1.2499999999999999e-06, 1.89759571538986e-17), (
+    1.3194444444444444e-06, -0.00648801849824808), (1.3888888888888887e-06, 
+    -0.014283620876071), (1.4583333333333333e-06, -0.023403447602933), (
+    1.5277777777777776e-06, -0.0338389269873728), (1.5972222222222221e-06, 
+    -0.0455549384751067), (1.6666666666666667e-06, -0.0584888892202554), (
+    1.736111111111111e-06, -0.0725502290618746), (1.8055555555555555e-06, 
+    -0.0876204226354028), (1.8749999999999998e-06, -0.103553390593274), (
+    1.9444444444444444e-06, -0.120176424896384), (2.0138888888888889e-06, 
+    -0.137291575968232), (2.083333333333333e-06, -0.154677502279009), (
+    2.1527777777777775e-06, -0.172091765751862), (2.2222222222222221e-06, 
+    -0.189273549361947), (2.2916666666666666e-06, -0.205946766533372), (
+    2.3611111111111111e-06, -0.221823525529131), (2.4305555555555552e-06, 
+    -0.236607906070061), (2.4999999999999998e-06, -0.25), (
+    2.5694444444444443e-06, -0.261700163018382), (2.6388888888888888e-06, 
+    -0.271413420402635), (2.708333333333333e-06, -0.278853966306167), (
+    2.7777777777777775e-06, -0.283749693698152), (2.847222222222222e-06, 
+    -0.285846690352682), (2.9166666666666666e-06, -0.284913635529207), (
+    2.9861111111111111e-06, -0.280746032133507), (3.0555555555555552e-06, 
+    -0.273170210216044), (3.1249999999999997e-06, -0.262047039647164), (
+    3.1944444444444443e-06, -0.247275292688113), (3.2638888888888888e-06, 
+    -0.228794600922638), (3.3333333333333333e-06, -0.206587955583268), (
+    3.4027777777777774e-06, -0.180683705644712), (3.472222222222222e-06, 
+    -0.151157014098732), (3.5416666666666665e-06, -0.118130739494686), (
+    3.611111111111111e-06, -0.0817757170429358), (3.6805555555555551e-06, 
+    -0.0423104212414982), (3.7499999999999997e-06, -5.35937719786114e-16), (
+    3.8194444444444442e-06, 0.0448453215061598), (3.8888888888888887e-06, 
+    0.0918724606239947), (3.9583333333333333e-06, 0.140688305607835), (
+    4.0277777777777778e-06, 0.190863129226937), (4.0972222222222223e-06, 
+    0.241934556095987), (4.166666666666666e-06, 0.293412044416732), (
+    4.2361111111111106e-06, 0.344781835428408), (4.3055555555555551e-06, 
+    0.395512316998426), (4.3749999999999996e-06, 0.445059741539383), (
+    4.4444444444444441e-06, 0.492874232902933), (4.5138888888888887e-06, 
+    0.538406012155484), (4.5833333333333332e-06, 0.581111768255231), (
+    4.6527777777777777e-06, 0.620461096683968), (4.7222222222222223e-06, 
+    0.655942927087756), (4.791666666666666e-06, 0.687071859982901), (
+    4.8611111111111105e-06, 0.713394332609573), (4.930555555555555e-06, 
+    0.734494535073363), (4.9999999999999996e-06, 0.75), (
+    5.0694444444444441e-06, 0.759586792021685), (5.1388888888888886e-06, 
+    0.762984227483076), (5.2083333333333332e-06, 0.759979059755696), (
+    5.2777777777777777e-06, 0.750419071423961), (5.3472222222222222e-06, 
+    0.734216021284788), (5.4166666666666659e-06, 0.711347901505429), (
+    5.4861111111111104e-06, 0.68186046832076), (5.555555555555555e-06, 
+    0.645868018222594), (5.6249999999999995e-06, 0.603553390593274), (
+    5.694444444444444e-06, 0.555167187051137), (5.7638888888888886e-06, 
+    0.501026207289172), (5.8333333333333331e-06, 0.441511110779745), (
+    5.9027777777777776e-06, 0.377063323265593), (5.9722222222222222e-06, 
+    0.308181216338297), (6.0416666666666659e-06, 0.235415597499589), (
+    6.1111111111111104e-06, 0.159364556790861), (6.1805555555555549e-06, 
+    0.0806677242494119), (6.2499999999999995e-06, 1.11433450186081e-15), (
+    6.319444444444444e-06, -0.0819351743817402), (6.3888888888888885e-06, 
+    -0.164412928581389), (6.458333333333333e-06, -0.246694380556162), (
+    6.5277777777777776e-06, -0.328034273902398), (6.5972222222222221e-06, 
+    -0.40768874849123), (6.6666666666666666e-06, -0.484923155196476), (
+    6.7361111111111103e-06, -0.559019824542056), (6.8055555555555549e-06, 
+    -0.629285699206292), (6.8749999999999994e-06, -0.695059741539383), (
+    6.9444444444444439e-06, -0.755720029566038), (7.0138888888888885e-06, 
+    -0.810690458331747), (7.083333333333333e-06, -0.85944696786844), (
+    7.1527777777777775e-06, -0.901523224450431), (7.2222222222222221e-06, 
+    -0.936515688118763), (7.2916666666666666e-06, -0.964088006594063), (
+    7.3611111111111103e-06, -0.983974683586545), (7.4305555555555548e-06, 
+    -0.995983978049175), (7.4999999999999993e-06, -1.0), (
+    7.5694444444444439e-06, -0.995983978049176), (7.6388888888888884e-06, 
+    -0.983974683586546), (7.7083333333333321e-06, -0.964088006594064), (
+    7.7777777777777775e-06, -0.936515688118763), (7.8472222222222212e-06, 
+    -0.901523224450433), (7.9166666666666665e-06, -0.859446967868441), (
+    7.9861111111111102e-06, -0.810690458331749), (8.0555555555555556e-06, 
+    -0.755720029566039), (8.1249999999999993e-06, -0.695059741539384), (
+    8.1944444444444447e-06, -0.629285699206294), (8.2638888888888884e-06, 
+    -0.559019824542058), (8.333333333333332e-06, -0.48492315519648), (
+    8.4027777777777774e-06, -0.407688748491232), (8.4722222222222211e-06, 
+    -0.3280342739024), (8.5416666666666665e-06, -0.246694380556164), (
+    8.6111111111111102e-06, -0.164412928581391), (8.6805555555555555e-06, 
+    -0.0819351743817417), (8.7499999999999992e-06, -2.0572773508812e-15), (
+    8.8194444444444446e-06, 0.0806677242494096), (8.8888888888888883e-06, 
+    0.159364556790857), (8.958333333333332e-06, 0.235415597499586), (
+    9.0277777777777774e-06, 0.308181216338294), (9.097222222222221e-06, 
+    0.377063323265591), (9.1666666666666664e-06, 0.441511110779744), (
+    9.2361111111111101e-06, 0.50102620728917), (9.3055555555555555e-06, 
+    0.555167187051136), (9.3749999999999992e-06, 0.603553390593272), (
+    9.4444444444444446e-06, 0.645868018222593), (9.5138888888888882e-06, 
+    0.681860468320759), (9.5833333333333319e-06, 0.711347901505428), (
+    9.6527777777777773e-06, 0.734216021284788), (9.722222222222221e-06, 
+    0.75041907142396), (9.7916666666666664e-06, 0.759979059755696), (
+    9.8611111111111101e-06, 0.762984227483077), (9.9305555555555554e-06, 
+    0.759586792021685), (9.9999999999999991e-06, 0.75), (
+    1.0069444444444445e-05, 0.734494535073364), (1.0138888888888888e-05, 
+    0.713394332609574), (1.0208333333333332e-05, 0.687071859982903), (
+    1.0277777777777777e-05, 0.655942927087758), (1.0347222222222221e-05, 
+    0.62046109668397), (1.0416666666666666e-05, 0.581111768255232), (
+    1.048611111111111e-05, 0.538406012155486), (1.0555555555555555e-05, 
+    0.492874232902935), (1.0624999999999999e-05, 0.445059741539385), (
+    1.0694444444444444e-05, 0.395512316998427), (1.0763888888888888e-05, 
+    0.344781835428409), (1.0833333333333332e-05, 0.293412044416735), (
+    1.0902777777777777e-05, 0.241934556095989), (1.0972222222222221e-05, 
+    0.190863129226939), (1.1041666666666666e-05, 0.140688305607837), (
+    1.111111111111111e-05, 0.0918724606239962), (1.1180555555555555e-05, 
+    0.0448453215061616), (1.1249999999999999e-05, 1.16372394950828e-15), (
+    1.1319444444444444e-05, -0.0423104212414966), (1.1388888888888888e-05, 
+    -0.0817757170429343), (1.1458333333333332e-05, -0.118130739494684), (
+    1.1527777777777777e-05, -0.151157014098731), (1.1597222222222221e-05, 
+    -0.180683705644711), (1.1666666666666666e-05, -0.206587955583267), (
+    1.173611111111111e-05, -0.228794600922637), (1.1805555555555555e-05, 
+    -0.247275292688113), (1.1874999999999999e-05, -0.262047039647164), (
+    1.1944444444444444e-05, -0.273170210216044), (1.2013888888888888e-05, 
+    -0.280746032133508), (1.2083333333333332e-05, -0.284913635529207), (
+    1.2152777777777777e-05, -0.285846690352682), (1.2222222222222221e-05, 
+    -0.283749693698152), (1.2291666666666666e-05, -0.278853966306167), (
+    1.236111111111111e-05, -0.271413420402635), (1.2430555555555555e-05, 
+    -0.261700163018382), (1.2499999999999999e-05, -0.25), (
+    1.2569444444444444e-05, -0.236607906070061), (1.2638888888888888e-05, 
+    -0.221823525529132), (1.2708333333333332e-05, -0.205946766533373), (
+    1.2777777777777777e-05, -0.189273549361948), (1.2847222222222221e-05, 
+    -0.172091765751863), (1.2916666666666666e-05, -0.15467750227901), (
+    1.298611111111111e-05, -0.137291575968233), (1.3055555555555555e-05, 
+    -0.120176424896385), (1.3124999999999999e-05, -0.103553390593275), (
+    1.3194444444444444e-05, -0.0876204226354034), (1.3263888888888888e-05, 
+    -0.0725502290618753), (1.3333333333333333e-05, -0.0584888892202559), (
+    1.3402777777777777e-05, -0.0455549384751073), (1.3472222222222221e-05, 
+    -0.0338389269873732), (1.3541666666666666e-05, -0.0234034476029335), (
+    1.361111111111111e-05, -0.0142836208760712), (1.3680555555555555e-05, 
+    -0.00648801849824842), (1.3749999999999999e-05, -1.64113024262873e-16), (
+    1.3819444444444444e-05, 0.00522056836591676), (1.3888888888888888e-05, 
+    0.0092352490855411), (1.3958333333333333e-05, 0.0121246645463581), (
+    1.4027777777777777e-05, 0.0139858694232699), (1.4097222222222221e-05, 
+    0.0149295132494685), (1.4166666666666666e-05, 0.015076844803523), (
+    1.423611111111111e-05, 0.0145566118089896), (1.4305555555555555e-05, 
+    0.0135019104802464), (1.4374999999999999e-05, 0.0120470396471642), (
+    1.4444444444444444e-05, 0.0103244135529395), (1.4513888888888888e-05, 
+    0.00846158595724411), (1.4583333333333333e-05, 0.00657843591599777), (
+    1.4652777777777777e-05, 0.00478456258621874), (1.4722222222222221e-05, 
+    0.00317693266714525), (1.4791666666666666e-05, 0.00183781969500511), (
+    1.486111111111111e-05, 0.000833069425662387), (1.4930555555555555e-05, 
+    0.000210720042569991), (1.4999999999999999e-05, 1.02139947479913e-30), (
+    1.5069444444444444e-05, 0.0), (1.5138888888888888e-05, 0.0)), name=
+    'transducer_transducer_03_Burst', smooth=SOLVER_DEFAULT, timeSpan=STEP)
+mdb.models['guw_model'].ConcentratedForce(amplitude=
+    'transducer_transducer_03_Burst', cf3=1.0, createStepName=
+    'load_case_0_control_step', distributionType=UNIFORM, field='', localCsys=
+    None, name='transducer_03_top_Burst', region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_03_top'])
+mdb.models['guw_model'].ConcentratedForce(amplitude=
+    'transducer_transducer_03_Burst', cf3=-1.0, createStepName=
+    'load_case_0_control_step', distributionType=UNIFORM, field='', localCsys=
+    None, name='transducer_03_bottom_Burst', region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_03_bottom'])
+mdb.models['guw_model'].TabularAmplitude(data=((0.0, 0.0), (
+    6.944444444444444e-08, 0.000210720042569967), (1.3888888888888888e-07, 
+    0.000833069425662322), (2.0833333333333333e-07, 0.00183781969500503), (
+    2.7777777777777776e-07, 0.00317693266714517), (3.4722222222222219e-07, 
+    0.00478456258621865), (4.1666666666666667e-07, 0.00657843591599772), (
+    4.8611111111111109e-07, 0.00846158595724399), (5.5555555555555552e-07, 
+    0.0103244135529394), (6.2499999999999995e-07, 0.0120470396471641), (
+    6.9444444444444437e-07, 0.0135019104802463), (7.638888888888888e-07, 
+    0.0145566118089895), (8.3333333333333333e-07, 0.0150768448035229), (
+    9.0277777777777776e-07, 0.0149295132494686), (9.7222222222222218e-07, 
+    0.0139858694232699), (1.0416666666666665e-06, 0.0121246645463581), (
+    1.111111111111111e-06, 0.00923524908554121), (1.1805555555555556e-06, 
+    0.00522056836591679), (1.2499999999999999e-06, 1.89759571538986e-17), (
+    1.3194444444444444e-06, -0.00648801849824808), (1.3888888888888887e-06, 
+    -0.014283620876071), (1.4583333333333333e-06, -0.023403447602933), (
+    1.5277777777777776e-06, -0.0338389269873728), (1.5972222222222221e-06, 
+    -0.0455549384751067), (1.6666666666666667e-06, -0.0584888892202554), (
+    1.736111111111111e-06, -0.0725502290618746), (1.8055555555555555e-06, 
+    -0.0876204226354028), (1.8749999999999998e-06, -0.103553390593274), (
+    1.9444444444444444e-06, -0.120176424896384), (2.0138888888888889e-06, 
+    -0.137291575968232), (2.083333333333333e-06, -0.154677502279009), (
+    2.1527777777777775e-06, -0.172091765751862), (2.2222222222222221e-06, 
+    -0.189273549361947), (2.2916666666666666e-06, -0.205946766533372), (
+    2.3611111111111111e-06, -0.221823525529131), (2.4305555555555552e-06, 
+    -0.236607906070061), (2.4999999999999998e-06, -0.25), (
+    2.5694444444444443e-06, -0.261700163018382), (2.6388888888888888e-06, 
+    -0.271413420402635), (2.708333333333333e-06, -0.278853966306167), (
+    2.7777777777777775e-06, -0.283749693698152), (2.847222222222222e-06, 
+    -0.285846690352682), (2.9166666666666666e-06, -0.284913635529207), (
+    2.9861111111111111e-06, -0.280746032133507), (3.0555555555555552e-06, 
+    -0.273170210216044), (3.1249999999999997e-06, -0.262047039647164), (
+    3.1944444444444443e-06, -0.247275292688113), (3.2638888888888888e-06, 
+    -0.228794600922638), (3.3333333333333333e-06, -0.206587955583268), (
+    3.4027777777777774e-06, -0.180683705644712), (3.472222222222222e-06, 
+    -0.151157014098732), (3.5416666666666665e-06, -0.118130739494686), (
+    3.611111111111111e-06, -0.0817757170429358), (3.6805555555555551e-06, 
+    -0.0423104212414982), (3.7499999999999997e-06, -5.35937719786114e-16), (
+    3.8194444444444442e-06, 0.0448453215061598), (3.8888888888888887e-06, 
+    0.0918724606239947), (3.9583333333333333e-06, 0.140688305607835), (
+    4.0277777777777778e-06, 0.190863129226937), (4.0972222222222223e-06, 
+    0.241934556095987), (4.166666666666666e-06, 0.293412044416732), (
+    4.2361111111111106e-06, 0.344781835428408), (4.3055555555555551e-06, 
+    0.395512316998426), (4.3749999999999996e-06, 0.445059741539383), (
+    4.4444444444444441e-06, 0.492874232902933), (4.5138888888888887e-06, 
+    0.538406012155484), (4.5833333333333332e-06, 0.581111768255231), (
+    4.6527777777777777e-06, 0.620461096683968), (4.7222222222222223e-06, 
+    0.655942927087756), (4.791666666666666e-06, 0.687071859982901), (
+    4.8611111111111105e-06, 0.713394332609573), (4.930555555555555e-06, 
+    0.734494535073363), (4.9999999999999996e-06, 0.75), (
+    5.0694444444444441e-06, 0.759586792021685), (5.1388888888888886e-06, 
+    0.762984227483076), (5.2083333333333332e-06, 0.759979059755696), (
+    5.2777777777777777e-06, 0.750419071423961), (5.3472222222222222e-06, 
+    0.734216021284788), (5.4166666666666659e-06, 0.711347901505429), (
+    5.4861111111111104e-06, 0.68186046832076), (5.555555555555555e-06, 
+    0.645868018222594), (5.6249999999999995e-06, 0.603553390593274), (
+    5.694444444444444e-06, 0.555167187051137), (5.7638888888888886e-06, 
+    0.501026207289172), (5.8333333333333331e-06, 0.441511110779745), (
+    5.9027777777777776e-06, 0.377063323265593), (5.9722222222222222e-06, 
+    0.308181216338297), (6.0416666666666659e-06, 0.235415597499589), (
+    6.1111111111111104e-06, 0.159364556790861), (6.1805555555555549e-06, 
+    0.0806677242494119), (6.2499999999999995e-06, 1.11433450186081e-15), (
+    6.319444444444444e-06, -0.0819351743817402), (6.3888888888888885e-06, 
+    -0.164412928581389), (6.458333333333333e-06, -0.246694380556162), (
+    6.5277777777777776e-06, -0.328034273902398), (6.5972222222222221e-06, 
+    -0.40768874849123), (6.6666666666666666e-06, -0.484923155196476), (
+    6.7361111111111103e-06, -0.559019824542056), (6.8055555555555549e-06, 
+    -0.629285699206292), (6.8749999999999994e-06, -0.695059741539383), (
+    6.9444444444444439e-06, -0.755720029566038), (7.0138888888888885e-06, 
+    -0.810690458331747), (7.083333333333333e-06, -0.85944696786844), (
+    7.1527777777777775e-06, -0.901523224450431), (7.2222222222222221e-06, 
+    -0.936515688118763), (7.2916666666666666e-06, -0.964088006594063), (
+    7.3611111111111103e-06, -0.983974683586545), (7.4305555555555548e-06, 
+    -0.995983978049175), (7.4999999999999993e-06, -1.0), (
+    7.5694444444444439e-06, -0.995983978049176), (7.6388888888888884e-06, 
+    -0.983974683586546), (7.7083333333333321e-06, -0.964088006594064), (
+    7.7777777777777775e-06, -0.936515688118763), (7.8472222222222212e-06, 
+    -0.901523224450433), (7.9166666666666665e-06, -0.859446967868441), (
+    7.9861111111111102e-06, -0.810690458331749), (8.0555555555555556e-06, 
+    -0.755720029566039), (8.1249999999999993e-06, -0.695059741539384), (
+    8.1944444444444447e-06, -0.629285699206294), (8.2638888888888884e-06, 
+    -0.559019824542058), (8.333333333333332e-06, -0.48492315519648), (
+    8.4027777777777774e-06, -0.407688748491232), (8.4722222222222211e-06, 
+    -0.3280342739024), (8.5416666666666665e-06, -0.246694380556164), (
+    8.6111111111111102e-06, -0.164412928581391), (8.6805555555555555e-06, 
+    -0.0819351743817417), (8.7499999999999992e-06, -2.0572773508812e-15), (
+    8.8194444444444446e-06, 0.0806677242494096), (8.8888888888888883e-06, 
+    0.159364556790857), (8.958333333333332e-06, 0.235415597499586), (
+    9.0277777777777774e-06, 0.308181216338294), (9.097222222222221e-06, 
+    0.377063323265591), (9.1666666666666664e-06, 0.441511110779744), (
+    9.2361111111111101e-06, 0.50102620728917), (9.3055555555555555e-06, 
+    0.555167187051136), (9.3749999999999992e-06, 0.603553390593272), (
+    9.4444444444444446e-06, 0.645868018222593), (9.5138888888888882e-06, 
+    0.681860468320759), (9.5833333333333319e-06, 0.711347901505428), (
+    9.6527777777777773e-06, 0.734216021284788), (9.722222222222221e-06, 
+    0.75041907142396), (9.7916666666666664e-06, 0.759979059755696), (
+    9.8611111111111101e-06, 0.762984227483077), (9.9305555555555554e-06, 
+    0.759586792021685), (9.9999999999999991e-06, 0.75), (
+    1.0069444444444445e-05, 0.734494535073364), (1.0138888888888888e-05, 
+    0.713394332609574), (1.0208333333333332e-05, 0.687071859982903), (
+    1.0277777777777777e-05, 0.655942927087758), (1.0347222222222221e-05, 
+    0.62046109668397), (1.0416666666666666e-05, 0.581111768255232), (
+    1.048611111111111e-05, 0.538406012155486), (1.0555555555555555e-05, 
+    0.492874232902935), (1.0624999999999999e-05, 0.445059741539385), (
+    1.0694444444444444e-05, 0.395512316998427), (1.0763888888888888e-05, 
+    0.344781835428409), (1.0833333333333332e-05, 0.293412044416735), (
+    1.0902777777777777e-05, 0.241934556095989), (1.0972222222222221e-05, 
+    0.190863129226939), (1.1041666666666666e-05, 0.140688305607837), (
+    1.111111111111111e-05, 0.0918724606239962), (1.1180555555555555e-05, 
+    0.0448453215061616), (1.1249999999999999e-05, 1.16372394950828e-15), (
+    1.1319444444444444e-05, -0.0423104212414966), (1.1388888888888888e-05, 
+    -0.0817757170429343), (1.1458333333333332e-05, -0.118130739494684), (
+    1.1527777777777777e-05, -0.151157014098731), (1.1597222222222221e-05, 
+    -0.180683705644711), (1.1666666666666666e-05, -0.206587955583267), (
+    1.173611111111111e-05, -0.228794600922637), (1.1805555555555555e-05, 
+    -0.247275292688113), (1.1874999999999999e-05, -0.262047039647164), (
+    1.1944444444444444e-05, -0.273170210216044), (1.2013888888888888e-05, 
+    -0.280746032133508), (1.2083333333333332e-05, -0.284913635529207), (
+    1.2152777777777777e-05, -0.285846690352682), (1.2222222222222221e-05, 
+    -0.283749693698152), (1.2291666666666666e-05, -0.278853966306167), (
+    1.236111111111111e-05, -0.271413420402635), (1.2430555555555555e-05, 
+    -0.261700163018382), (1.2499999999999999e-05, -0.25), (
+    1.2569444444444444e-05, -0.236607906070061), (1.2638888888888888e-05, 
+    -0.221823525529132), (1.2708333333333332e-05, -0.205946766533373), (
+    1.2777777777777777e-05, -0.189273549361948), (1.2847222222222221e-05, 
+    -0.172091765751863), (1.2916666666666666e-05, -0.15467750227901), (
+    1.298611111111111e-05, -0.137291575968233), (1.3055555555555555e-05, 
+    -0.120176424896385), (1.3124999999999999e-05, -0.103553390593275), (
+    1.3194444444444444e-05, -0.0876204226354034), (1.3263888888888888e-05, 
+    -0.0725502290618753), (1.3333333333333333e-05, -0.0584888892202559), (
+    1.3402777777777777e-05, -0.0455549384751073), (1.3472222222222221e-05, 
+    -0.0338389269873732), (1.3541666666666666e-05, -0.0234034476029335), (
+    1.361111111111111e-05, -0.0142836208760712), (1.3680555555555555e-05, 
+    -0.00648801849824842), (1.3749999999999999e-05, -1.64113024262873e-16), (
+    1.3819444444444444e-05, 0.00522056836591676), (1.3888888888888888e-05, 
+    0.0092352490855411), (1.3958333333333333e-05, 0.0121246645463581), (
+    1.4027777777777777e-05, 0.0139858694232699), (1.4097222222222221e-05, 
+    0.0149295132494685), (1.4166666666666666e-05, 0.015076844803523), (
+    1.423611111111111e-05, 0.0145566118089896), (1.4305555555555555e-05, 
+    0.0135019104802464), (1.4374999999999999e-05, 0.0120470396471642), (
+    1.4444444444444444e-05, 0.0103244135529395), (1.4513888888888888e-05, 
+    0.00846158595724411), (1.4583333333333333e-05, 0.00657843591599777), (
+    1.4652777777777777e-05, 0.00478456258621874), (1.4722222222222221e-05, 
+    0.00317693266714525), (1.4791666666666666e-05, 0.00183781969500511), (
+    1.486111111111111e-05, 0.000833069425662387), (1.4930555555555555e-05, 
+    0.000210720042569991), (1.4999999999999999e-05, 1.02139947479913e-30), (
+    1.5069444444444444e-05, 0.0), (1.5138888888888888e-05, 0.0)), name=
+    'transducer_transducer_04_Burst', smooth=SOLVER_DEFAULT, timeSpan=STEP)
+mdb.models['guw_model'].ConcentratedForce(amplitude=
+    'transducer_transducer_04_Burst', cf3=1.0, createStepName=
+    'load_case_0_control_step', distributionType=UNIFORM, field='', localCsys=
+    None, name='transducer_04_top_Burst', region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_04_top'])
+mdb.models['guw_model'].ConcentratedForce(amplitude=
+    'transducer_transducer_04_Burst', cf3=1.0, createStepName=
+    'load_case_0_control_step', distributionType=UNIFORM, field='', localCsys=
+    None, name='transducer_04_bottom_Burst', region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_04_bottom'])
+mdb.models['guw_model'].TabularAmplitude(data=((0.0, 0.0), (
+    6.944444444444444e-08, 0.000210720042569967), (1.3888888888888888e-07, 
+    0.000833069425662322), (2.0833333333333333e-07, 0.00183781969500503), (
+    2.7777777777777776e-07, 0.00317693266714517), (3.4722222222222219e-07, 
+    0.00478456258621865), (4.1666666666666667e-07, 0.00657843591599772), (
+    4.8611111111111109e-07, 0.00846158595724399), (5.5555555555555552e-07, 
+    0.0103244135529394), (6.2499999999999995e-07, 0.0120470396471641), (
+    6.9444444444444437e-07, 0.0135019104802463), (7.638888888888888e-07, 
+    0.0145566118089895), (8.3333333333333333e-07, 0.0150768448035229), (
+    9.0277777777777776e-07, 0.0149295132494686), (9.7222222222222218e-07, 
+    0.0139858694232699), (1.0416666666666665e-06, 0.0121246645463581), (
+    1.111111111111111e-06, 0.00923524908554121), (1.1805555555555556e-06, 
+    0.00522056836591679), (1.2499999999999999e-06, 1.89759571538986e-17), (
+    1.3194444444444444e-06, -0.00648801849824808), (1.3888888888888887e-06, 
+    -0.014283620876071), (1.4583333333333333e-06, -0.023403447602933), (
+    1.5277777777777776e-06, -0.0338389269873728), (1.5972222222222221e-06, 
+    -0.0455549384751067), (1.6666666666666667e-06, -0.0584888892202554), (
+    1.736111111111111e-06, -0.0725502290618746), (1.8055555555555555e-06, 
+    -0.0876204226354028), (1.8749999999999998e-06, -0.103553390593274), (
+    1.9444444444444444e-06, -0.120176424896384), (2.0138888888888889e-06, 
+    -0.137291575968232), (2.083333333333333e-06, -0.154677502279009), (
+    2.1527777777777775e-06, -0.172091765751862), (2.2222222222222221e-06, 
+    -0.189273549361947), (2.2916666666666666e-06, -0.205946766533372), (
+    2.3611111111111111e-06, -0.221823525529131), (2.4305555555555552e-06, 
+    -0.236607906070061), (2.4999999999999998e-06, -0.25), (
+    2.5694444444444443e-06, -0.261700163018382), (2.6388888888888888e-06, 
+    -0.271413420402635), (2.708333333333333e-06, -0.278853966306167), (
+    2.7777777777777775e-06, -0.283749693698152), (2.847222222222222e-06, 
+    -0.285846690352682), (2.9166666666666666e-06, -0.284913635529207), (
+    2.9861111111111111e-06, -0.280746032133507), (3.0555555555555552e-06, 
+    -0.273170210216044), (3.1249999999999997e-06, -0.262047039647164), (
+    3.1944444444444443e-06, -0.247275292688113), (3.2638888888888888e-06, 
+    -0.228794600922638), (3.3333333333333333e-06, -0.206587955583268), (
+    3.4027777777777774e-06, -0.180683705644712), (3.472222222222222e-06, 
+    -0.151157014098732), (3.5416666666666665e-06, -0.118130739494686), (
+    3.611111111111111e-06, -0.0817757170429358), (3.6805555555555551e-06, 
+    -0.0423104212414982), (3.7499999999999997e-06, -5.35937719786114e-16), (
+    3.8194444444444442e-06, 0.0448453215061598), (3.8888888888888887e-06, 
+    0.0918724606239947), (3.9583333333333333e-06, 0.140688305607835), (
+    4.0277777777777778e-06, 0.190863129226937), (4.0972222222222223e-06, 
+    0.241934556095987), (4.166666666666666e-06, 0.293412044416732), (
+    4.2361111111111106e-06, 0.344781835428408), (4.3055555555555551e-06, 
+    0.395512316998426), (4.3749999999999996e-06, 0.445059741539383), (
+    4.4444444444444441e-06, 0.492874232902933), (4.5138888888888887e-06, 
+    0.538406012155484), (4.5833333333333332e-06, 0.581111768255231), (
+    4.6527777777777777e-06, 0.620461096683968), (4.7222222222222223e-06, 
+    0.655942927087756), (4.791666666666666e-06, 0.687071859982901), (
+    4.8611111111111105e-06, 0.713394332609573), (4.930555555555555e-06, 
+    0.734494535073363), (4.9999999999999996e-06, 0.75), (
+    5.0694444444444441e-06, 0.759586792021685), (5.1388888888888886e-06, 
+    0.762984227483076), (5.2083333333333332e-06, 0.759979059755696), (
+    5.2777777777777777e-06, 0.750419071423961), (5.3472222222222222e-06, 
+    0.734216021284788), (5.4166666666666659e-06, 0.711347901505429), (
+    5.4861111111111104e-06, 0.68186046832076), (5.555555555555555e-06, 
+    0.645868018222594), (5.6249999999999995e-06, 0.603553390593274), (
+    5.694444444444444e-06, 0.555167187051137), (5.7638888888888886e-06, 
+    0.501026207289172), (5.8333333333333331e-06, 0.441511110779745), (
+    5.9027777777777776e-06, 0.377063323265593), (5.9722222222222222e-06, 
+    0.308181216338297), (6.0416666666666659e-06, 0.235415597499589), (
+    6.1111111111111104e-06, 0.159364556790861), (6.1805555555555549e-06, 
+    0.0806677242494119), (6.2499999999999995e-06, 1.11433450186081e-15), (
+    6.319444444444444e-06, -0.0819351743817402), (6.3888888888888885e-06, 
+    -0.164412928581389), (6.458333333333333e-06, -0.246694380556162), (
+    6.5277777777777776e-06, -0.328034273902398), (6.5972222222222221e-06, 
+    -0.40768874849123), (6.6666666666666666e-06, -0.484923155196476), (
+    6.7361111111111103e-06, -0.559019824542056), (6.8055555555555549e-06, 
+    -0.629285699206292), (6.8749999999999994e-06, -0.695059741539383), (
+    6.9444444444444439e-06, -0.755720029566038), (7.0138888888888885e-06, 
+    -0.810690458331747), (7.083333333333333e-06, -0.85944696786844), (
+    7.1527777777777775e-06, -0.901523224450431), (7.2222222222222221e-06, 
+    -0.936515688118763), (7.2916666666666666e-06, -0.964088006594063), (
+    7.3611111111111103e-06, -0.983974683586545), (7.4305555555555548e-06, 
+    -0.995983978049175), (7.4999999999999993e-06, -1.0), (
+    7.5694444444444439e-06, -0.995983978049176), (7.6388888888888884e-06, 
+    -0.983974683586546), (7.7083333333333321e-06, -0.964088006594064), (
+    7.7777777777777775e-06, -0.936515688118763), (7.8472222222222212e-06, 
+    -0.901523224450433), (7.9166666666666665e-06, -0.859446967868441), (
+    7.9861111111111102e-06, -0.810690458331749), (8.0555555555555556e-06, 
+    -0.755720029566039), (8.1249999999999993e-06, -0.695059741539384), (
+    8.1944444444444447e-06, -0.629285699206294), (8.2638888888888884e-06, 
+    -0.559019824542058), (8.333333333333332e-06, -0.48492315519648), (
+    8.4027777777777774e-06, -0.407688748491232), (8.4722222222222211e-06, 
+    -0.3280342739024), (8.5416666666666665e-06, -0.246694380556164), (
+    8.6111111111111102e-06, -0.164412928581391), (8.6805555555555555e-06, 
+    -0.0819351743817417), (8.7499999999999992e-06, -2.0572773508812e-15), (
+    8.8194444444444446e-06, 0.0806677242494096), (8.8888888888888883e-06, 
+    0.159364556790857), (8.958333333333332e-06, 0.235415597499586), (
+    9.0277777777777774e-06, 0.308181216338294), (9.097222222222221e-06, 
+    0.377063323265591), (9.1666666666666664e-06, 0.441511110779744), (
+    9.2361111111111101e-06, 0.50102620728917), (9.3055555555555555e-06, 
+    0.555167187051136), (9.3749999999999992e-06, 0.603553390593272), (
+    9.4444444444444446e-06, 0.645868018222593), (9.5138888888888882e-06, 
+    0.681860468320759), (9.5833333333333319e-06, 0.711347901505428), (
+    9.6527777777777773e-06, 0.734216021284788), (9.722222222222221e-06, 
+    0.75041907142396), (9.7916666666666664e-06, 0.759979059755696), (
+    9.8611111111111101e-06, 0.762984227483077), (9.9305555555555554e-06, 
+    0.759586792021685), (9.9999999999999991e-06, 0.75), (
+    1.0069444444444445e-05, 0.734494535073364), (1.0138888888888888e-05, 
+    0.713394332609574), (1.0208333333333332e-05, 0.687071859982903), (
+    1.0277777777777777e-05, 0.655942927087758), (1.0347222222222221e-05, 
+    0.62046109668397), (1.0416666666666666e-05, 0.581111768255232), (
+    1.048611111111111e-05, 0.538406012155486), (1.0555555555555555e-05, 
+    0.492874232902935), (1.0624999999999999e-05, 0.445059741539385), (
+    1.0694444444444444e-05, 0.395512316998427), (1.0763888888888888e-05, 
+    0.344781835428409), (1.0833333333333332e-05, 0.293412044416735), (
+    1.0902777777777777e-05, 0.241934556095989), (1.0972222222222221e-05, 
+    0.190863129226939), (1.1041666666666666e-05, 0.140688305607837), (
+    1.111111111111111e-05, 0.0918724606239962), (1.1180555555555555e-05, 
+    0.0448453215061616), (1.1249999999999999e-05, 1.16372394950828e-15), (
+    1.1319444444444444e-05, -0.0423104212414966), (1.1388888888888888e-05, 
+    -0.0817757170429343), (1.1458333333333332e-05, -0.118130739494684), (
+    1.1527777777777777e-05, -0.151157014098731), (1.1597222222222221e-05, 
+    -0.180683705644711), (1.1666666666666666e-05, -0.206587955583267), (
+    1.173611111111111e-05, -0.228794600922637), (1.1805555555555555e-05, 
+    -0.247275292688113), (1.1874999999999999e-05, -0.262047039647164), (
+    1.1944444444444444e-05, -0.273170210216044), (1.2013888888888888e-05, 
+    -0.280746032133508), (1.2083333333333332e-05, -0.284913635529207), (
+    1.2152777777777777e-05, -0.285846690352682), (1.2222222222222221e-05, 
+    -0.283749693698152), (1.2291666666666666e-05, -0.278853966306167), (
+    1.236111111111111e-05, -0.271413420402635), (1.2430555555555555e-05, 
+    -0.261700163018382), (1.2499999999999999e-05, -0.25), (
+    1.2569444444444444e-05, -0.236607906070061), (1.2638888888888888e-05, 
+    -0.221823525529132), (1.2708333333333332e-05, -0.205946766533373), (
+    1.2777777777777777e-05, -0.189273549361948), (1.2847222222222221e-05, 
+    -0.172091765751863), (1.2916666666666666e-05, -0.15467750227901), (
+    1.298611111111111e-05, -0.137291575968233), (1.3055555555555555e-05, 
+    -0.120176424896385), (1.3124999999999999e-05, -0.103553390593275), (
+    1.3194444444444444e-05, -0.0876204226354034), (1.3263888888888888e-05, 
+    -0.0725502290618753), (1.3333333333333333e-05, -0.0584888892202559), (
+    1.3402777777777777e-05, -0.0455549384751073), (1.3472222222222221e-05, 
+    -0.0338389269873732), (1.3541666666666666e-05, -0.0234034476029335), (
+    1.361111111111111e-05, -0.0142836208760712), (1.3680555555555555e-05, 
+    -0.00648801849824842), (1.3749999999999999e-05, -1.64113024262873e-16), (
+    1.3819444444444444e-05, 0.00522056836591676), (1.3888888888888888e-05, 
+    0.0092352490855411), (1.3958333333333333e-05, 0.0121246645463581), (
+    1.4027777777777777e-05, 0.0139858694232699), (1.4097222222222221e-05, 
+    0.0149295132494685), (1.4166666666666666e-05, 0.015076844803523), (
+    1.423611111111111e-05, 0.0145566118089896), (1.4305555555555555e-05, 
+    0.0135019104802464), (1.4374999999999999e-05, 0.0120470396471642), (
+    1.4444444444444444e-05, 0.0103244135529395), (1.4513888888888888e-05, 
+    0.00846158595724411), (1.4583333333333333e-05, 0.00657843591599777), (
+    1.4652777777777777e-05, 0.00478456258621874), (1.4722222222222221e-05, 
+    0.00317693266714525), (1.4791666666666666e-05, 0.00183781969500511), (
+    1.486111111111111e-05, 0.000833069425662387), (1.4930555555555555e-05, 
+    0.000210720042569991), (1.4999999999999999e-05, 1.02139947479913e-30), (
+    1.5069444444444444e-05, 0.0), (1.5138888888888888e-05, 0.0)), name=
+    'transducer_transducer_05_Burst', smooth=SOLVER_DEFAULT, timeSpan=STEP)
+mdb.models['guw_model'].ConcentratedForce(amplitude=
+    'transducer_transducer_05_Burst', cf3=1.0, createStepName=
+    'load_case_0_control_step', distributionType=UNIFORM, field='', localCsys=
+    None, name='transducer_05_top_Burst', region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_05_top'])
+mdb.models['guw_model'].TabularAmplitude(data=((0.0, 0.0), (
+    6.944444444444444e-08, 0.000210720042569967), (1.3888888888888888e-07, 
+    0.000833069425662322), (2.0833333333333333e-07, 0.00183781969500503), (
+    2.7777777777777776e-07, 0.00317693266714517), (3.4722222222222219e-07, 
+    0.00478456258621865), (4.1666666666666667e-07, 0.00657843591599772), (
+    4.8611111111111109e-07, 0.00846158595724399), (5.5555555555555552e-07, 
+    0.0103244135529394), (6.2499999999999995e-07, 0.0120470396471641), (
+    6.9444444444444437e-07, 0.0135019104802463), (7.638888888888888e-07, 
+    0.0145566118089895), (8.3333333333333333e-07, 0.0150768448035229), (
+    9.0277777777777776e-07, 0.0149295132494686), (9.7222222222222218e-07, 
+    0.0139858694232699), (1.0416666666666665e-06, 0.0121246645463581), (
+    1.111111111111111e-06, 0.00923524908554121), (1.1805555555555556e-06, 
+    0.00522056836591679), (1.2499999999999999e-06, 1.89759571538986e-17), (
+    1.3194444444444444e-06, -0.00648801849824808), (1.3888888888888887e-06, 
+    -0.014283620876071), (1.4583333333333333e-06, -0.023403447602933), (
+    1.5277777777777776e-06, -0.0338389269873728), (1.5972222222222221e-06, 
+    -0.0455549384751067), (1.6666666666666667e-06, -0.0584888892202554), (
+    1.736111111111111e-06, -0.0725502290618746), (1.8055555555555555e-06, 
+    -0.0876204226354028), (1.8749999999999998e-06, -0.103553390593274), (
+    1.9444444444444444e-06, -0.120176424896384), (2.0138888888888889e-06, 
+    -0.137291575968232), (2.083333333333333e-06, -0.154677502279009), (
+    2.1527777777777775e-06, -0.172091765751862), (2.2222222222222221e-06, 
+    -0.189273549361947), (2.2916666666666666e-06, -0.205946766533372), (
+    2.3611111111111111e-06, -0.221823525529131), (2.4305555555555552e-06, 
+    -0.236607906070061), (2.4999999999999998e-06, -0.25), (
+    2.5694444444444443e-06, -0.261700163018382), (2.6388888888888888e-06, 
+    -0.271413420402635), (2.708333333333333e-06, -0.278853966306167), (
+    2.7777777777777775e-06, -0.283749693698152), (2.847222222222222e-06, 
+    -0.285846690352682), (2.9166666666666666e-06, -0.284913635529207), (
+    2.9861111111111111e-06, -0.280746032133507), (3.0555555555555552e-06, 
+    -0.273170210216044), (3.1249999999999997e-06, -0.262047039647164), (
+    3.1944444444444443e-06, -0.247275292688113), (3.2638888888888888e-06, 
+    -0.228794600922638), (3.3333333333333333e-06, -0.206587955583268), (
+    3.4027777777777774e-06, -0.180683705644712), (3.472222222222222e-06, 
+    -0.151157014098732), (3.5416666666666665e-06, -0.118130739494686), (
+    3.611111111111111e-06, -0.0817757170429358), (3.6805555555555551e-06, 
+    -0.0423104212414982), (3.7499999999999997e-06, -5.35937719786114e-16), (
+    3.8194444444444442e-06, 0.0448453215061598), (3.8888888888888887e-06, 
+    0.0918724606239947), (3.9583333333333333e-06, 0.140688305607835), (
+    4.0277777777777778e-06, 0.190863129226937), (4.0972222222222223e-06, 
+    0.241934556095987), (4.166666666666666e-06, 0.293412044416732), (
+    4.2361111111111106e-06, 0.344781835428408), (4.3055555555555551e-06, 
+    0.395512316998426), (4.3749999999999996e-06, 0.445059741539383), (
+    4.4444444444444441e-06, 0.492874232902933), (4.5138888888888887e-06, 
+    0.538406012155484), (4.5833333333333332e-06, 0.581111768255231), (
+    4.6527777777777777e-06, 0.620461096683968), (4.7222222222222223e-06, 
+    0.655942927087756), (4.791666666666666e-06, 0.687071859982901), (
+    4.8611111111111105e-06, 0.713394332609573), (4.930555555555555e-06, 
+    0.734494535073363), (4.9999999999999996e-06, 0.75), (
+    5.0694444444444441e-06, 0.759586792021685), (5.1388888888888886e-06, 
+    0.762984227483076), (5.2083333333333332e-06, 0.759979059755696), (
+    5.2777777777777777e-06, 0.750419071423961), (5.3472222222222222e-06, 
+    0.734216021284788), (5.4166666666666659e-06, 0.711347901505429), (
+    5.4861111111111104e-06, 0.68186046832076), (5.555555555555555e-06, 
+    0.645868018222594), (5.6249999999999995e-06, 0.603553390593274), (
+    5.694444444444444e-06, 0.555167187051137), (5.7638888888888886e-06, 
+    0.501026207289172), (5.8333333333333331e-06, 0.441511110779745), (
+    5.9027777777777776e-06, 0.377063323265593), (5.9722222222222222e-06, 
+    0.308181216338297), (6.0416666666666659e-06, 0.235415597499589), (
+    6.1111111111111104e-06, 0.159364556790861), (6.1805555555555549e-06, 
+    0.0806677242494119), (6.2499999999999995e-06, 1.11433450186081e-15), (
+    6.319444444444444e-06, -0.0819351743817402), (6.3888888888888885e-06, 
+    -0.164412928581389), (6.458333333333333e-06, -0.246694380556162), (
+    6.5277777777777776e-06, -0.328034273902398), (6.5972222222222221e-06, 
+    -0.40768874849123), (6.6666666666666666e-06, -0.484923155196476), (
+    6.7361111111111103e-06, -0.559019824542056), (6.8055555555555549e-06, 
+    -0.629285699206292), (6.8749999999999994e-06, -0.695059741539383), (
+    6.9444444444444439e-06, -0.755720029566038), (7.0138888888888885e-06, 
+    -0.810690458331747), (7.083333333333333e-06, -0.85944696786844), (
+    7.1527777777777775e-06, -0.901523224450431), (7.2222222222222221e-06, 
+    -0.936515688118763), (7.2916666666666666e-06, -0.964088006594063), (
+    7.3611111111111103e-06, -0.983974683586545), (7.4305555555555548e-06, 
+    -0.995983978049175), (7.4999999999999993e-06, -1.0), (
+    7.5694444444444439e-06, -0.995983978049176), (7.6388888888888884e-06, 
+    -0.983974683586546), (7.7083333333333321e-06, -0.964088006594064), (
+    7.7777777777777775e-06, -0.936515688118763), (7.8472222222222212e-06, 
+    -0.901523224450433), (7.9166666666666665e-06, -0.859446967868441), (
+    7.9861111111111102e-06, -0.810690458331749), (8.0555555555555556e-06, 
+    -0.755720029566039), (8.1249999999999993e-06, -0.695059741539384), (
+    8.1944444444444447e-06, -0.629285699206294), (8.2638888888888884e-06, 
+    -0.559019824542058), (8.333333333333332e-06, -0.48492315519648), (
+    8.4027777777777774e-06, -0.407688748491232), (8.4722222222222211e-06, 
+    -0.3280342739024), (8.5416666666666665e-06, -0.246694380556164), (
+    8.6111111111111102e-06, -0.164412928581391), (8.6805555555555555e-06, 
+    -0.0819351743817417), (8.7499999999999992e-06, -2.0572773508812e-15), (
+    8.8194444444444446e-06, 0.0806677242494096), (8.8888888888888883e-06, 
+    0.159364556790857), (8.958333333333332e-06, 0.235415597499586), (
+    9.0277777777777774e-06, 0.308181216338294), (9.097222222222221e-06, 
+    0.377063323265591), (9.1666666666666664e-06, 0.441511110779744), (
+    9.2361111111111101e-06, 0.50102620728917), (9.3055555555555555e-06, 
+    0.555167187051136), (9.3749999999999992e-06, 0.603553390593272), (
+    9.4444444444444446e-06, 0.645868018222593), (9.5138888888888882e-06, 
+    0.681860468320759), (9.5833333333333319e-06, 0.711347901505428), (
+    9.6527777777777773e-06, 0.734216021284788), (9.722222222222221e-06, 
+    0.75041907142396), (9.7916666666666664e-06, 0.759979059755696), (
+    9.8611111111111101e-06, 0.762984227483077), (9.9305555555555554e-06, 
+    0.759586792021685), (9.9999999999999991e-06, 0.75), (
+    1.0069444444444445e-05, 0.734494535073364), (1.0138888888888888e-05, 
+    0.713394332609574), (1.0208333333333332e-05, 0.687071859982903), (
+    1.0277777777777777e-05, 0.655942927087758), (1.0347222222222221e-05, 
+    0.62046109668397), (1.0416666666666666e-05, 0.581111768255232), (
+    1.048611111111111e-05, 0.538406012155486), (1.0555555555555555e-05, 
+    0.492874232902935), (1.0624999999999999e-05, 0.445059741539385), (
+    1.0694444444444444e-05, 0.395512316998427), (1.0763888888888888e-05, 
+    0.344781835428409), (1.0833333333333332e-05, 0.293412044416735), (
+    1.0902777777777777e-05, 0.241934556095989), (1.0972222222222221e-05, 
+    0.190863129226939), (1.1041666666666666e-05, 0.140688305607837), (
+    1.111111111111111e-05, 0.0918724606239962), (1.1180555555555555e-05, 
+    0.0448453215061616), (1.1249999999999999e-05, 1.16372394950828e-15), (
+    1.1319444444444444e-05, -0.0423104212414966), (1.1388888888888888e-05, 
+    -0.0817757170429343), (1.1458333333333332e-05, -0.118130739494684), (
+    1.1527777777777777e-05, -0.151157014098731), (1.1597222222222221e-05, 
+    -0.180683705644711), (1.1666666666666666e-05, -0.206587955583267), (
+    1.173611111111111e-05, -0.228794600922637), (1.1805555555555555e-05, 
+    -0.247275292688113), (1.1874999999999999e-05, -0.262047039647164), (
+    1.1944444444444444e-05, -0.273170210216044), (1.2013888888888888e-05, 
+    -0.280746032133508), (1.2083333333333332e-05, -0.284913635529207), (
+    1.2152777777777777e-05, -0.285846690352682), (1.2222222222222221e-05, 
+    -0.283749693698152), (1.2291666666666666e-05, -0.278853966306167), (
+    1.236111111111111e-05, -0.271413420402635), (1.2430555555555555e-05, 
+    -0.261700163018382), (1.2499999999999999e-05, -0.25), (
+    1.2569444444444444e-05, -0.236607906070061), (1.2638888888888888e-05, 
+    -0.221823525529132), (1.2708333333333332e-05, -0.205946766533373), (
+    1.2777777777777777e-05, -0.189273549361948), (1.2847222222222221e-05, 
+    -0.172091765751863), (1.2916666666666666e-05, -0.15467750227901), (
+    1.298611111111111e-05, -0.137291575968233), (1.3055555555555555e-05, 
+    -0.120176424896385), (1.3124999999999999e-05, -0.103553390593275), (
+    1.3194444444444444e-05, -0.0876204226354034), (1.3263888888888888e-05, 
+    -0.0725502290618753), (1.3333333333333333e-05, -0.0584888892202559), (
+    1.3402777777777777e-05, -0.0455549384751073), (1.3472222222222221e-05, 
+    -0.0338389269873732), (1.3541666666666666e-05, -0.0234034476029335), (
+    1.361111111111111e-05, -0.0142836208760712), (1.3680555555555555e-05, 
+    -0.00648801849824842), (1.3749999999999999e-05, -1.64113024262873e-16), (
+    1.3819444444444444e-05, 0.00522056836591676), (1.3888888888888888e-05, 
+    0.0092352490855411), (1.3958333333333333e-05, 0.0121246645463581), (
+    1.4027777777777777e-05, 0.0139858694232699), (1.4097222222222221e-05, 
+    0.0149295132494685), (1.4166666666666666e-05, 0.015076844803523), (
+    1.423611111111111e-05, 0.0145566118089896), (1.4305555555555555e-05, 
+    0.0135019104802464), (1.4374999999999999e-05, 0.0120470396471642), (
+    1.4444444444444444e-05, 0.0103244135529395), (1.4513888888888888e-05, 
+    0.00846158595724411), (1.4583333333333333e-05, 0.00657843591599777), (
+    1.4652777777777777e-05, 0.00478456258621874), (1.4722222222222221e-05, 
+    0.00317693266714525), (1.4791666666666666e-05, 0.00183781969500511), (
+    1.486111111111111e-05, 0.000833069425662387), (1.4930555555555555e-05, 
+    0.000210720042569991), (1.4999999999999999e-05, 1.02139947479913e-30), (
+    1.5069444444444444e-05, 0.0), (1.5138888888888888e-05, 0.0)), name=
+    'transducer_transducer_06_Burst', smooth=SOLVER_DEFAULT, timeSpan=STEP)
+mdb.models['guw_model'].ConcentratedForce(amplitude=
+    'transducer_transducer_06_Burst', cf3=-1.0, createStepName=
+    'load_case_0_control_step', distributionType=UNIFORM, field='', localCsys=
+    None, name='transducer_06_bottom_Burst', region=
+    mdb.models['guw_model'].rootAssembly.instances['plate'].sets['transducer_06_bottom'])
+mdb.Job(atTime=None, contactPrint=OFF, description='', echoPrint=OFF, 
+    explicitPrecision=SINGLE, historyPrint=OFF, memory=90, memoryUnits=
+    PERCENTAGE, model='guw_model', modelPrint=OFF, name=
+    'example_01_load_case_0_control_step', nodalOutputPrecision=SINGLE, queue=
+    None, resultsFormat=ODB, scratch='', type=ANALYSIS, userSubroutine='', 
+    waitHours=0, waitMinutes=0)
+#* Student Edition is restricted to 1,000 nodes
+#* Student Edition is restricted to 1,000 nodes

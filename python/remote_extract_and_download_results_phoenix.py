@@ -87,7 +87,7 @@ generate_python_job_script(output_file_path=job_file_name,
                            n_tasks_per_node=1,
                            max_time_in_h=2,
                            slurm_job_name='collect',
-                           python_file='phoenix_post_process.py',
+                           python_file='guwlib/trash/phoenix_post_process.py',
                            args=args,
                            working_dir=working_dir)
 

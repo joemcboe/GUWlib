@@ -385,13 +385,18 @@ def create_transducer_as_vertex(plate, transducer, element_size):
     s.Line(point1=(piezo_pos_x, piezo_pos_y), point2=(x_center, y_upper))
 
     # partition the face
-    sketch_face = p.faces.findAt(((piezo_pos_x, piezo_pos_y, plate.thickness),), )
+    sketch_face = p.faces.findAt(((piezo_pos_x, piezo_pos_y, 0),),
+                                 ((piezo_pos_x, piezo_pos_y, plate.thickness),) )
     p.PartitionFaceBySketchThruAll(faces=sketch_face, sketchPlane=p.datums[sketch_plane_id],
                                    sketchUpEdge=p.datums[sketch_up_edge_id], sketchPlaneSide=SIDE1, sketch=s)
 
-    # add line intersection point to piezo node set
+    # add line intersection point at plate top surface to piezo node set
     intersection_point = p.vertices.findAt(((piezo_pos_x, piezo_pos_y, plate.thickness),))
-    p.Set(name=transducer.cell_set_name, vertices=intersection_point)
+    p.Set(name=transducer.on_plate_top_set_name, vertices=intersection_point)
+
+    # add line intersection point at plate bottom surface to piezo node set
+    intersection_point = p.vertices.findAt(((piezo_pos_x, piezo_pos_y, 0),))
+    p.Set(name=transducer.on_plate_bottom_set_name, vertices=intersection_point)
 
     return [x_left, y_lower, x_right, y_upper]
 
@@ -560,14 +565,16 @@ def remove_standard_field_output_request():
 def add_history_output_request_transducer_signals(transducers, create_step_name):
     for i, transducer in enumerate(transducers):
         a = mdb.models[MODEL_NAME].rootAssembly
-        region_def = a.instances[PLATE_PART_NAME].sets[transducer.cell_set_name]
-        mdb.models[MODEL_NAME].HistoryOutputRequest(name='history_transducer_{}'.format(i),
-                                                    createStepName=create_step_name,
-                                                    variables=('U1', 'U2', 'U3'),
-                                                    frequency=1,
-                                                    region=region_def,
-                                                    sectionPoints=DEFAULT,
-                                                    rebar=EXCLUDE)
+        for set_name, description in zip([transducer.on_plate_top_set_name, transducer.on_plate_bottom_set_name],
+                                         ['top', 'bottom']):
+            region_def = a.instances[PLATE_PART_NAME].sets[set_name]
+            mdb.models[MODEL_NAME].HistoryOutputRequest(name='history_transducer_{}_{}'.format(i, description),
+                                                        createStepName=create_step_name,
+                                                        variables=('U1', 'U2', 'U3'),
+                                                        frequency=1,
+                                                        region=region_def,
+                                                        sectionPoints=DEFAULT,
+                                                        rebar=EXCLUDE)
 
 
 def add_field_output_request_plate_surface(plate, create_step_name, time_interval):
@@ -595,13 +602,32 @@ def add_amplitude(name, signal, max_time_increment):
                                             data=tuple(time_data_table))
 
 
-def add_transducer_concentrated_force(load_name, step_name, transducer, signal, max_time_increment):
-    add_amplitude(load_name, signal, max_time_increment)
-    a = mdb.models[MODEL_NAME].rootAssembly
-    region = a.instances[PLATE_PART_NAME].sets[transducer.cell_set_name]
-    mdb.models[MODEL_NAME].ConcentratedForce(name=load_name, createStepName=step_name, region=region, cf3=1.0,
-                                             amplitude=load_name, distributionType=UNIFORM,
-                                             field='', localCsys=None)
+def add_transducer_concentrated_force(step_name, transducer, signal, max_time_increment):
+
+    amplitude_name = 'transducer_{}_{}'.format(transducer.name, signal.__class__.__name__)
+    add_amplitude(amplitude_name, signal, max_time_increment)
+
+    set_names, concentrated_force_z_amplitudes = (None, None)
+    if transducer.position_z == 'top':
+        set_names = [transducer.on_plate_top_set_name]
+        concentrated_force_z_amplitudes = [1.0]
+    if transducer.position_z == 'bottom':
+        set_names = [transducer.on_plate_bottom_set_name]
+        concentrated_force_z_amplitudes = [-1.0]
+    if transducer.position_z == 'symmetric':
+        set_names = [transducer.on_plate_top_set_name, transducer.on_plate_bottom_set_name]
+        concentrated_force_z_amplitudes = [1.0, -1.0]
+    if transducer.position_z == 'asymmetric':
+        set_names = [transducer.on_plate_top_set_name, transducer.on_plate_bottom_set_name]
+        concentrated_force_z_amplitudes = [1.0, 1.0]
+
+    for set_name, concentrated_force_z_amplitude in zip(set_names, concentrated_force_z_amplitudes):
+        region = mdb.models[MODEL_NAME].rootAssembly.instances[PLATE_PART_NAME].sets[set_name]
+        load_name = '{}_{}'.format(set_name, signal.__class__.__name__)
+        mdb.models[MODEL_NAME].ConcentratedForce(name=load_name, createStepName=step_name, region=region,
+                                                 cf3=concentrated_force_z_amplitude,
+                                                 amplitude=amplitude_name, distributionType=UNIFORM,
+                                                 field='', localCsys=None)
 
 
 def write_input_file(job_name, output_directory):

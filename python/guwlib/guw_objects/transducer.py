@@ -2,28 +2,30 @@ class CircularTransducer:
     def __init__(self, position_x, position_y, diameter, thickness=None, material=None, electrode_thickness=None,
                  electrode_material=None, position_z='top'):
 
-        # basic properties
+        # properties for modes 'point_force' and 'piezo_electric'
         self.radius = diameter / 2
         self.position_x = position_x
         self.position_y = position_y
         self.position_z = position_z
 
-        # Validate position_z
+        # position_z (validation)
         valid_position_z = ['top', 'bottom', 'symmetric', 'asymmetric']
         if position_z not in valid_position_z:
             raise ValueError("Invalid value for position_z. Accepted values are: {}".format(valid_position_z))
         self.position_z = position_z
-
-        # abaqus properties --------------------------------------------------------------------------------------------
-        self.id = None
-        self.cell_set_name = None
-        self.bounding_box_cell_set_name = None
 
         # properties for mode 'piezo_electric'
         self.thickness = thickness
         self.material = material
         self.electrode_thickness = electrode_thickness
         self.electrode_material = electrode_material
+
+        # abaqus properties --------------------------------------------------------------------------------------------
+        self.id = None
+        self.name = None               # deprecated
+        self.on_plate_top_set_name = None
+        self.on_plate_bottom_set_name = None
+        self.bounding_box_cell_set_name = None
 
         # abaqus properties only needed for mode 'piezo_electric' - geometry and cell sets
         self.piezo_material_cell_set_name = None
@@ -47,12 +49,15 @@ class CircularTransducer:
         :return: None
         """
         self.id = unique_id
-        self.cell_set_name = "transducer_{:02d}".format(self.id)
-        self.bounding_box_cell_set_name = "transducer_{:02d}_bound_box".format(self.id)
+        self.name = "transducer_{:02d}".format(self.id)
+        self.on_plate_top_set_name = "{}_top".format(self.name)
+        self.on_plate_bottom_set_name = "{}_bottom".format(self.name)
 
-        self.piezo_material_cell_set_name = "transducer_{:02d}_piezo_material".format(self.id)
-        self.electrode_material_cell_set_name = "transducer_{:02d}_electrode_material".format(self.id)
-        self.piezo_top_surf_set_name = "transducer_{:02d}_top_surf".format(self.id)
+        # this will need some work since top, bot, sym, asym were introduced ...
+        self.bounding_box_cell_set_name = "{}_bound_box".format(self.name)
+        self.piezo_material_cell_set_name = "{}_piezo_material".format(self.name)
+        self.electrode_material_cell_set_name = "{}_electrode_material".format(self.name)
+        self.piezo_top_surf_set_name = "{}_top_surf".format(self.name)
         self.piezo_bot_surf_set_name = "transducer_{:d}_bot_surf".format(self.id)
         self.interface_surf_set_name = "transducer_{:d}_interface_surf".format(self.id)
 

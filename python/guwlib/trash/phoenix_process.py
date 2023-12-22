@@ -32,10 +32,10 @@ from guwlib.functions_phoenix.slurm import generate_abaqus_job_script
 
 def submit_model_files(model_file_paths, n_nodes, n_tasks_per_node, partition, max_time):
     """
-    Submits ABAQUS simulations for a set of GUW model files (*.py) using SLURM job scripts. This function
+    Submits ABAQUS simulations for a list of GUWlib model files (*.py) using SLURM job scripts. This function
     is intended to be run on an environment with SLURM, ABAQUS and PYTHON installed (e.g. Phoenix Cluster).
 
-    :param List[str] model_file_paths: paths to GUWLIB model files (.py).
+    :param List[str] model_file_paths: paths to GUWlib model files (.py).
     :param int n_nodes: number of compute nodes to request for each job.
     :param int n_tasks_per_node: number of tasks (CPUs) to allocate per node.
     :param str partition: name of the SLURM partition to allocate resources from.
@@ -43,7 +43,7 @@ def submit_model_files(model_file_paths, n_nodes, n_tasks_per_node, partition, m
 
     :return: None
 
-    The function takes a list of ABAQUS model files, runs ABAQUS/CAE to generate corresponding *.INP files,
+    The function takes a list of GUWlib model files, runs ABAQUS/CAE to generate corresponding *.INP files,
     creates SLURM job scripts for each generated *.INP file, and submits the jobs to the specified SLURM
     partition. Each job is identified by a unique SLURM job name based on its position in the input list.
 

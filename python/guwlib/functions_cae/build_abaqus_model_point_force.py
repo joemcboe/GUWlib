@@ -130,9 +130,7 @@ def build_abaqus_model_point_force(model):
         # create all amplitudes and loads
         for j, transducer_signal in enumerate(step.transducer_signals):
             if transducer_signal is not None:
-                add_transducer_concentrated_force(load_name='piezo_{}_{}'.format(j,
-                                                                                 transducer_signal.__class__.__name__),
-                                                  step_name=step_name,
+                add_transducer_concentrated_force(step_name=step_name,
                                                   transducer=model.transducers[j],
                                                   signal=transducer_signal,
                                                   max_time_increment=max_time_increment)
@@ -140,6 +138,6 @@ def build_abaqus_model_point_force(model):
         # write input file for this load case
         if model.no_gui_mode:
             output_directory = os.path.join(model.output_directory, step_name)
-            write_input_file(job_name=step_name, output_directory=output_directory)
+            write_input_file(job_name='{}_{}'.format(model.model_name, step_name), output_directory=output_directory)
             log_info("Created an ABAQUS job definition (*.INP) file for "
                      "the current load case ({}.inp).".format(step_name))

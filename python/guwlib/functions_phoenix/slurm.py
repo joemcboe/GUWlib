@@ -14,7 +14,7 @@ number of nodes, tasks per node, maximum run time, job name, input files, and wo
 import textwrap
 
 
-def generate_abaqus_job_script(output_file_path, partition, n_nodes, n_tasks_per_node, max_time_in_h, slurm_job_name,
+def generate_abaqus_job_script(output_file_path, partition, n_nodes, n_tasks_per_node, max_time, slurm_job_name,
                                inp_file, working_dir):
     """
     Generates a SLURM job script (*.JOB) for running ABAQUS simulations on an HPC (e.g. Phoenix Cluster).
@@ -23,7 +23,7 @@ def generate_abaqus_job_script(output_file_path, partition, n_nodes, n_tasks_per
     :param str partition: name of the SLURM partition to allocate resources from.
     :param int n_nodes: int, number of compute nodes to request for the job.
     :param int n_tasks_per_node: number of tasks (CPU cores) to allocate per node.
-    :param int max_time_in_h: maximum time in hours for the job to run before being cancelled.
+    :param int max_time: maximum time for the job to run before being cancelled.
     :param str slurm_job_name: name of the SLURM job.
     :param str inp_file: path to the ABAQUS input file.
     :param str working_dir: working directory where the job will be executed.
@@ -53,7 +53,7 @@ def generate_abaqus_job_script(output_file_path, partition, n_nodes, n_tasks_per
         #SBATCH --nodes={n_nodes}
         #SBATCH --job-name={slurm_job_name}
         #SBATCH --ntasks-per-node={n_tasks_per_node}
-        #SBATCH --time={int(max_time_in_h)}:00:00
+        #SBATCH --time={max_time}
         #SBATCH -o bo-%j.log
 
         module purge
@@ -96,16 +96,16 @@ def generate_abaqus_job_script(output_file_path, partition, n_nodes, n_tasks_per
         file.write(content)
 
 
-def generate_python_job_script(output_file_path, partition, n_nodes, n_tasks_per_node, max_time_in_h, slurm_job_name,
+def generate_python_job_script(output_file_path, partition, n_nodes, n_tasks_per_node, max_time, slurm_job_name,
                                python_file, args, working_dir):
     """
-    Generates a SLURM job script (*.JOB) for running a Python script on an HPC (e.g. Phoenix Cluster).
+    Generates a SLURM job script (*.JOB) for running a Python script on an HPC cluster (e.g. Phoenix cluster).
 
     :param str, output_file_path: path to the output SLURM job script file.
     :param str, partition: name of the SLURM partition to allocate resources from.
     :param int, n_nodes: number of compute nodes to request for the job.
     :param int, n_tasks_per_node: number of tasks (CPU cores) to allocate per node.
-    :param int, max_time_in_h: maximum time in hours for the job to run.
+    :param int, max_time: maximum time for the job to run.
     :param str, slurm_job_name: name of the SLURM job file.
     :param str, python_file: path to the Python script to be executed.
     :param str, args: command-line arguments to pass to the Python script.
@@ -125,7 +125,7 @@ def generate_python_job_script(output_file_path, partition, n_nodes, n_tasks_per
         partition='standard',
         n_nodes=4,
         n_tasks_per_node=8,
-        max_time_in_h=24,
+        max_time_in_h="24:0:0",
         slurm_job_name='python_script_execution',
         python_file='script.py',
         args='--arg1 value1 --arg2 value2',
@@ -141,7 +141,7 @@ def generate_python_job_script(output_file_path, partition, n_nodes, n_tasks_per
         #SBATCH --nodes={n_nodes}
         #SBATCH --job-name={slurm_job_name}
         #SBATCH --ntasks-per-node={n_tasks_per_node}
-        #SBATCH --time={int(max_time_in_h)}:00:00
+        #SBATCH --time={max_time}
         #SBATCH -o bo-%j.log
 
         module purge

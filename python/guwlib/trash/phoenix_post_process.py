@@ -44,7 +44,7 @@ def extract_history_from_output_databases(results_folders):
     expected to be located in the 'guwlib/functions_odb/' directory.
     """
 
-    helper_script_name = os.path.join('guwlib', 'functions_odb', 'abaqus_odb_history_export_helper.py')
+    helper_script_name = os.path.join('..', 'functions_odb', 'abaqus_odb_history_export_helper.py')
     extracted_data_file_names = []
 
     for result_folder in results_folders:

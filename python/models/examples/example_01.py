@@ -24,10 +24,12 @@ class SimpleModel(FEModel):
         phi = np.linspace(0, 2 * np.pi, PHASED_ARRAY_N_ELEMENTS)
         pos_x = PLATE_WIDTH / 2 + PHASED_ARRAY_RADIUS * np.cos(phi[0:-1])
         pos_y = PLATE_LENGTH / 2 + PHASED_ARRAY_RADIUS * np.sin(phi[0:-1])
+        position_z_values = ['top', 'bottom', 'symmetric', 'asymmetric']
 
-        for (x, y) in zip(pos_x, pos_y):
+        for i, (x, y) in enumerate(zip(pos_x, pos_y)):
             phased_array.append(CircularTransducer(position_x=x,
                                                    position_y=y,
+                                                   position_z=position_z_values[i % 4],
                                                    diameter=16e-3))
 
         self.plate = IsotropicPlate(material=aluminum,
@@ -40,13 +42,21 @@ class SimpleModel(FEModel):
         self.transducers = phased_array
 
         # set up the time / loading information ------------------------------------------------------------------------
-        transducer_signals = [None] * len(self.transducers)
-        transducer_signals[0] = Burst(center_frequency=200e3, n_cycles=3)
+        burst = Burst(center_frequency=200e3, n_cycles=3)
+        transducer_signals = [burst] * len(self.transducers)
         control_step = LoadCase(name='control_step',
                                 duration=0.25e-3,
                                 transducer_signals=transducer_signals,
                                 output_request='history')
-        self.load_cases.append(control_step)
+        self.load_cases = [control_step]
+
+        # transducer_signals = [None] * len(self.transducers)
+        # transducer_signals[0] = Burst(center_frequency=200e3, n_cycles=3)
+        # control_step = LoadCase(name='control_step',
+        #                         duration=0.25e-3,
+        #                         transducer_signals=transducer_signals,
+        #                         output_request='history')
+        # self.load_cases.append(control_step)
 
 
 # ----------------------------------------------------------------------------------------------------------------------

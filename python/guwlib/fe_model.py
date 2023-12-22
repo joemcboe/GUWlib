@@ -48,11 +48,11 @@ class FEModel:
         self.model_approach = 'point_force'
 
         # other parameters
-        input_file_path = inspect.getouterframes(inspect.currentframe())[1][1]
-        input_file_name = os.path.basename(input_file_path)
-        self.input_file_name = os.path.splitext(input_file_name)[0]
-        self.input_file_path = input_file_path
-        self.output_directory = os.path.join('results', self.input_file_name)
+        model_file_path = inspect.getouterframes(inspect.currentframe())[1][1]
+        model_file_name = os.path.basename(model_file_path)
+        self.model_name = os.path.splitext(model_file_name)[0]             # rename, risk of confusion (.INP file)
+        self.model_file_path = model_file_path
+        self.output_directory = os.path.join('results', self.model_name)
         self.no_gui_mode = any(arg == "-noGUI" for arg in sys.argv)
 
     # @abstractmethod
@@ -146,8 +146,8 @@ class FEModel:
         os.makedirs(self.output_directory)
 
         # Copy the model file to the output directory
-        src = self.input_file_path
-        dst = os.path.join(self.output_directory, self.input_file_name + '.mdl')
+        src = self.model_file_path
+        dst = os.path.join(self.output_directory, self.model_name + '.mdl')
         shutil.copy(src, dst)
 
 
