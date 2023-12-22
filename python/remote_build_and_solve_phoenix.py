@@ -9,7 +9,8 @@ from guwlib.functions_phoenix.slurm import *
 
 # specify the model files to upload to the cluster
 model_files_local = [
-    os.path.join('models', 'examples', 'example_01.py')
+    os.path.join('models', 'examples', 'example_01.py'),
+    os.path.join('models', 'examples', 'crack_test.py')
 ]
 
 # specify the directory on remote machine where GUWlib is located
@@ -24,11 +25,7 @@ cae_n_tasks_per_node = 1
 cae_partition = 'standard'
 cae_max_time = "0:5:0"
 
-# resources to allocate for the submission handling script
-solving_handler_max_time = "14-0:0:0"
-# solving_handler will by default run on only one node, one task and on partition 'longrun'
-
-# resources to allocate for each solve (ABAQUS/Explicit, ABAQUS/Standard)
+# resources to allocate for each solver run (ABAQUS/Explicit, ABAQUS/Standard)
 solver_n_nodes = 1
 solver_n_tasks_per_node = 20
 solver_partition = 'shortrun_small'
@@ -45,7 +42,7 @@ for model_file in model_files_local:
 # generate a job file that calls phoenix_preprocesses_handler.py on the cluster ----------------------------------------
 model_files_remote = ('"[' + ", ".join(["'models/{}'".format(os.path.basename(model_file))
                                         for model_file in model_files_local]) + ']"')
-args = (f"{model_files_remote} {solving_handler_max_time} {int(solver_n_nodes)} {int(solver_n_tasks_per_node)} "
+args = (f"{model_files_remote} {int(solver_n_nodes)} {int(solver_n_tasks_per_node)} "
         f"{solver_partition} {solver_max_time}")
 job_file_name = 'run_preproc.job'
 generate_python_job_script(output_file_path=job_file_name,
@@ -54,7 +51,7 @@ generate_python_job_script(output_file_path=job_file_name,
                            n_tasks_per_node=cae_n_tasks_per_node,
                            max_time=cae_max_time,
                            slurm_job_name='PREPROC',
-                           python_file='guwlib/functions_phoenix/phoenix_preprocess_handler.py',
+                           python_file='guwlib/functions_phoenix/phoenix_preprocess_submit_handler.py',
                            args=args,
                            working_dir=remote_guwlib_path)
 

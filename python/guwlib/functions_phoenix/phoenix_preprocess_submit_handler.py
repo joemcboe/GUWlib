@@ -33,7 +33,7 @@ def find_inp_files_generate_job_script(directory_to_search, partition, n_nodes, 
                                            slurm_job_name=job_name,
                                            working_dir=os.path.abspath(root),
                                            inp_file=file_name)
-                job_file_paths.append(job_file_path)
+                job_file_paths.append(os.path.abspath(job_file_path))
 
     return job_file_paths
 
@@ -44,25 +44,16 @@ if __name__ == "__main__":
 
     # Extracting specific arguments based on their positions in the list
     model_file_paths_str = args[0]
-    solving_handler_max_time = args[1]
-    solver_n_nodes = int(args[2])
-    solver_n_tasks_per_node = int(args[3])
-    solver_partition = args[4]
-    solver_max_time = args[5]
-
-    # model_file_paths_str = "['C:\\\\Users\\\\joern\\\\Documents\\\\GitHub\\\\GUW\\\\python\\\\results\\\\alu3a_01.py']"
-    # solving_handler_max_time = "2:0:0"
-    # solver_n_nodes = 1
-    # solver_n_tasks_per_node = 1
-    # solver_partition = 'standard'
-    # solver_max_time = "0:30:0"
+    solver_n_nodes = int(args[1])
+    solver_n_tasks_per_node = int(args[2])
+    solver_partition = args[3]
+    solver_max_time = args[4]
 
     # Parsing the string representation of a list into an actual list
     model_file_paths = ast.literal_eval(model_file_paths_str)
 
-    # Initialize list of all generated *.JOB files
+    # Iterate through model_file_paths, run CAE to create *.INP files and generate SLURM jobs for each of them ---------
     job_files = []
-
     for model_file_path in model_file_paths:
         # run ABAQUS/CAE on the model.py file to create *.INP files (one for each load case)
         model_file_name = os.path.splitext(os.path.basename(model_file_path))[0]
@@ -81,6 +72,13 @@ if __name__ == "__main__":
                                                              max_time=solver_max_time)
         job_files.extend(model_job_files)
 
-    print(job_files)
-    # write_solving_handler_job_file(job paths)
-    # submit the solving handler job file
+    # build sequential submission chain --------------------------------------------------------------------------------
+    last_job_id = None
+    for i, job_file in enumerate(job_files):
+        if i == 0:
+            command = f"sbatch {job_file}"
+        else:
+            command = f"sbatch --dependency=afterany:{last_job_id} {job_file}"
+        result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
+        last_job_id = result.stdout.split()[-1].strip()
+

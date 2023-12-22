@@ -12,7 +12,7 @@ import subprocess
 import os
 
 # specify your model file path here
-model_file = os.path.join('models/examples', 'example_01.py')
+model_file = os.path.join('models/examples', 'example_02.py')
 
 
 # run ABAQUS/CAE on the model.py file ----------------
