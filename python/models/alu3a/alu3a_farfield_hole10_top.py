@@ -36,7 +36,8 @@ class MyModel(FEModel):
                                                    position_z='top',
                                                    diameter=16e-3))
 
-        self.defects = []
+        defect_pos_x, defect_pos_y = (PLATE_WIDTH - 3e-2, PLATE_WIDTH - 12e-2)
+        self.defects = [Hole(position_x=defect_pos_x, position_y=defect_pos_y, diameter=10e-3)]
         self.transducers = phased_array
 
         # set up the time / loading information ------------------------------------------------------------------------

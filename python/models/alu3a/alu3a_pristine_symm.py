@@ -33,7 +33,7 @@ class MyModel(FEModel):
         for i, (x, y) in enumerate(zip(pos_x, pos_y)):
             phased_array.append(CircularTransducer(position_x=x,
                                                    position_y=y,
-                                                   position_z='top',
+                                                   position_z='symmetric',
                                                    diameter=16e-3))
 
         self.defects = []

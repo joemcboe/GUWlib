@@ -36,7 +36,12 @@ class MyModel(FEModel):
                                                    position_z='top',
                                                    diameter=16e-3))
 
-        self.defects = []
+        defect_pos_radius = 220e-3
+        defect_pos_angle = 38.0/180.0 * np.pi
+        defect_pos_x, defect_pos_y = (PLATE_WIDTH / 2 + defect_pos_radius * np.cos(defect_pos_angle),
+                                      PLATE_WIDTH / 2 + defect_pos_radius * np.sin(defect_pos_angle))
+        self.defects = [Crack(position_x=defect_pos_x, position_y=defect_pos_y,
+                              length=15e-3, angle_degrees=45)]
         self.transducers = phased_array
 
         # set up the time / loading information ------------------------------------------------------------------------

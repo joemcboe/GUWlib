@@ -120,7 +120,7 @@ class FEModel:
 
     def get_max_time_increment(self):
         """
-        Computes the maximal time increment according to the CFL condition with the desired courant number.
+        Computes the maximum time increment according to the CFL condition with the desired courant number.
 
         :return: (Float) Maximum time increment used for time integration in ABAQUS/Explicit.
         """
