@@ -1,17 +1,17 @@
+# The Docker image that will be used to build your app
 image: python:latest
-
-stages:          # List of stages for jobs, and their order of execution
-  - docs
-
-docs-job:       # This job runs in the build stage, which runs first.
-  stage: docs
+# Functions that should be executed before the build script is run
+before_script:
+  - pip install -r requirements.txt
+pages:
   script:
-    - echo "Building the documentation..."
-    - echo "Installing requirements..."
-    - pip install -r requirements.txt
     - cd docs
-    - make html
+    - make -b html source ./public
   artifacts:
-      paths:
-      - docs/build/html
-
+    paths:
+      # The folder that contains the files to be exposed at the Page URL
+      - public
+  rules:
+    # This ensures that only pushes to the default branch will trigger
+    # a pages deploy
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
