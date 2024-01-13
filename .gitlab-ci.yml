@@ -13,4 +13,5 @@ docs-job:       # This job runs in the build stage, which runs first.
     - make html
   artifacts:
       paths:
-      - public
+      - docs/build/html
+
