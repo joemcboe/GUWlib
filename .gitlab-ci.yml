@@ -1,8 +1,8 @@
 stages:          # List of stages for jobs, and their order of execution
   - docs
 
-docs:       # This job runs in the build stage, which runs first.
-  stage: build
+docs-job:       # This job runs in the build stage, which runs first.
+  stage: docs
   script:
     - echo "Compiling the code..."
     - sleep 60
