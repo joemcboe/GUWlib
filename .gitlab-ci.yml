@@ -1,0 +1,13 @@
+# The Docker image that will be used to build your app
+image: python:latest
+
+pages:
+  script:
+  - pip install -r requirements.txt
+  - cd docs
+  - make html
+  artifacts:
+    paths:
+    - public
+  only:
+  - master
