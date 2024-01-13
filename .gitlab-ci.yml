@@ -14,5 +14,3 @@ docs-job:       # This job runs in the build stage, which runs first.
   artifacts:
       paths:
       - public
-  only:
-    - master
