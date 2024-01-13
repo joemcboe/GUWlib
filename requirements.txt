@@ -1,0 +1,3 @@
+sphinx
+sphinx-togglebutton
+sphinx-piccolo-theme
