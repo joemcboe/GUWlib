@@ -8,9 +8,17 @@
     <title>Material &#8212; GUWlib 2024 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
     <link rel="stylesheet" type="text/css" href="../_static/basic_mod.css?v=94a554c0" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=ef06060f" />
     <script src="../_static/documentation_options.js?v=6fefd858"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Show base class';</script>
+    <script>let toggleHintHide = 'Hide base class';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="../_static/js/theme.js"></script>
     <script src="../_static/js/petite-vue.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -131,7 +139,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage/first.html">Tutorial: First simulation</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Workflow</span></p>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../workflow/general.html">General procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../workflow/modelfiles.html">Writing model files</a></li>
@@ -165,11 +173,105 @@
             
   <section id="material">
 <h1>Material<a class="headerlink" href="#material" title="Link to this heading">¶</a></h1>
+<section id="id1">
+<h2><code class="docutils literal notranslate"><span class="pre">Material</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<div class="toggle docutils container">
 <dl class="py class">
 <dt class="sig sig-object py" id="guwlib.guw_objects.Material">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">guwlib.guw_objects.</span></span><span class="sig-name descname"><span class="pre">Material</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">material_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">material_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.guw_objects.Material" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">guwlib.guw_objects.</span></span><span class="sig-name descname"><span class="pre">Material</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">material_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.guw_objects.Material" title="Link to this definition">¶</a></dt>
+<dd><p>Base class to represent materials by their properties and by their material-dependent dispersion data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>material_name</strong> (<em>str</em>) – Name of the material for which to load the data.</p>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of the material.</p></li>
+<li><p><strong>properties</strong> (<em>dict</em>) – Dictionary storing the material properties.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
+</div>
+</section>
+<hr class="docutils" />
+<section id="isotropicmaterial">
+<h2><code class="docutils literal notranslate"><span class="pre">IsotropicMaterial</span></code><a class="headerlink" href="#isotropicmaterial" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="guwlib.guw_objects.IsotropicMaterial">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">guwlib.guw_objects.</span></span><span class="sig-name descname"><span class="pre">IsotropicMaterial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">material_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.guw_objects.IsotropicMaterial" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#guwlib.guw_objects.Material" title="guwlib.guw_objects.material.Material"><code class="xref py py-class docutils literal notranslate"><span class="pre">Material</span></code></a></p>
+<p>Represents an isotropic material, e.g. 1100 aluminum alloy.</p>
+<p>An <code class="docutils literal notranslate"><span class="pre">IsotropicMaterial</span></code> instance is initialized by passing a valid  material name to its constructor.
+The respective material properties are then loaded from the <code class="docutils literal notranslate"><span class="pre">guwlib/data/isotropic_materials.json</span></code> file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ValueError: If the material name doesn’t exist in the material library (<a href="#id2"><span class="problematic" id="id3">*</span></a>.JSON file).</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>material_name</strong> (<em>str</em>) – Name of the isotropic material for which to load the data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<hr class="docutils" />
+<section id="piezoelectricmaterial">
+<h2><code class="docutils literal notranslate"><span class="pre">PiezoElectricMaterial</span></code><a class="headerlink" href="#piezoelectricmaterial" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="guwlib.guw_objects.PiezoElectricMaterial">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">guwlib.guw_objects.</span></span><span class="sig-name descname"><span class="pre">PiezoElectricMaterial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">material_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.guw_objects.PiezoElectricMaterial" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#guwlib.guw_objects.Material" title="guwlib.guw_objects.material.Material"><code class="xref py py-class docutils literal notranslate"><span class="pre">Material</span></code></a></p>
+<p>Represents a piezoelectric material, e.g. PIC255.</p>
+<p>A <code class="docutils literal notranslate"><span class="pre">PiezoelectricMaterial</span></code> instance is initialized by passing a valid  material name to its constructor.
+The respective material properties are then loaded from the <code class="docutils literal notranslate"><span class="pre">guwlib/data/piezoelectric_materials.json</span></code> file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ValueError: If the material name doesn’t exist in the material library (<a href="#id4"><span class="problematic" id="id5">*</span></a>.JSON file).</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>material_name</strong> (<em>str</em>) – Name of the piezoelectric material for which to load the data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<hr class="docutils" />
+<section id="adding-materials-to-the-material-library">
+<h2>Adding materials to the material library<a class="headerlink" href="#adding-materials-to-the-material-library" title="Link to this heading">¶</a></h2>
+<p>A lot of materials are already available by default and can be loaded by providing their name.
+All material data is stored in the <em>data</em> directory (<code class="docutils literal notranslate"><span class="pre">guwlib/data/</span></code>) in respective .JSON
+and .TXT files. By default, the content of this directory looks like this:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>guwlib/
+│   ...
+│
+├───data/
+│       AluminumAlloy1100_A_Lamb.txt
+│       AluminumAlloy1100_S_Lamb.txt
+│       isotropic_materials.json
+│       piezoelectric_materials.json
+│
+├───...
+</pre></div>
+</div>
+<p>For each material class, the respective .JSON file stores material properties,
+like Youngs modulus and density. Please inspect these files to see which materials are
+available. To add your own materials, follow the format of the existing entries.</p>
+<p>If a material is used for the <code class="xref py py-class docutils literal notranslate"><span class="pre">Plate</span></code>, GUWlib will
+also try to obtain analytical dispersion data for this material. This dispersion data has to
+be stored in two .TXT files for each material, and the files have to be named after this
+convention:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;material_name&gt;_S_Lamb.txt</span></code> (symmetric modes data)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;material_name&gt;_A_Lamb.txt</span></code> (antisymmetric modes data)</p></li>
+</ul>
+</div></blockquote>
+<p>These files can be created with <a class="reference external" href="https://www.dlr.de/zlp/en/desktopdefault.aspx/tabid-14332/24874_read-61142/">DLR Dispersion Calculator</a>.
+Make sure that your .TXT files are formatted the same way as the existing example files
+for 1100 aluminum alloy.</p>
+</section>
 </section>
 
 
@@ -187,7 +289,19 @@
             <div class="page_toc">
                 <ul>
 <li><a class="reference internal" href="#">Material</a><ul>
+<li><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">Material</span></code></a><ul>
 <li><a class="reference internal" href="#guwlib.guw_objects.Material"><code class="docutils literal notranslate"><span class="pre">Material</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#isotropicmaterial"><code class="docutils literal notranslate"><span class="pre">IsotropicMaterial</span></code></a><ul>
+<li><a class="reference internal" href="#guwlib.guw_objects.IsotropicMaterial"><code class="docutils literal notranslate"><span class="pre">IsotropicMaterial</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#piezoelectricmaterial"><code class="docutils literal notranslate"><span class="pre">PiezoElectricMaterial</span></code></a><ul>
+<li><a class="reference internal" href="#guwlib.guw_objects.PiezoElectricMaterial"><code class="docutils literal notranslate"><span class="pre">PiezoElectricMaterial</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#adding-materials-to-the-material-library">Adding materials to the material library</a></li>
 </ul>
 </li>
 </ul>

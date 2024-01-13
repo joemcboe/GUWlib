@@ -8,9 +8,17 @@
     <title>Reviewing model files &#8212; GUWlib 2024 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
     <link rel="stylesheet" type="text/css" href="../_static/basic_mod.css?v=94a554c0" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=ef06060f" />
     <script src="../_static/documentation_options.js?v=6fefd858"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Show base class';</script>
+    <script>let toggleHintHide = 'Hide base class';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="../_static/js/theme.js"></script>
     <script src="../_static/js/petite-vue.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -131,7 +139,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage/first.html">Tutorial: First simulation</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Workflow</span></p>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="general.html">General procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modelfiles.html">Writing model files</a></li>
@@ -173,13 +181,13 @@
 </section>
 <section id="opening-a-model-file-py-in-cae-using-local-preview-model-py-script">
 <h2>Opening a model file (<a href="#id5"><span class="problematic" id="id6">*</span></a>.PY) in CAE using <code class="docutils literal notranslate"><span class="pre">local_preview_model.py</span></code> script<a class="headerlink" href="#opening-a-model-file-py-in-cae-using-local-preview-model-py-script" title="Link to this heading">¶</a></h2>
-<p id="module-local_preview_model">This script opens the ABAQUS/CAE environment to preview a GUWLIB model file (<a href="#id7"><span class="problematic" id="id8">*</span></a>.PY). Specify
-the path to the model file, and the script will execute Abaqus/CAE to display the model. The
+<p id="module-local_preview_model">This script opens the ABAQUS/CAE GUI to preview a GUWlib model file (.PY). Specify the
+path to the model file, and the script will execute Abaqus/CAE to display the model. The
 generation of .INP files in ABAQUS/CAE is omitted when Abaqus is run in GUI mode.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Usage<span class="colon">:</span></dt>
 <dd class="field-odd"><ol class="arabic simple">
-<li><p>Specify the path to the GUWLIB model file in the ‘model_file’ variable.</p></li>
+<li><p>Specify the path to the GUWlib model file in the ‘model_file’ variable.</p></li>
 <li><p>Run the script.</p></li>
 </ol>
 </dd>
@@ -188,7 +196,7 @@ generation of .INP files in ABAQUS/CAE is omitted when Abaqus is run in GUI mode
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="c1"># specify your model file path here</span>
-<span class="n">model_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;models/examples&#39;</span><span class="p">,</span> <span class="s1">&#39;crack_test.py&#39;</span><span class="p">)</span>
+<span class="n">model_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;models/examples&#39;</span><span class="p">,</span> <span class="s1">&#39;my_plate.py&#39;</span><span class="p">)</span>
 
 
 <span class="c1"># run ABAQUS/CAE on the model.py file ----------------</span>

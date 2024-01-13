@@ -20,10 +20,10 @@ class MyModel(FEModel):
         # setup plate, defects and transducers -------------------------------------------------------------------------
         aluminum = Material(material_type='isotropic', material_name='AluminumAlloy1100')
 
-        self.plate = IsotropicPlate(material=aluminum,
-                                    thickness=3e-3,
-                                    width=PLATE_WIDTH,
-                                    length=PLATE_LENGTH)
+        self.plate = IsotropicRectangularPlate(material=aluminum,
+                                               thickness=3e-3,
+                                               width=PLATE_WIDTH,
+                                               length=PLATE_LENGTH)
 
         phased_array = []
         phi = np.linspace(0, 2 * np.pi, PHASED_ARRAY_N_ELEMENTS + 1)

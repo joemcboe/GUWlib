@@ -8,9 +8,17 @@
     <title>Loadcase &#8212; GUWlib 2024 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
     <link rel="stylesheet" type="text/css" href="../_static/basic_mod.css?v=94a554c0" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=ef06060f" />
     <script src="../_static/documentation_options.js?v=6fefd858"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Show base class';</script>
+    <script>let toggleHintHide = 'Hide base class';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="../_static/js/theme.js"></script>
     <script src="../_static/js/petite-vue.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -131,7 +139,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage/first.html">Tutorial: First simulation</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Workflow</span></p>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../workflow/general.html">General procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../workflow/modelfiles.html">Writing model files</a></li>
@@ -168,7 +176,36 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="guwlib.guw_objects.LoadCase">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">guwlib.guw_objects.</span></span><span class="sig-name descname"><span class="pre">LoadCase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transducer_signals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_request</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'history'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.guw_objects.LoadCase" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Container for loading data / transducer excitation signals.</p>
+<p>Each load case represents one independent ABAQUS simulation. Multiple load cases can be defined for one GUWlib
+model. A <code class="docutils literal notranslate"><span class="pre">LoadCase</span></code> instance contains the excitation signals applied to each transducer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of this load case.</p></li>
+<li><p><strong>duration</strong> (<em>float</em>) – Total ABAQUS simulation duration for this load case.</p></li>
+<li><p><strong>transducer_signals</strong> (<em>list</em><em>[</em><a class="reference internal" href="Signal.html#guwlib.guw_objects.Signal" title="guwlib.guw_objects.Signal"><em>Signal</em></a><em>, </em><em>None</em><em>]</em>) – A list, containing the excitation signal for each transducer, in
+the same order as the transducers in <code class="docutils literal notranslate"><span class="pre">FEModel.transducers</span></code>. The length of this list must be equal to the
+number of transducers used in the model, i.e. <code class="docutils literal notranslate"><span class="pre">len(LoadCase.transducer_signals)</span></code> !=
+<code class="docutils literal notranslate"><span class="pre">len(FEModel.transducers)</span></code>. If a transducer is not excited in this load case, set the corresponding list
+item to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>output_request</strong> (<em>str</em>) – The output to be requested in ABAQUS for this load case. If set to
+<code class="docutils literal notranslate"><span class="pre">history</span></code>, history output is requested for all transducer signals. If set to <code class="docutils literal notranslate"><span class="pre">field</span></code>, an additional
+field output is requested for the nodes contained in the  plates’ field output set (i.e. the plates top
+surface) in time intervals of 10 * <code class="docutils literal notranslate"><span class="pre">FEModel.get_max_time_increment()</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of this load case.</p></li>
+<li><p><strong>duration</strong> (<em>float</em>) – Total ABAQUS simulation duration for this load case.</p></li>
+<li><p><strong>transducer_signals</strong> (<em>list</em><em>[</em><a class="reference internal" href="Signal.html#guwlib.guw_objects.Signal" title="guwlib.guw_objects.Signal"><em>Signal</em></a><em>]</em>) – A list, containing the excitation signal for each transducer.</p></li>
+<li><p><strong>output_request</strong> (<em>str</em>) – The output to be requested in ABAQUS for this load case.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Figures:</strong></p>
+</dd></dl>
 
 </section>
 

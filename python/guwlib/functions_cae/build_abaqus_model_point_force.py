@@ -56,10 +56,14 @@ def build_abaqus_model_point_force(model):
 
     # create the transducer geometry
     for i, transducer in enumerate(model.transducers):
-        transducer.set_identifiers(unique_id=i + 1)
-        bounding_box = create_transducer_as_vertex(plate=model.plate, transducer=transducer,
-                                                   element_size=element_size_in_plane)
-        bounding_box_list.append(bounding_box)
+        if isinstance(transducer, CircularTransducer):
+            transducer.set_identifiers(unique_id=i + 1)
+            bounding_box = create_transducer_as_vertex(plate=model.plate, transducer=transducer,
+                                                       element_size=element_size_in_plane)
+            bounding_box_list.append(bounding_box)
+        else:
+            raise NotImplementedError("Transducer of type {} not implemented.".format(type(transducer)))
+
     log_info("Added " + str(len(model.transducers)) + " nodes, representing the piezoelectric transducers.")
 
     # partition the plate into partitions that are suitable for structured meshing

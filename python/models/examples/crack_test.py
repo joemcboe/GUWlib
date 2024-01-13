@@ -30,10 +30,10 @@ class SimpleModel(FEModel):
                                                    position_y=y,
                                                    diameter=16e-3))
 
-        self.plate = IsotropicPlate(material=aluminum,
-                                    thickness=3e-3,
-                                    width=PLATE_WIDTH,
-                                    length=PLATE_LENGTH)
+        self.plate = IsotropicRectangularPlate(material=aluminum,
+                                               thickness=3e-3,
+                                               width=PLATE_WIDTH,
+                                               length=PLATE_LENGTH)
 
         self.defects = []
         alpha = 0

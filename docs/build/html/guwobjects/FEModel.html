@@ -8,9 +8,17 @@
     <title>FEModel &#8212; GUWlib 2024 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
     <link rel="stylesheet" type="text/css" href="../_static/basic_mod.css?v=94a554c0" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=ef06060f" />
     <script src="../_static/documentation_options.js?v=6fefd858"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Show base class';</script>
+    <script>let toggleHintHide = 'Hide base class';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="../_static/js/theme.js"></script>
     <script src="../_static/js/petite-vue.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -131,7 +139,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage/first.html">Tutorial: First simulation</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Workflow</span></p>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../workflow/general.html">General procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../workflow/modelfiles.html">Writing model files</a></li>
@@ -165,71 +173,50 @@
             
   <section id="femodel">
 <h1>FEModel<a class="headerlink" href="#femodel" title="Link to this heading">¶</a></h1>
-<section id="overview">
-<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
-</section>
-<section id="class-definition">
-<h2>Class definition<a class="headerlink" href="#class-definition" title="Link to this heading">¶</a></h2>
+<section id="id1">
+<h2><code class="docutils literal notranslate"><span class="pre">FEModel</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="guwlib.FEModel">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">guwlib.</span></span><span class="sig-name descname"><span class="pre">FEModel</span></span><a class="headerlink" href="#guwlib.FEModel" title="Link to this definition">¶</a></dt>
-<dd><p>Abstract class, acting as a container for simulation parameters (e.g. discretization level) as well as spatial and
-time/loading data (e.g. plate, defects, transducers, excitation signals).</p>
-<p>To create a valid GUWlib model, you have to instantiate an <a class="reference internal" href="#guwlib.FEModel" title="guwlib.FEModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEModel</span></code></a> object in your python script. Override
-its <a class="reference internal" href="#guwlib.FEModel.setup_parameters" title="guwlib.FEModel.setup_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setup_parameters()</span></code></a> method to define your simulation by setting its variables. To set the model up in
-ABAQUS/CAE, call its <a class="reference internal" href="#guwlib.FEModel.setup_in_abaqus" title="guwlib.FEModel.setup_in_abaqus"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setup_in_abaqus()</span></code></a> method. See models/examples for reference.</p>
+<dd><p>Instances of this class act as a container for all simulation parameters.</p>
+<p>An FEModel instance carries general simulation parameters (e.g. discretization level) as well as spatial and
+time/loading data (e.g. plate, defects, transducers, excitation signals to be used in the simulation).</p>
+<p>To create a valid GUWlib model, you have to instantiate an <a class="reference internal" href="#guwlib.FEModel" title="guwlib.FEModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEModel</span></code></a> object in your python script.
+Override its <a class="reference internal" href="#guwlib.FEModel.setup_parameters" title="guwlib.FEModel.setup_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setup_parameters()</span></code></a> method to define your simulation by setting its variables. To set the
+model up in ABAQUS/CAE, call its <a class="reference internal" href="#guwlib.FEModel.setup_in_abaqus" title="guwlib.FEModel.setup_in_abaqus"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setup_in_abaqus()</span></code></a> method. See <code class="docutils literal notranslate"><span class="pre">models/examples/</span></code> for reference.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>plate</strong> (<a class="reference internal" href="Plate.html#guwlib.guw_objects.plate.IsotropicPlate" title="guwlib.guw_objects.plate.IsotropicPlate"><em>IsotropicPlate</em></a>) – Plate of the FE model</p></li>
-<li><p><strong>transducers</strong> (<em>List</em><em>[</em><a class="reference internal" href="Transducer.html#guwlib.guw_objects.CircularTransducer" title="guwlib.guw_objects.CircularTransducer"><em>CircularTransducer</em></a><em>]</em>) – A list with the transducers applied to the plate</p></li>
-<li><p><strong>defects</strong> (<em>List</em><em>[</em><a class="reference internal" href="Defects.html#guwlib.guw_objects.Defect" title="guwlib.guw_objects.Defect"><em>Defect</em></a><em>]</em>) – A list with the defects (cracks, holes, …) of the plate</p></li>
-<li><p><strong>load_cases</strong> (<em>List</em><em>[</em><a class="reference internal" href="Loadcase.html#guwlib.guw_objects.LoadCase" title="guwlib.guw_objects.LoadCase"><em>LoadCase</em></a><em>]</em>) – A list with loadcases for the simulation</p></li>
-<li><p><strong>max_frequency</strong> (<em>Float</em>) – Specifies the maximum frequency up to which the plate will be excited</p></li>
-<li><p><strong>elements_per_wavelength</strong> (<em>Int</em>) – Number of elements that shall be used for discretization per one wavelength
-(smallest wavelength in range [0, max_frequency] that occurs in the plate, according to the dispersion data of
-the material), Default: 16</p></li>
-<li><p><strong>elements_in_thickness_direction</strong> (<em>Int</em>) – Number of elements that shall be used for discretization along the
-thickness direction of the plate, Default: 8</p></li>
-<li><p><strong>courant_number</strong> (<em>Float</em>) – Used for the computation of the maximum time increment according to CFL condition,
-Default: 0.5</p></li>
-<li><p><strong>model_approach</strong> (<em>String</em>) – Specifies which script shall be used to build the FE model in ABAQUS/CAE, either
-‘point_force’ or ‘piezo_electric’</p></li>
+<li><p><strong>plate</strong> (<a class="reference internal" href="Plate.html#guwlib.guw_objects.plate.Plate" title="guwlib.guw_objects.plate.Plate"><em>Plate</em></a>) – Plate of the FE model.</p></li>
+<li><p><strong>transducers</strong> (<em>list</em><em>[</em><a class="reference internal" href="Transducer.html#guwlib.guw_objects.Transducer" title="guwlib.guw_objects.Transducer"><em>Transducer</em></a><em>]</em>) – A list with the transducers applied to the plate.</p></li>
+<li><p><strong>defects</strong> (<em>list</em><em>[</em><a class="reference internal" href="Defects.html#guwlib.guw_objects.Defect" title="guwlib.guw_objects.Defect"><em>Defect</em></a><em>]</em>) – A list with the defects (cracks, holes, …) of the plate.</p></li>
+<li><p><strong>load_cases</strong> (<em>list</em><em>[</em><a class="reference internal" href="Loadcase.html#guwlib.guw_objects.LoadCase" title="guwlib.guw_objects.LoadCase"><em>LoadCase</em></a><em>]</em>) – A list with load cases (transducer excitation data) for the simulation.</p></li>
+<li><p><strong>max_frequency</strong> (<em>float</em>) – Specifies the maximum frequency up to which the plate will be excited.</p></li>
+<li><p><strong>elements_per_wavelength</strong> (<em>int</em>) – Number of elements per wavelength to be used for spatial discretization
+(decisive is the smallest wavelength in range [0, max_frequency] that occurs in the plate, according to the
+dispersion data of the material), (default: 16).</p></li>
+<li><p><strong>elements_in_thickness_direction</strong> (<em>int</em>) – Number of elements along the thickness direction of the plate to be
+used for spatial discretization (default: 8).</p></li>
+<li><p><strong>courant_number</strong> (<em>float</em>) – Used for the computation of the maximum time increment of the explicit solver,
+according to CFL condition (default: 0.5).</p></li>
+<li><p><strong>model_approach</strong> (<em>str</em>) – Specifies which script to use to build the FE model in ABAQUS/CAE, either
+<code class="docutils literal notranslate"><span class="pre">'point_force'</span></code> or <code class="docutils literal notranslate"><span class="pre">'piezo_electric'</span></code> (default: <code class="docutils literal notranslate"><span class="pre">'point_force'</span></code>).</p></li>
 </ul>
 </dd>
 </dl>
+<p><strong>Figures:</strong></p>
+<p><strong>Methods:</strong></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="guwlib.FEModel.setup_parameters">
 <span class="sig-name descname"><span class="pre">setup_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.FEModel.setup_parameters" title="Link to this definition">¶</a></dt>
 <dd><p>Abstract method to be overridden in inherent classes to set up the models parameters.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="guwlib.FEModel.setup_in_abaqus">
 <span class="sig-name descname"><span class="pre">setup_in_abaqus</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.FEModel.setup_in_abaqus" title="Link to this definition">¶</a></dt>
-<dd><p>Calls the function that creates the FE model in ABAQUS/CAE, depending on the model_approach attribute.
+<dd><p>Calls the function that creates the FE model in ABAQUS/CAE, depending on the <code class="docutils literal notranslate"><span class="pre">model_approach</span></code> attribute.
 A basic check for inconsistencies in the model definition is performed beforehand.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="guwlib.FEModel.generate_report">
-<span class="sig-name descname"><span class="pre">generate_report</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.FEModel.generate_report" title="Link to this definition">¶</a></dt>
-<dd><p>Generates a visual representation of the model and an easy-to-read summary of its parameters as a Latex file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -238,7 +225,7 @@ A basic check for inconsistencies in the model definition is performed beforehan
 <dd><p>Compute the required element size in thickness direction of the plate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(Float) Element size used for in-thickness discretization of the plate.</p>
+<dd class="field-odd"><p>(float) Element size used for in-thickness discretization of the plate.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -250,7 +237,7 @@ A basic check for inconsistencies in the model definition is performed beforehan
 occurring in the range [0, <code class="xref py py-attr docutils literal notranslate"><span class="pre">max_frequency</span></code>].</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(Float) Element size used for in-plane discretization of the plate.</p>
+<dd class="field-odd"><p>(float) Element size used for in-plane discretization of the plate.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -258,20 +245,16 @@ occurring in the range [0, <code class="xref py py-attr docutils literal notrans
 <dl class="py method">
 <dt class="sig sig-object py" id="guwlib.FEModel.get_max_time_increment">
 <span class="sig-name descname"><span class="pre">get_max_time_increment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.FEModel.get_max_time_increment" title="Link to this definition">¶</a></dt>
-<dd><p>Computes the maximal time increment according to the CFL condition with the desired courant number.</p>
+<dd><p>Computes the maximum time increment according to the CFL condition with the desired courant number.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(Float) Maximum time increment used for time integration in ABAQUS/Explicit.</p>
+<dd class="field-odd"><p>(float) Maximum time increment used for time integration in ABAQUS/Explicit.</p>
 </dd>
 </dl>
 </dd></dl>
 
 </dd></dl>
 
-</section>
-<section id="see-also">
-<h2>See also<a class="headerlink" href="#see-also" title="Link to this heading">¶</a></h2>
-<p>…</p>
 </section>
 </section>
 
@@ -290,12 +273,10 @@ occurring in the range [0, <code class="xref py py-attr docutils literal notrans
             <div class="page_toc">
                 <ul>
 <li><a class="reference internal" href="#">FEModel</a><ul>
-<li><a class="reference internal" href="#overview">Overview</a></li>
-<li><a class="reference internal" href="#class-definition">Class definition</a><ul>
+<li><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">FEModel</span></code></a><ul>
 <li><a class="reference internal" href="#guwlib.FEModel"><code class="docutils literal notranslate"><span class="pre">FEModel</span></code></a><ul>
 <li><a class="reference internal" href="#guwlib.FEModel.setup_parameters"><code class="docutils literal notranslate"><span class="pre">FEModel.setup_parameters()</span></code></a></li>
 <li><a class="reference internal" href="#guwlib.FEModel.setup_in_abaqus"><code class="docutils literal notranslate"><span class="pre">FEModel.setup_in_abaqus()</span></code></a></li>
-<li><a class="reference internal" href="#guwlib.FEModel.generate_report"><code class="docutils literal notranslate"><span class="pre">FEModel.generate_report()</span></code></a></li>
 <li><a class="reference internal" href="#guwlib.FEModel.get_element_size_thickness"><code class="docutils literal notranslate"><span class="pre">FEModel.get_element_size_thickness()</span></code></a></li>
 <li><a class="reference internal" href="#guwlib.FEModel.get_element_size_in_plane"><code class="docutils literal notranslate"><span class="pre">FEModel.get_element_size_in_plane()</span></code></a></li>
 <li><a class="reference internal" href="#guwlib.FEModel.get_max_time_increment"><code class="docutils literal notranslate"><span class="pre">FEModel.get_max_time_increment()</span></code></a></li>
@@ -303,7 +284,6 @@ occurring in the range [0, <code class="xref py py-attr docutils literal notrans
 </li>
 </ul>
 </li>
-<li><a class="reference internal" href="#see-also">See also</a></li>
 </ul>
 </li>
 </ul>

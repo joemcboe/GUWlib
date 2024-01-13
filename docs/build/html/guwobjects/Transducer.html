@@ -8,9 +8,17 @@
     <title>Transducer &#8212; GUWlib 2024 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
     <link rel="stylesheet" type="text/css" href="../_static/basic_mod.css?v=94a554c0" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=ef06060f" />
     <script src="../_static/documentation_options.js?v=6fefd858"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Show base class';</script>
+    <script>let toggleHintHide = 'Hide base class';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="../_static/js/theme.js"></script>
     <script src="../_static/js/petite-vue.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -131,7 +139,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage/first.html">Tutorial: First simulation</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Workflow</span></p>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../workflow/general.html">General procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../workflow/modelfiles.html">Writing model files</a></li>
@@ -165,11 +173,82 @@
             
   <section id="transducer">
 <h1>Transducer<a class="headerlink" href="#transducer" title="Link to this heading">¶</a></h1>
+<section id="id1">
+<h2><code class="docutils literal notranslate"><span class="pre">Transducer</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<div class="toggle docutils container">
+<dl class="py class">
+<dt class="sig sig-object py" id="guwlib.guw_objects.Transducer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">guwlib.guw_objects.</span></span><span class="sig-name descname"><span class="pre">Transducer</span></span><a class="headerlink" href="#guwlib.guw_objects.Transducer" title="Link to this definition">¶</a></dt>
+<dd><p>Base class to represent (piezoelectric) transducers.</p>
+<p><strong>Methods:</strong></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="guwlib.guw_objects.Transducer.set_identifiers">
+<span class="sig-name descname"><span class="pre">set_identifiers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unique_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.guw_objects.Transducer.set_identifiers" title="Link to this definition">¶</a></dt>
+<dd><p>Sets the names to identify different ABAQUS geometry / mesh parts of the transducer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>unique_id</strong> (<em>int</em>) – A unique ID of this transducer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</section>
+<hr class="docutils" />
+<section id="circulartransducer">
+<h2><code class="docutils literal notranslate"><span class="pre">CircularTransducer</span></code><a class="headerlink" href="#circulartransducer" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="guwlib.guw_objects.CircularTransducer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">guwlib.guw_objects.</span></span><span class="sig-name descname"><span class="pre">CircularTransducer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thickness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">material</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">electrode_thickness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">electrode_material</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'top'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.guw_objects.CircularTransducer" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">guwlib.guw_objects.</span></span><span class="sig-name descname"><span class="pre">CircularTransducer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'top'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thickness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">material</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">electrode_thickness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">electrode_material</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.guw_objects.CircularTransducer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#guwlib.guw_objects.Transducer" title="guwlib.guw_objects.transducer.Transducer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transducer</span></code></a></p>
+<p>Represents a circular (piezoelectric) transducer.</p>
+<p>The transducer may be realised in the FE model as a concentrated force or as a piezoelectric patch with an electric
+potential applied to its surfaces, depending on whether <code class="docutils literal notranslate"><span class="pre">model_approach</span></code> is set to <code class="docutils literal notranslate"><span class="pre">point_force</span></code> or
+<code class="docutils literal notranslate"><span class="pre">piezo_electric</span></code>, respectively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>position_x</strong> (<em>float</em>) – Position of the transducer in x-direction from the coordinate origin.</p></li>
+<li><p><strong>position_y</strong> (<em>float</em>) – Position of the transducer in y-direction from the coordinate origin.</p></li>
+<li><p><strong>diameter</strong> (<em>float</em>) – Diameter of the circular transducer.</p></li>
+<li><p><strong>position_z</strong> (<em>str</em>) – Position of the transducer with respect to the plate surface, either
+<code class="docutils literal notranslate"><span class="pre">top</span></code>, <code class="docutils literal notranslate"><span class="pre">bottom</span></code>, <code class="docutils literal notranslate"><span class="pre">symmetric</span></code> or <code class="docutils literal notranslate"><span class="pre">asymmetric</span></code>.</p></li>
+<li><p><strong>thickness</strong> (<em>float</em>) – Thickness of the piezo-electric material part of the transducer (required only
+if <code class="docutils literal notranslate"><span class="pre">FEModel.model_approach</span></code> is set to <code class="docutils literal notranslate"><span class="pre">piezo_electric</span></code>.)</p></li>
+<li><p><strong>material</strong> (<a class="reference internal" href="Material.html#guwlib.guw_objects.PiezoElectricMaterial" title="guwlib.guw_objects.PiezoElectricMaterial"><em>PiezoElectricMaterial</em></a>) – Material used to model the transducer (required only
+if <code class="docutils literal notranslate"><span class="pre">FEModel.model_approach</span></code> is set to <code class="docutils literal notranslate"><span class="pre">piezo_electric</span></code>.)</p></li>
+<li><p><strong>electrode_thickness</strong> (<em>float</em>) – Thickness of the electrode material part of the transducer (required only
+if <code class="docutils literal notranslate"><span class="pre">FEModel.model_approach</span></code> is set to <code class="docutils literal notranslate"><span class="pre">piezo_electric</span></code>.)</p></li>
+<li><p><strong>electrode_material</strong> (<a class="reference internal" href="Material.html#guwlib.guw_objects.IsotropicMaterial" title="guwlib.guw_objects.IsotropicMaterial"><em>IsotropicMaterial</em></a>) – Material used to model the transducers’ electrode
+(required only if <code class="docutils literal notranslate"><span class="pre">FEModel.model_approach</span></code> is set to <code class="docutils literal notranslate"><span class="pre">piezo_electric</span></code>.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>radius</strong> (<em>float</em>) – Radius of the circular transducer.</p></li>
+<li><p><strong>position_x</strong> (<em>float</em>) – Position of the transducer in x-direction from the coordinate origin.</p></li>
+<li><p><strong>position_y</strong> (<em>float</em>) – Position of the transducer in y-direction from the coordinate origin.</p></li>
+<li><p><strong>position_z</strong> (<em>str</em>) – Position of the transducer with respect to the plate surface.</p></li>
+<li><p><strong>thickness</strong> (<em>float</em>) – Thickness of the piezo-electric material part of the transducer.</p></li>
+<li><p><strong>material</strong> (<a class="reference internal" href="Material.html#guwlib.guw_objects.PiezoElectricMaterial" title="guwlib.guw_objects.PiezoElectricMaterial"><em>PiezoElectricMaterial</em></a>) – Material used to model the transducer.</p></li>
+<li><p><strong>electrode_thickness</strong> (<em>float</em>) – Thickness of the electrode material part of the transducer.</p></li>
+<li><p><strong>electrode_material</strong> (<a class="reference internal" href="Material.html#guwlib.guw_objects.IsotropicMaterial" title="guwlib.guw_objects.IsotropicMaterial"><em>IsotropicMaterial</em></a>) – Material used to model the transducers’ electrode.</p></li>
+<li><p><strong>id</strong> (<em>int</em>) – A unique ID of this transducer.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – A unique, descriptive name of this transducer.</p></li>
+<li><p><strong>on_plate_top_set_name</strong> (<em>str</em>) – Name for the ABAQUS set containing the transducer which is applied to the
+top surface of the plate.</p></li>
+<li><p><strong>on_plate_bottom_set_name</strong> (<em>str</em>) – Name for the ABAQUS set containing the transducer which is applied to the
+top surface of the plate.</p></li>
+<li><p><strong>bounding_box_cell_set_name</strong> (<em>str</em>) – Name for the ABAQUS set containing the transducers bounding box.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Figures:</strong></p>
+</dd></dl>
 
+</section>
 </section>
 
 
@@ -187,7 +266,17 @@
             <div class="page_toc">
                 <ul>
 <li><a class="reference internal" href="#">Transducer</a><ul>
+<li><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">Transducer</span></code></a><ul>
+<li><a class="reference internal" href="#guwlib.guw_objects.Transducer"><code class="docutils literal notranslate"><span class="pre">Transducer</span></code></a><ul>
+<li><a class="reference internal" href="#guwlib.guw_objects.Transducer.set_identifiers"><code class="docutils literal notranslate"><span class="pre">Transducer.set_identifiers()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#circulartransducer"><code class="docutils literal notranslate"><span class="pre">CircularTransducer</span></code></a><ul>
 <li><a class="reference internal" href="#guwlib.guw_objects.CircularTransducer"><code class="docutils literal notranslate"><span class="pre">CircularTransducer</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

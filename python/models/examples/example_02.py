@@ -32,10 +32,10 @@ class SimpleModel(FEModel):
                                                    position_z=position_z_values[i % 4],
                                                    diameter=16e-3))
 
-        self.plate = IsotropicPlate(material=aluminum,
-                                    thickness=3e-3,
-                                    width=PLATE_WIDTH,
-                                    length=PLATE_LENGTH)
+        self.plate = IsotropicRectangularPlate(material=aluminum,
+                                               thickness=3e-3,
+                                               width=PLATE_WIDTH,
+                                               length=PLATE_LENGTH)
 
         self.defects = [Hole(position_x=15e-2, position_y=3e-2, diameter=12e-3)]
         self.transducers = phased_array

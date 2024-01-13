@@ -13,12 +13,12 @@ class SimpleModel(FEModel):
     def setup_parameters(self):
         # basic simulation parameters ----------------------------------------------------------------------------------
         self.max_frequency = 300e3
-        self.elements_per_wavelength = 12
-        self.elements_in_thickness_direction = 4
+        self.elements_per_wavelength = 16
+        self.elements_in_thickness_direction = 8
         self.model_approach = 'point_force'
 
         # setup plate, defects and transducers -------------------------------------------------------------------------
-        aluminum = Material(material_type='isotropic', material_name='AluminumAlloy1100')
+        aluminum = IsotropicMaterial(material_name='AluminumAlloy1100')
 
         phased_array = []
         phi = np.linspace(0, 2 * np.pi, PHASED_ARRAY_N_ELEMENTS)
@@ -32,12 +32,12 @@ class SimpleModel(FEModel):
                                                    position_z=position_z_values[i % 4],
                                                    diameter=16e-3))
 
-        self.plate = IsotropicPlate(material=aluminum,
-                                    thickness=3e-3,
-                                    width=PLATE_WIDTH,
-                                    length=PLATE_LENGTH)
+        self.plate = IsotropicRectangularPlate(material=aluminum,
+                                               thickness=3e-3,
+                                               width=PLATE_WIDTH,
+                                               length=PLATE_LENGTH)
 
-        self.defects = [Crack(position_x=2e-2, position_y=4e-2, length=10e-3, angle_degrees=20),
+        self.defects = [Crack(position_x=2e-2, position_y=4e-2, length=10e-3, angle_degrees=0),
                         Hole(position_x=15e-2, position_y=3e-2, diameter=12e-3)]
         self.transducers = phased_array
 

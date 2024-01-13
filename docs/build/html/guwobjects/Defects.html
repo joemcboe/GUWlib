@@ -8,9 +8,17 @@
     <title>Defects &#8212; GUWlib 2024 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
     <link rel="stylesheet" type="text/css" href="../_static/basic_mod.css?v=94a554c0" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=ef06060f" />
     <script src="../_static/documentation_options.js?v=6fefd858"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Show base class';</script>
+    <script>let toggleHintHide = 'Hide base class';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="../_static/js/theme.js"></script>
     <script src="../_static/js/petite-vue.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -131,7 +139,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage/first.html">Tutorial: First simulation</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Workflow</span></p>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../workflow/general.html">General procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../workflow/modelfiles.html">Writing model files</a></li>
@@ -165,21 +173,153 @@
             
   <section id="defects">
 <h1>Defects<a class="headerlink" href="#defects" title="Link to this heading">¶</a></h1>
+<section id="defect">
+<h2><code class="docutils literal notranslate"><span class="pre">Defect</span></code><a class="headerlink" href="#defect" title="Link to this heading">¶</a></h2>
+<div class="toggle docutils container">
 <dl class="py class">
 <dt class="sig sig-object py" id="guwlib.guw_objects.Defect">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">guwlib.guw_objects.</span></span><span class="sig-name descname"><span class="pre">Defect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.guw_objects.Defect" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Base class to represent plate defects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>position_x</strong> (<em>float</em>) – Position of the defect in x-direction from the coordinate origin.</p></li>
+<li><p><strong>position_y</strong> (<em>float</em>) – Position of the defect in y-direction from the coordinate origin.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>position_x</strong> (<em>float</em>) – Position of the defect in x-direction from the coordinate origin.</p></li>
+<li><p><strong>position_y</strong> (<em>float</em>) – Position of the defect in y-direction from the coordinate origin.</p></li>
+<li><p><strong>id</strong> (<em>int</em>) – Unique identification number of the defect.</p></li>
+<li><p><strong>bounding_box_cell_set_name</strong> (<em>str</em>) – Unique name for the ABAQUS cell set of the defects bounding box.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Methods:</strong></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="guwlib.guw_objects.Defect.set_identifiers">
+<span class="sig-name descname"><span class="pre">set_identifiers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unique_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.guw_objects.Defect.set_identifiers" title="Link to this definition">¶</a></dt>
+<dd><p>Sets a unique ID and ABAQUS cell set name for this defects’ bounding box.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>unique_id</strong> (<em>int</em>) – Unique ID of this defect.</p>
+</dd>
+</dl>
+</dd></dl>
 
+</dd></dl>
+
+</div>
+</section>
+<hr class="docutils" />
+<section id="hole">
+<h2><code class="docutils literal notranslate"><span class="pre">Hole</span></code><a class="headerlink" href="#hole" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="guwlib.guw_objects.Hole">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">guwlib.guw_objects.</span></span><span class="sig-name descname"><span class="pre">Hole</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.guw_objects.Hole" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Bases: <a class="reference internal" href="#guwlib.guw_objects.Defect" title="guwlib.guw_objects.defects.Defect"><code class="xref py py-class docutils literal notranslate"><span class="pre">Defect</span></code></a></p>
+<p>Represents a simple, circular through-thickness hole.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>position_x</strong> (<em>float</em>) – Position of the hole in x-direction from the coordinate origin.</p></li>
+<li><p><strong>position_y</strong> (<em>float</em>) – Position of the hole in y-direction from the coordinate origin.</p></li>
+<li><p><strong>diameter</strong> (<em>float</em>) – Diameter of the hole.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>radius</strong> (<em>float</em>) – Radius of the hole.</p>
+</dd>
+</dl>
+<p><strong>Figures:</strong></p>
 
+        <div style="position: relative; width: 100%; display: inline-block;">
+          <object data="..\_static/defect_sketch_txt_removed.svg" type="image/svg+xml" style="width: 100%; height: auto; display: block;"></object>
+          
+                <div style="position: absolute; bottom: 8.193715713668414%; left: 28.981033%;
+                    transform: translateY(+0.5em);">
+                    <code class="docutils literal notranslate" style="font-size: 0.70em;">
+                        <span class="pre">position_x</span>
+                    </code>
+                </div>
+                <div style="position: absolute; bottom: 21.30056218887865%; left: 1.9736770000000001%;
+                    transform: translateY(+0.5em);">
+                    <code class="docutils literal notranslate" style="font-size: 0.70em;">
+                        <span class="pre">position_y</span>
+                    </code>
+                </div>
+                <div style="position: absolute; bottom: 46.105019169347955%; left: 32.916726000000004%;
+                    transform: translateY(+0.5em);">
+                    <code class="docutils literal notranslate" style="font-size: 0.70em;">
+                        <span class="pre">diameter</span>
+                    </code>
+                </div>
+       </div>
+        <p><em>Left: illustration of</em> <code class="docutils literal notranslate"><span class="pre">Hole</span></code> <em>parameters, right: example ABAQUS model</em></p>
+</dd></dl>
+
+</section>
+<hr class="docutils" />
+<section id="crack">
+<h2><code class="docutils literal notranslate"><span class="pre">Crack</span></code><a class="headerlink" href="#crack" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="guwlib.guw_objects.Crack">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">guwlib.guw_objects.</span></span><span class="sig-name descname"><span class="pre">Crack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_degrees</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.guw_objects.Crack" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Bases: <a class="reference internal" href="#guwlib.guw_objects.Defect" title="guwlib.guw_objects.defects.Defect"><code class="xref py py-class docutils literal notranslate"><span class="pre">Defect</span></code></a></p>
+<p>Represents a simple, through-thickness crack (realised by node-separation in the FE model).</p>
+<p>The crack is oriented along the y-axis if <code class="docutils literal notranslate"><span class="pre">angle_degrees</span></code> is set to <code class="docutils literal notranslate"><span class="pre">0</span></code> (default).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>position_x</strong> (<em>float</em>) – Position of the crack midpoint in x-direction from the coordinate origin.</p></li>
+<li><p><strong>position_y</strong> (<em>float</em>) – Position of the crack midpoint in y-direction from the coordinate origin.</p></li>
+<li><p><strong>length</strong> (<em>float</em>) – Length of the crack.</p></li>
+<li><p><strong>angle_degrees</strong> (<em>float</em>) – Rotation angle of the crack, in degrees (counterclockwise rotation).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>length</strong> (<em>float</em>) – Length of the crack.</p></li>
+<li><p><strong>angle</strong> (<em>float</em>) – Rotation angle of the crack, in radians (counterclockwise rotation).</p></li>
+<li><p><strong>seam_face_set_name</strong> (<em>str</em>) – Name for the ABAQUS face set containing the crack edge faces.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Figures:</strong></p>
 
+        <div style="position: relative; width: 100%; display: inline-block;">
+          <object data="..\_static/crack_sketch_txt_removed.svg" type="image/svg+xml" style="width: 100%; height: auto; display: block;"></object>
+          
+                <div style="position: absolute; bottom: 11.729245678516477%; left: 31.034806999999997%;
+                    transform: translateY(+0.5em);">
+                    <code class="docutils literal notranslate" style="font-size: 0.70em;">
+                        <span class="pre">position_x</span>
+                    </code>
+                </div>
+                <div style="position: absolute; bottom: 21.13220277594938%; left: 0.300232%;
+                    transform: translateY(+0.5em);">
+                    <code class="docutils literal notranslate" style="font-size: 0.70em;">
+                        <span class="pre">position_y</span>
+                    </code>
+                </div>
+                <div style="position: absolute; bottom: 61.38164057268406%; left: 7.604743999999999%;
+                    transform: translateY(+0.5em);">
+                    <code class="docutils literal notranslate" style="font-size: 0.70em;">
+                        <span class="pre">length</span>
+                    </code>
+                </div>
+                <div style="position: absolute; bottom: 65.51660760276013%; left: 26.986261%;
+                    transform: translateY(+0.5em);">
+                    <code class="docutils literal notranslate" style="font-size: 0.70em;">
+                        <span class="pre">angle_degrees</span>
+                    </code>
+                </div>
+       </div>
+        <p><em>Left: illustration of</em> <code class="docutils literal notranslate"><span class="pre">Crack</span></code> <em>parameters, right: example ABAQUS model</em></p>
+</dd></dl>
+
+</section>
 </section>
 
 
@@ -197,9 +337,21 @@
             <div class="page_toc">
                 <ul>
 <li><a class="reference internal" href="#">Defects</a><ul>
-<li><a class="reference internal" href="#guwlib.guw_objects.Defect"><code class="docutils literal notranslate"><span class="pre">Defect</span></code></a></li>
+<li><a class="reference internal" href="#defect"><code class="docutils literal notranslate"><span class="pre">Defect</span></code></a><ul>
+<li><a class="reference internal" href="#guwlib.guw_objects.Defect"><code class="docutils literal notranslate"><span class="pre">Defect</span></code></a><ul>
+<li><a class="reference internal" href="#guwlib.guw_objects.Defect.set_identifiers"><code class="docutils literal notranslate"><span class="pre">Defect.set_identifiers()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#hole"><code class="docutils literal notranslate"><span class="pre">Hole</span></code></a><ul>
 <li><a class="reference internal" href="#guwlib.guw_objects.Hole"><code class="docutils literal notranslate"><span class="pre">Hole</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#crack"><code class="docutils literal notranslate"><span class="pre">Crack</span></code></a><ul>
 <li><a class="reference internal" href="#guwlib.guw_objects.Crack"><code class="docutils literal notranslate"><span class="pre">Crack</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

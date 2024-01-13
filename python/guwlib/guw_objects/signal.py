@@ -8,22 +8,28 @@ class Signal(object):
 
     def __init__(self, magnitude=1):
         """
-        Initialize the Signal object.
+        :param float magnitude: Magnitude of the signal.
 
-        :param magnitude: Magnitude of the signal.
+        :ivar float magnitude: Magnitude of the signal.
         """
         self.magnitude = magnitude
 
     def get_value_at(self, t):
         """
-        Abstract method to get the value of the signal at a specific time.
+        Returns the value of the signal at a specific time.
 
-        :param t: Time at which to evaluate the signal.
-        :return: Signal value at time t.
+        :param float t: Time at which to evaluate the signal.
+
+        :return: (float) Signal value at time t.
         """
         pass
 
     def get_duration(self):
+        """
+        Returns the duration for which the signal is non-zero.
+
+        :return: (float) Signal duration.
+        """
         pass
 
 
@@ -31,17 +37,23 @@ class Signal(object):
 class Burst(Signal):
     """
     Class representing a burst signal.
+
+    A burst consists of a concise number of cycles of a sinusoidal signal, multiplied by a window function.
     """
 
     def __init__(self, center_frequency, n_cycles, magnitude=1, delta_t=0, window='hanning'):
         """
-        Initialize the Burst object.
+        :param float center_frequency: Center frequency of the burst.
+        :param int n_cycles: Number of cycles in the burst.
+        :param float magnitude: Magnitude of the burst.
+        :param float delta_t: Time delay of the burst.
+        :param str window: Type of window function, either ``rectangle``, ``hanning``,
+            ``hamming`` or ``blackmann`` (default: ``hanning``).
 
-        :param center_frequency: Center frequency of the burst.
-        :param n_cycles: Number of cycles in the burst.
-        :param magnitude: Magnitude of the burst.
-        :param delta_t: Time delay of the burst.
-        :param window: Type of window function ('hanning' by default).
+        :ivar float center_frequency: Center frequency of the burst.
+        :ivar int n_cycles: Number of cycles in the burst.
+        :ivar float delta_t: Time delay of the burst.
+        :ivar str window: Type of window function.
         """
         super(Burst, self).__init__(magnitude=magnitude)
         self.center_frequency = center_frequency
@@ -51,24 +63,49 @@ class Burst(Signal):
 
     def get_value_at(self, t):
         """
-        Get the value of the burst signal at a specific time.
+        Returns the value of the signal at a specific time.
 
-        :param t: Time at which to evaluate the burst signal.
-        :return: Signal value at time t.
+        :param float t: Time at which to evaluate the signal.
+
+        :return: (float) Signal value at time t.
         """
         f = self.center_frequency
         n_cycles = self.n_cycles
         dt = self.delta_t
 
+        length = n_cycles * (1 / f)
+        y = math.cos(2 * math.pi * f * (t - dt))
+
+        if self.window == 'rectangle':
+            rectangle = 1 if (dt <= t <= length + dt) else 0
+            return y * rectangle
+
         if self.window == 'hanning':
-            length = n_cycles * (1 / f)
-            y = math.cos(2 * math.pi * f * (t - dt))
             hanning = math.sin(math.pi * (t - dt) / length) ** 2 if (dt <= t <= length + dt) else 0
             return y * hanning
+
+        if self.window == 'hamming':
+            hamming = 0.54 - 0.46 * math.cos(2*math.pi * (t - dt) / length) if (dt <= t <= length + dt) else 0
+            return y * hamming
+
+        if self.window == 'blackmann':
+            alpha = 0.16
+            a0 = (1-alpha)/2
+            a1 = 1/2
+            a2 = alpha/2
+            blackmann = (a0 - a1 * math.cos(2*math.pi * (t - dt) / length) +
+                         a2 * math.cos(4*math.pi * (t - dt) / length)) if (dt <= t <= length + dt) else 0
+            return y * blackmann
+
         else:
             raise ValueError("Unsupported window type: {}".format(self.window))
 
     def get_duration(self):
+        """
+        Returns the duration for which the signal is non-zero.
+
+        :return: (float) Signal duration.
+        """
         return self.n_cycles * (1/self.center_frequency)
 
 
@@ -76,12 +113,12 @@ class Burst(Signal):
 class DiracImpulse(Signal):
     """
     Class representing a Dirac impulse signal.
+
+    The discrete dirac impulse is 1 * ``magnitude`` for exactly one sample at ``t`` = 0 and 0 elsewhere.
     """
 
     def __init__(self, magnitude=1):
         """
-        Initialize the DiracImpulse object.
-
         :param magnitude: Magnitude of the Dirac impulse.
         """
         super(DiracImpulse, self).__init__(magnitude=magnitude)
@@ -91,6 +128,8 @@ class DiracImpulse(Signal):
         Get the value of the Dirac impulse signal at a specific time.
 
         :param t: Time at which to evaluate the Dirac impulse signal.
+
         :return: Signal value at time t.
         """
         return self.magnitude if (t == 0) else 0
+

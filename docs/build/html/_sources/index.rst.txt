@@ -30,11 +30,7 @@ run in ABAQUS/CAE to generate the FE model.
 The **GUWlib** module utilizes the ABAQUS `Scripting Interface
 <https://classes.engineering.wustl.edu/2009/spring/mase5513/abaqus/docs/v6.6/books/cmd/default.htm?startat=pt02ch04.html>`_
 to automate the modelling work in ABAQUS/CAE. It also handles some essential considerations,
-like choosing an appropriate mesh density based on your input parameters.
-
-
-
-
+like choosing an appropriate mesh density based on input parameters...
 
 
 Features
@@ -61,7 +57,7 @@ Content
 
 .. toctree::
    :maxdepth: 1
-   :caption: Workflow
+   :caption: User Guide
 
    workflow/general
    workflow/modelfiles
@@ -81,6 +77,19 @@ Content
    guwobjects/Signal
    guwobjects/Material
    guwobjects/Loadcase
+
+..
+   .. toctree::
+      :maxdepth: 3
+      :caption: AutoAPI
+
+      autoapi/guwlib/index
+      autoapi/guwlib/fe_model/index
+      autoapi/guwlib/guw_objects/defects/index
+      autoapi/guwlib/guw_objects/plate/index
+      autoapi/guwlib/guw_objects/transducer/index
+      autoapi/guwlib/guw_objects/signal/index
+
 
 .. toctree::
    :maxdepth: 1

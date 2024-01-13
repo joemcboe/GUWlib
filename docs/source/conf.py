@@ -17,19 +17,44 @@ release = '2024'
 import os
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join('..', '..', 'python')))
+sys.path.insert(0, os.path.abspath('.'))
 
-extensions = ['sphinx.ext.autodoc']
+# extensions = ['sphinx.ext.autodoc']
+autoclass_content = 'both'
+autoapi_python_class_content = 'both' 
+autodoc_member_order = 'groupwise'
 
-templates_path = ['_templates']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx_togglebutton', 'custom_directives']
+# extensions = ['sphinx.ext.autodoc', 'numpydoc']
+numpydoc_show_class_members = False
+napoleon_use_ivar = True
+autodoc_typehints = "none"
+
 exclude_patterns = []
-autodoc_member_order = 'bysource'
+# autodoc_member_order = 'bysource'
+
+# -- AutoAPI settings --------------------------------------------------------
+autoapi_dirs = ['../../python/guwlib/']
+autoapi_type = "python"
+autoapi_template_dir = "_autoapi_templates"
+autoapi_options = [
+    "members",
+    "undoc-members",
+    "show-inheritance",
+    "show-module-summary",
+    "imported-members",
+]
+autoapi_add_toctree_entry = False
+# autoapi_keep_files = True
 
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'piccolo_theme'
+# html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
+html_css_files = ['custom.css']
 
 # If specified, this will be used in the nav bar instead.
 html_short_title = "GUWlib"
@@ -38,3 +63,6 @@ html_theme_options = {
     "source_url": 'https://github.com/joemcboe/GUW',
     "source_icon": "github",
 }
+
+togglebutton_hint = "Show base class"
+togglebutton_hint_hide = "Hide base class"

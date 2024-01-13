@@ -36,7 +36,7 @@ REFERENCE_PLATE_PART_NAME = 'reference_plate'
 def create_plate_part(plate):
     """
     Creates the plate as an Abaqus part by solid extrusion.
-    :param guw_objects.IsotropicPlate plate: Plate instance to be modelled in Abaqus.
+    :param guw_objects.IsotropicRectangularPlate plate: Plate instance to be modelled in Abaqus.
     :return: None
     """
     # rename the model
@@ -94,7 +94,7 @@ def create_circular_hole_in_plate(plate, hole, element_size):
     """
     Adds a cut extrude hole to an existing plate part in Abaqus and partitions the region so that structured meshing can
     be applied. The hole position must be on the plate and must not intersect other features already added to the plate.
-    :param IsotropicPlate plate: Plate to which the hole is to be added.
+    :param IsotropicRectangularPlate plate: Plate to which the hole is to be added.
     :param Hole hole: Hole that is to be added.
     :param element_size: Desired element size of the FE mesh, needed to determine a suitable position of the partition.
     :return:
@@ -170,7 +170,7 @@ def create_crack_in_plate(plate, crack, element_size):
     """
     Adds a cut extrude hole to an existing plate part in Abaqus and partitions the region so that structured meshing can
     be applied. The hole position must be on the plate and must not intersect other features already added to the plate.
-    :param IsotropicPlate plate: Plate to which the hole is to be added.
+    :param IsotropicRectangularPlate plate: Plate to which the hole is to be added.
     :param Crack crack: Crack that is to be added.
     :param element_size: Desired element size of the FE mesh, needed to determine a suitable position of the partition.
     :return:
@@ -346,7 +346,7 @@ def create_transducer_as_vertex(plate, transducer, element_size):
     Creates a line intersection on the plate part, to ensure that a node is generated at the exact position of the piezo
     element during meshing.
 
-    :param IsotropicPlate plate:
+    :param IsotropicRectangularPlate plate:
     :param transducer:
     :param element_size:
     :return:
@@ -508,7 +508,7 @@ def mesh_part(element_size_in_plane, element_size_thickness, plate, transducers,
 
 # PROPERTY MODULE HELPER FUNCTIONS -------------------------------------------------------------------------------------
 def create_isotropic_material(material):
-    if material.type == "isotropic":
+    if isinstance(material, IsotropicMaterial):
         mdb.models[MODEL_NAME].Material(name=material.name)
         mdb.models[MODEL_NAME].materials[material.name].Density(table=((material.properties["density"],),))
         mdb.models[MODEL_NAME].materials[material.name].Elastic(table=((material.properties["youngs_modulus"],
@@ -658,7 +658,7 @@ def create_crack_in_plate_deprecated(plate, crack, element_size):
     """
     Adds a cut extrude hole to an existing plate part in Abaqus and partitions the region so that structured meshing can
     be applied. The hole position must be on the plate and must not intersect other features already added to the plate.
-    :param IsotropicPlate plate: Plate to which the hole is to be added.
+    :param IsotropicRectangularPlate plate: Plate to which the hole is to be added.
     :param Crack crack: Crack that is to be added.
     :param element_size: Desired element size of the FE mesh, needed to determine a suitable position of the partition.
     :return:

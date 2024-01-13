@@ -8,9 +8,17 @@
     <title>Signal &#8212; GUWlib 2024 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
     <link rel="stylesheet" type="text/css" href="../_static/basic_mod.css?v=94a554c0" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=ef06060f" />
     <script src="../_static/documentation_options.js?v=6fefd858"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Show base class';</script>
+    <script>let toggleHintHide = 'Hide base class';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="../_static/js/theme.js"></script>
     <script src="../_static/js/petite-vue.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -131,7 +139,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage/first.html">Tutorial: First simulation</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Workflow</span></p>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../workflow/general.html">General procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../workflow/modelfiles.html">Writing model files</a></li>
@@ -165,24 +173,102 @@
             
   <section id="signal">
 <h1>Signal<a class="headerlink" href="#signal" title="Link to this heading">¶</a></h1>
+<section id="id1">
+<h2><code class="docutils literal notranslate"><span class="pre">Signal</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<div class="toggle docutils container">
 <dl class="py class">
 <dt class="sig sig-object py" id="guwlib.guw_objects.Signal">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">guwlib.guw_objects.</span></span><span class="sig-name descname"><span class="pre">Signal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">magnitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.guw_objects.Signal" title="Link to this definition">¶</a></dt>
 <dd><p>Base class for signals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>magnitude</strong> (<em>float</em>) – Magnitude of the signal.</p>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>magnitude</strong> (<em>float</em>) – Magnitude of the signal.</p>
+</dd>
+</dl>
+<p><strong>Methods:</strong></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="guwlib.guw_objects.Signal.get_value_at">
+<span class="sig-name descname"><span class="pre">get_value_at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.guw_objects.Signal.get_value_at" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the value of the signal at a specific time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>t</strong> (<em>float</em>) – Time at which to evaluate the signal.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(float) Signal value at time t.</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="py class">
-<dt class="sig sig-object py" id="guwlib.guw_objects.Burst">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">guwlib.guw_objects.</span></span><span class="sig-name descname"><span class="pre">Burst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">center_frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cycles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">magnitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hanning'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.guw_objects.Burst" title="Link to this definition">¶</a></dt>
-<dd><p>Class representing a burst signal.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="guwlib.guw_objects.Signal.get_duration">
+<span class="sig-name descname"><span class="pre">get_duration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.guw_objects.Signal.get_duration" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the duration for which the signal is non-zero.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(float) Signal duration.</p>
+</dd>
+</dl>
 </dd></dl>
 
+</dd></dl>
+
+</div>
+</section>
+<hr class="docutils" />
+<section id="diracimpulse">
+<h2><code class="docutils literal notranslate"><span class="pre">DiracImpulse</span></code><a class="headerlink" href="#diracimpulse" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="guwlib.guw_objects.DiracImpulse">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">guwlib.guw_objects.</span></span><span class="sig-name descname"><span class="pre">DiracImpulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">magnitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.guw_objects.DiracImpulse" title="Link to this definition">¶</a></dt>
-<dd><p>Class representing a Dirac impulse signal.</p>
+<dd><p>Bases: <a class="reference internal" href="#guwlib.guw_objects.Signal" title="guwlib.guw_objects.signal.Signal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Signal</span></code></a></p>
+<p>Class representing a Dirac impulse signal.</p>
+<p>The discrete dirac impulse is 1 * <code class="docutils literal notranslate"><span class="pre">magnitude</span></code> for exactly one sample at <code class="docutils literal notranslate"><span class="pre">t</span></code> = 0 and 0 elsewhere.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>magnitude</strong> – Magnitude of the Dirac impulse.</p>
+</dd>
+</dl>
+<p><strong>Figures:</strong></p>
 </dd></dl>
 
+</section>
+<hr class="docutils" />
+<section id="burst">
+<h2><code class="docutils literal notranslate"><span class="pre">Burst</span></code><a class="headerlink" href="#burst" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="guwlib.guw_objects.Burst">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">guwlib.guw_objects.</span></span><span class="sig-name descname"><span class="pre">Burst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">center_frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cycles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">magnitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hanning'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.guw_objects.Burst" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#guwlib.guw_objects.Signal" title="guwlib.guw_objects.signal.Signal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Signal</span></code></a></p>
+<p>Class representing a burst signal.</p>
+<p>A burst consists of a concise number of cycles of a sinusoidal signal, multiplied by a window function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>center_frequency</strong> (<em>float</em>) – Center frequency of the burst.</p></li>
+<li><p><strong>n_cycles</strong> (<em>int</em>) – Number of cycles in the burst.</p></li>
+<li><p><strong>magnitude</strong> (<em>float</em>) – Magnitude of the burst.</p></li>
+<li><p><strong>delta_t</strong> (<em>float</em>) – Time delay of the burst.</p></li>
+<li><p><strong>window</strong> (<em>str</em>) – Type of window function, either <code class="docutils literal notranslate"><span class="pre">rectangle</span></code>, <code class="docutils literal notranslate"><span class="pre">hanning</span></code>,
+<code class="docutils literal notranslate"><span class="pre">hamming</span></code> or <code class="docutils literal notranslate"><span class="pre">blackmann</span></code> (default: <code class="docutils literal notranslate"><span class="pre">hanning</span></code>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>center_frequency</strong> (<em>float</em>) – Center frequency of the burst.</p></li>
+<li><p><strong>n_cycles</strong> (<em>int</em>) – Number of cycles in the burst.</p></li>
+<li><p><strong>delta_t</strong> (<em>float</em>) – Time delay of the burst.</p></li>
+<li><p><strong>window</strong> (<em>str</em>) – Type of window function.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Figures:</strong></p>
+</dd></dl>
+
+</section>
 </section>
 
 
@@ -200,9 +286,22 @@
             <div class="page_toc">
                 <ul>
 <li><a class="reference internal" href="#">Signal</a><ul>
-<li><a class="reference internal" href="#guwlib.guw_objects.Signal"><code class="docutils literal notranslate"><span class="pre">Signal</span></code></a></li>
-<li><a class="reference internal" href="#guwlib.guw_objects.Burst"><code class="docutils literal notranslate"><span class="pre">Burst</span></code></a></li>
+<li><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">Signal</span></code></a><ul>
+<li><a class="reference internal" href="#guwlib.guw_objects.Signal"><code class="docutils literal notranslate"><span class="pre">Signal</span></code></a><ul>
+<li><a class="reference internal" href="#guwlib.guw_objects.Signal.get_value_at"><code class="docutils literal notranslate"><span class="pre">Signal.get_value_at()</span></code></a></li>
+<li><a class="reference internal" href="#guwlib.guw_objects.Signal.get_duration"><code class="docutils literal notranslate"><span class="pre">Signal.get_duration()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#diracimpulse"><code class="docutils literal notranslate"><span class="pre">DiracImpulse</span></code></a><ul>
 <li><a class="reference internal" href="#guwlib.guw_objects.DiracImpulse"><code class="docutils literal notranslate"><span class="pre">DiracImpulse</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#burst"><code class="docutils literal notranslate"><span class="pre">Burst</span></code></a><ul>
+<li><a class="reference internal" href="#guwlib.guw_objects.Burst"><code class="docutils literal notranslate"><span class="pre">Burst</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

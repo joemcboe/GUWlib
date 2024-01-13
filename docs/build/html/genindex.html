@@ -7,9 +7,17 @@
     <title>Index &#8212; GUWlib 2024 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
     <link rel="stylesheet" type="text/css" href="_static/basic_mod.css?v=94a554c0" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=ef06060f" />
     <script src="_static/documentation_options.js?v=6fefd858"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Show base class';</script>
+    <script>let toggleHintHide = 'Hide base class';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="_static/js/theme.js"></script>
     <script src="_static/js/petite-vue.js"></script>
     <link rel="index" title="Index" href="#" />
@@ -128,7 +136,7 @@
 <li class="toctree-l1"><a class="reference internal" href="usage/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage/first.html">Tutorial: First simulation</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Workflow</span></p>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="workflow/general.html">General procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="workflow/modelfiles.html">Writing model files</a></li>
@@ -173,7 +181,9 @@
  | <a href="#I"><strong>I</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
+ | <a href="#P"><strong>P</strong></a>
  | <a href="#S"><strong>S</strong></a>
+ | <a href="#T"><strong>T</strong></a>
  
 </div>
 <h2 id="B">B</h2>
@@ -219,7 +229,7 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="guwobjects/FEModel.html#guwlib.FEModel.generate_report">generate_report() (guwlib.FEModel method)</a>
+      <li><a href="guwobjects/Signal.html#guwlib.guw_objects.Signal.get_duration">get_duration() (guwlib.guw_objects.Signal method)</a>
 </li>
       <li><a href="guwobjects/FEModel.html#guwlib.FEModel.get_element_size_in_plane">get_element_size_in_plane() (guwlib.FEModel method)</a>
 </li>
@@ -228,6 +238,8 @@
       <li><a href="guwobjects/FEModel.html#guwlib.FEModel.get_element_size_thickness">get_element_size_thickness() (guwlib.FEModel method)</a>
 </li>
       <li><a href="guwobjects/FEModel.html#guwlib.FEModel.get_max_time_increment">get_max_time_increment() (guwlib.FEModel method)</a>
+</li>
+      <li><a href="guwobjects/Signal.html#guwlib.guw_objects.Signal.get_value_at">get_value_at() (guwlib.guw_objects.Signal method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -243,7 +255,11 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="guwobjects/Plate.html#guwlib.guw_objects.plate.IsotropicPlate">IsotropicPlate (class in guwlib.guw_objects.plate)</a>
+      <li><a href="guwobjects/Material.html#guwlib.guw_objects.IsotropicMaterial">IsotropicMaterial (class in guwlib.guw_objects)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="guwobjects/Plate.html#guwlib.guw_objects.plate.IsotropicRectangularPlate">IsotropicRectangularPlate (class in guwlib.guw_objects.plate)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -282,16 +298,42 @@
   </ul></td>
 </tr></table>
 
-<h2 id="S">S</h2>
+<h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="guwobjects/FEModel.html#guwlib.FEModel.setup_in_abaqus">setup_in_abaqus() (guwlib.FEModel method)</a>
+      <li><a href="guwobjects/Material.html#guwlib.guw_objects.PiezoElectricMaterial">PiezoElectricMaterial (class in guwlib.guw_objects)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="guwobjects/Plate.html#guwlib.guw_objects.plate.Plate">Plate (class in guwlib.guw_objects.plate)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="S">S</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="guwobjects/Defects.html#guwlib.guw_objects.Defect.set_identifiers">set_identifiers() (guwlib.guw_objects.Defect method)</a>
+
+      <ul>
+        <li><a href="guwobjects/Transducer.html#guwlib.guw_objects.Transducer.set_identifiers">(guwlib.guw_objects.Transducer method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="guwobjects/FEModel.html#guwlib.FEModel.setup_in_abaqus">setup_in_abaqus() (guwlib.FEModel method)</a>
+</li>
       <li><a href="guwobjects/FEModel.html#guwlib.FEModel.setup_parameters">setup_parameters() (guwlib.FEModel method)</a>
 </li>
       <li><a href="guwobjects/Signal.html#guwlib.guw_objects.Signal">Signal (class in guwlib.guw_objects)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="T">T</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="guwobjects/Transducer.html#guwlib.guw_objects.Transducer">Transducer (class in guwlib.guw_objects)</a>
 </li>
   </ul></td>
 </tr></table>

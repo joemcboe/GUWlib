@@ -8,9 +8,17 @@
     <title>Plate &#8212; GUWlib 2024 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
     <link rel="stylesheet" type="text/css" href="../_static/basic_mod.css?v=94a554c0" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=ef06060f" />
     <script src="../_static/documentation_options.js?v=6fefd858"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Show base class';</script>
+    <script>let toggleHintHide = 'Hide base class';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="../_static/js/theme.js"></script>
     <script src="../_static/js/petite-vue.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -131,7 +139,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage/first.html">Tutorial: First simulation</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Workflow</span></p>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../workflow/general.html">General procedure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../workflow/modelfiles.html">Writing model files</a></li>
@@ -165,12 +173,97 @@
             
   <section id="plate">
 <h1>Plate<a class="headerlink" href="#plate" title="Link to this heading">¶</a></h1>
+<section id="id1">
+<h2><code class="docutils literal notranslate"><span class="pre">Plate</span></code><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<div class="toggle docutils container">
 <dl class="py class">
-<dt class="sig sig-object py" id="guwlib.guw_objects.plate.IsotropicPlate">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">guwlib.guw_objects.plate.</span></span><span class="sig-name descname"><span class="pre">IsotropicPlate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">material</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thickness</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.guw_objects.plate.IsotropicPlate" title="Link to this definition">¶</a></dt>
-<dd><p>A class representing an isotropic plate.</p>
+<dt class="sig sig-object py" id="guwlib.guw_objects.plate.Plate">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">guwlib.guw_objects.plate.</span></span><span class="sig-name descname"><span class="pre">Plate</span></span><a class="headerlink" href="#guwlib.guw_objects.plate.Plate" title="Link to this definition">¶</a></dt>
+<dd><p>Base class to represent thin plates in which GUW can propagate.</p>
 </dd></dl>
 
+</div>
+</section>
+<hr class="docutils" />
+<section id="isotropicrectangularplate">
+<h2><code class="docutils literal notranslate"><span class="pre">IsotropicRectangularPlate</span></code><a class="headerlink" href="#isotropicrectangularplate" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="guwlib.guw_objects.plate.IsotropicRectangularPlate">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">guwlib.guw_objects.plate.</span></span><span class="sig-name descname"><span class="pre">IsotropicRectangularPlate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">material</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thickness</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#guwlib.guw_objects.plate.IsotropicRectangularPlate" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#guwlib.guw_objects.plate.Plate" title="guwlib.guw_objects.plate.Plate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Plate</span></code></a></p>
+<p>A class representing a simple isotropic, rectangular plate.</p>
+<p>The bottom left-hand corner of the plate marks the reference (coordinate origin) for all other
+objects (<code class="xref py py-class docutils literal notranslate"><span class="pre">Defect</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Transducer</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>material</strong> (<a class="reference internal" href="Material.html#guwlib.guw_objects.IsotropicMaterial" title="guwlib.guw_objects.IsotropicMaterial"><em>IsotropicMaterial</em></a>) – Plate material, e.g. 1100 aluminum alloy.</p></li>
+<li><p><strong>thickness</strong> (<em>float</em>) – Plate thickness.</p></li>
+<li><p><strong>width</strong> (<em>float</em>) – Plate width (ABAQUS x-direction).</p></li>
+<li><p><strong>length</strong> (<em>float</em>) – Plate length (ABAQUS y-direction).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>material</strong> (<a class="reference internal" href="Material.html#guwlib.guw_objects.IsotropicMaterial" title="guwlib.guw_objects.IsotropicMaterial"><em>IsotropicMaterial</em></a>) – Plate material, e.g. 1100 aluminum alloy.</p></li>
+<li><p><strong>thickness</strong> (<em>float</em>) – Plate thickness.</p></li>
+<li><p><strong>width</strong> (<em>float</em>) – Plate width (ABAQUS x-direction).</p></li>
+<li><p><strong>length</strong> (<em>float</em>) – Plate length (ABAQUS y-direction).</p></li>
+<li><p><strong>description</strong> (<em>str</em>) – A short description of the plate for logging.</p></li>
+<li><p><strong>datum_xy_plane_id</strong> (<em>int</em>) – ABAQUS feature ID of a datum xy-plane (modelling aid).</p></li>
+<li><p><strong>datum_y_axis_id</strong> (<em>int</em>) – ABAQUS feature ID of a datum y-axis (modelling aid).</p></li>
+<li><p><strong>datum_z_axis_id</strong> (<em>int</em>) – ABAQUS feature ID of a datum z-axis (modelling aid).</p></li>
+<li><p><strong>cell_set_name</strong> (<em>str</em>) – Name for the ABAQUS cell set containing the entire plate
+(excluding defect and transducer bounding boxes).</p></li>
+<li><p><strong>material_cell_set_name</strong> (<em>str</em>) – Name for the ABAQUS cell set containing the entire plate
+(including all defect and transducer bounding boxes).</p></li>
+<li><p><strong>top_surf_face_set_name</strong> (<em>str</em>) – Name for the ABAQUS face set containing the top surface of the plate
+(excluding defect and transducer bounding boxes).</p></li>
+<li><p><strong>field_output_face_set_name</strong> (<em>str</em>) – Name for the ABAQUS face set containing the top surface of the plate
+(including defect and transducer bounding boxes).</p></li>
+<li><p><strong>std_interface_node_set_name</strong> (<em>str</em>) – Name for the ABAQUS node set containing all nodes of the
+STD-XPL interface between plate and transducers, on the STD part of the model (relevant only if
+<code class="docutils literal notranslate"><span class="pre">modeling_approach</span></code> is set to <code class="docutils literal notranslate"><span class="pre">piezo_electric</span></code>).</p></li>
+<li><p><strong>xpl_interface_node_set_name</strong> (<em>str</em>) – Name for the ABAQUS node set containing all nodes of the
+STD-XPL interface between plate and transducers, on the XPL part of the model (relevant only if
+<code class="docutils literal notranslate"><span class="pre">modeling_approach</span></code> is set to <code class="docutils literal notranslate"><span class="pre">piezo_electric</span></code>).</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Figures:</strong></p>
+
+        <div style="position: relative; width: 100%; display: inline-block;">
+          <object data="..\_static/plate_sketch_txt_removed.svg" type="image/svg+xml" style="width: 100%; height: auto; display: block;"></object>
+          
+                <div style="position: absolute; bottom: 80.2512611407303%; left: 9.280016%;
+                    transform: translateY(+0.5em);">
+                    <code class="docutils literal notranslate" style="font-size: 0.75em;">
+                        <span class="pre">width</span>
+                    </code>
+                </div>
+                <div style="position: absolute; bottom: 17.428315611505376%; left: 33.99639%;
+                    transform: translateY(+0.5em);">
+                    <code class="docutils literal notranslate" style="font-size: 0.75em;">
+                        <span class="pre">thickness</span>
+                    </code>
+                </div>
+                <div style="position: absolute; bottom: 70.79803924341803%; left: 41.984237%;
+                    transform: translateY(+0.5em);">
+                    <code class="docutils literal notranslate" style="font-size: 0.75em;">
+                        <span class="pre">length</span>
+                    </code>
+                </div>
+                <div style="position: absolute; bottom: 60.39448505505324%; left: 24.121368%;
+                    transform: translateY(+0.5em);">
+                    <code class="docutils literal notranslate" style="font-size: 0.75em;">
+                        <span class="pre">material</span>
+                    </code>
+                </div>
+       </div>
+        <p><em>Left: illustration of</em> <code class="docutils literal notranslate"><span class="pre">Plate</span></code> <em>parameters, right: example ABAQUS model</em></p>
+</dd></dl>
+
+</section>
 </section>
 
 
@@ -188,7 +281,14 @@
             <div class="page_toc">
                 <ul>
 <li><a class="reference internal" href="#">Plate</a><ul>
-<li><a class="reference internal" href="#guwlib.guw_objects.plate.IsotropicPlate"><code class="docutils literal notranslate"><span class="pre">IsotropicPlate</span></code></a></li>
+<li><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">Plate</span></code></a><ul>
+<li><a class="reference internal" href="#guwlib.guw_objects.plate.Plate"><code class="docutils literal notranslate"><span class="pre">Plate</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#isotropicrectangularplate"><code class="docutils literal notranslate"><span class="pre">IsotropicRectangularPlate</span></code></a><ul>
+<li><a class="reference internal" href="#guwlib.guw_objects.plate.IsotropicRectangularPlate"><code class="docutils literal notranslate"><span class="pre">IsotropicRectangularPlate</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
