@@ -1,9 +1,12 @@
+image: python:latest
+
 stages:          # List of stages for jobs, and their order of execution
   - docs
 
 docs-job:       # This job runs in the build stage, which runs first.
   stage: docs
   script:
-    - echo "Compiling the code..."
-    - sleep 60
-    - echo "Compile complete."
+    - echo "Building the documentation..."
+    - echo "Installing requirements..."
+    - pip install -r requirements.txt
+    - echo "Documentation build."
