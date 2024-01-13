@@ -6,7 +6,7 @@ before_script:
 pages:
   script:
     - cd docs
-    - make -b html source ./public
+    - sphinx-build -b html source ./public
   artifacts:
     paths:
       # The folder that contains the files to be exposed at the Page URL
