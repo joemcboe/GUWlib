@@ -6,3 +6,4 @@ python/results/*
 *.rec
 *.job
 .idea/
+abaqusMacros.py
