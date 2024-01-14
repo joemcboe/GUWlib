@@ -137,6 +137,9 @@ def find_coordinates(latex_content, svg_output):
 
 
 class SVGOverlayDirective(Directive):
+    """
+    Important! This directive only works when Sphinx is run from the root directory!
+    """
     required_arguments = 1
     optional_arguments = 0
     final_argument_whitespace = True
@@ -154,7 +157,7 @@ class SVGOverlayDirective(Directive):
         path = self.options.get('path', '')
         font_size = self.options.get('font-size', '0.9em')
 
-        matches = get_text_from_svg('source/' + svg_file)
+        matches = get_text_from_svg('docs/source/' + svg_file)
         if matches is None:
             overlay_html = ''
             svg_src = os.path.join(path, svg_file)
