@@ -24,6 +24,7 @@ Plate
 
     *Left: illustration of* ``Plate`` *parameters, right: example ABAQUS model*
 
+
 ..
     .. image:: _static/test_pic.png
       :width: 48%

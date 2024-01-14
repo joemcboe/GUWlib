@@ -712,7 +712,10 @@ cDgcDofD4XA4HA6Hw+FwOBz3jf8P0i7ZcitUDncAAAAASUVORK5CYII=
        id="image4191"
        x="97.239395"
        y="9.6291027"
-       clip-path="url(#clipPath4223)" />
+       clip-path="url(#clipPath4223)"
+	   onmouseenter="document.getElementById('image4191').style.opacity = 0;"
+	   onmouseleave="document.getElementById('image4191').style.opacity = 1;"
+	   />
     <g
        inkscape:groupmode="layer"
        id="strokes"

@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import guwlib
+import math
 
 # define the signal
 my_signal = guwlib.Burst(n_cycles=4, center_frequency=1, delta_t=2, window='hanning')
@@ -9,6 +10,11 @@ my_signal = guwlib.Burst(n_cycles=4, center_frequency=1, delta_t=2, window='hann
 # time domain ----------------------------------------------------------------------------------------------------------
 t = np.linspace(0, 100, 10000)
 s = np.array([my_signal.get_value_at(i_t) for i_t in t])
+
+# hanning window
+length = my_signal.get_duration()
+dt = my_signal.delta_t
+hanning = np.array([math.sin(math.pi * (i_t - dt) / length) ** 2 if (dt <= i_t <= length + dt) else 0 for i_t in t])
 
 
 # frequency domain -----------------------------------------------------------------------------------------------------
@@ -30,6 +36,7 @@ amp_spectrum = 2.0 / n_samples * np.abs(fft)
 fig, axs = plt.subplots(nrows=1, ncols=2, figsize=(10, 5))
 
 ax1 = axs[0]
+ax1.fill_between(t, -hanning, hanning, alpha=0.2)
 ax1.plot(t, s)
 ax1.set_title('Time domain')
 ax1.set_xlabel('t')
@@ -40,7 +47,7 @@ ax1.grid(color='lightgray', which='both')
 ax1.set_xticklabels([])
 ax1.set_yticklabels([])
 
-# fill_between
+
 
 
 

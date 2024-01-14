@@ -28,6 +28,7 @@ Defects
     *Left: illustration of* ``Hole`` *parameters, right: example ABAQUS model*
 
 
+
 ..
     **Methods:**
 

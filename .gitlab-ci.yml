@@ -2,7 +2,7 @@
 image: python:latest
 # Functions that should be executed before the build script is run
 before_script:
-  - pip install -r requirements.txt
+  - pip install -r docs/requirements.txt
 pages:
   script:
     - sphinx-build -b html docs/source public

@@ -7,9 +7,9 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'GUWlib'
-copyright = '2023, Jörn Froböse'
+copyright = '2024, Jörn Froböse'
 author = 'Jörn Froböse'
-release = '2024'
+release = '02/2024'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -26,7 +26,6 @@ autodoc_member_order = 'groupwise'
 
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx_togglebutton', 'custom_directives']
 # extensions = ['sphinx.ext.autodoc', 'numpydoc']
-numpydoc_show_class_members = False
 napoleon_use_ivar = True
 autodoc_typehints = "none"
 

@@ -1,5 +1,0 @@
-General procedure
-=================
-
-Image [B]
-
