@@ -5,8 +5,7 @@ before_script:
   - pip install -r requirements.txt
 pages:
   script:
-    - cd docs
-    - sphinx-build -b html source ./public
+    - sphinx-build -b html docs/source public
   artifacts:
     paths:
       # The folder that contains the files to be exposed at the Page URL
