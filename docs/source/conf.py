@@ -59,8 +59,8 @@ html_css_files = ['custom.css']
 html_short_title = "GUWlib"
 
 html_theme_options = {
-    "source_url": 'https://github.com/joemcboe/GUW',
-    "source_icon": "github",
+    "source_url": 'https://git.rz.tu-bs.de/j.froboese/GUW',
+    "source_icon": "gitlab",
 }
 
 togglebutton_hint = "Show base class"
