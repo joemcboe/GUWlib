@@ -1,8 +1,7 @@
 # GUW
-A python module to simulate Guided Ultrasonic Wave (GUW) propagation and defect interaction in simple plates using ABAQUS. 
+A python module to simulate Guided Ultrasonic Wave (GUW) propagation and defect interaction in simple plates using ABAQUS. Please refer to the documentation on GitLab pages: [GUWlib documentation](https://guw-j-froboese-7e83bff35047dd42a62d8fb269d632ab5d9e6a1d5b2d7867.gitlab-pages.rz.tu-bs.de/index.html).
 
-## Usage
-Please refer to the documentation on GitLab pages: [GUWlib documentation](https://guw-j-froboese-7e83bff35047dd42a62d8fb269d632ab5d9e6a1d5b2d7867.gitlab-pages.rz.tu-bs.de/index.html).
+
 
 
 <!---
