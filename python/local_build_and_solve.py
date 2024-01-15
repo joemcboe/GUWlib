@@ -19,7 +19,14 @@ model_files_local = [
 # specify the number of threads to use for the solver run (ABAQUS/EXPLICIT)
 n_threads = 1
 
-# ----------------------------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------#
+#                                                                                                                      #
+#                                                                                                                      #
+#                                     !DO NOT CHANGE THE FOLLOWING SECTIONS!                                           #
+#                                                                                                                      #
+#                                                                                                                      #
+# ---------------------------------------------------------------------------------------------------------------------#
+
 # run ABAQUS/CAE on the model.py files
 print("Running preprocessing stage (writing .INP files ...)")
 for model_file in model_files_local:

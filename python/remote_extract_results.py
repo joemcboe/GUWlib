@@ -14,13 +14,20 @@ script there as a SLURM job.
 # parameters set by the user -------------------------------------------------------------------------------------------
 # specify the model files to upload to the cluster
 model_files_local = [
-    os.path.join('models/convergence_test', 'convergence_pristine_20_x_10.py')
+    os.path.join('models', 'testing', 'small.py'),
 ]
 
 working_dir = '/work/y0106916/'
 
 
-# ----------------------------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------#
+#                                                                                                                      #
+#                                                                                                                      #
+#                                     !DO NOT CHANGE THE FOLLOWING SECTIONS!                                           #
+#                                                                                                                      #
+#                                                                                                                      #
+# ---------------------------------------------------------------------------------------------------------------------#
+
 # compile a list of result folders from the script names
 result_directories = [f"'results/{os.path.splitext(os.path.basename(model_file_path))[0]}'"
                       for model_file_path in model_files_local]
@@ -32,9 +39,9 @@ generate_python_job_script(output_file_path=job_file_name,
                            partition='standard',
                            n_nodes=1,
                            n_tasks_per_node=1,
-                           max_time_in_h=2,
+                           max_time='0:5:0',
                            slurm_job_name='collect',
-                           python_file='guwlib/trash/phoenix_post_process.py',
+                           python_file='guwlib/functions_cluster/cluster_post.py',
                            args=args,
                            working_dir=working_dir)
 

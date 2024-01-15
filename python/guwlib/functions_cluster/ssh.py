@@ -96,7 +96,7 @@ def copy_file_from_remote(remote_path, local_path, username_env_var, password_en
 
         # Create the local directory if it doesn't exist
         local_directory = os.path.dirname(local_path)
-        if not os.path.exists(local_directory):
+        if not os.path.exists(local_directory) and not local_directory == '':
             os.makedirs(local_directory)
 
         # Download the file
@@ -160,56 +160,56 @@ def run_commands_on_remote(command, username_env_var, password_env_var,
         return output
 
 
-def tail_log_file_with_regex_trigger(username_env_var, password_env_var, regex_patterns, log_file_path,
-                                     hostname='phoenix.hlr.rz.tu-bs.de', port=22):
-    try:
-        ssh_username = os.environ[username_env_var]
-        ssh_password = os.environ[password_env_var]
-    except KeyError as e:
-        raise ValueError(f"Error: Missing environment variable {e}. "
-                         f"Please set {username_env_var} and {password_env_var} before running the script.")
+# def tail_log_file_with_regex_trigger(username_env_var, password_env_var, regex_patterns, log_file_path,
+#                                      hostname='phoenix.hlr.rz.tu-bs.de', port=22):
+#     try:
+#         ssh_username = os.environ[username_env_var]
+#         ssh_password = os.environ[password_env_var]
+#     except KeyError as e:
+#         raise ValueError(f"Error: Missing environment variable {e}. "
+#                          f"Please set {username_env_var} and {password_env_var} before running the script.")
 
-    # Create an SSH client
-    ssh = paramiko.SSHClient()
-
-    try:
-        # Connect to the remote server
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(hostname, port, ssh_username, ssh_password)
-        # ssh.connect(hostname, username=ssh_username, password=ssh_password)
-
-        # Start an interactive shell
-        ssh_shell = ssh.invoke_shell()
-
-        # Send the 'tail -f' command to the shell
-        ssh_shell.send("tail -f {}\n".format(log_file_path).encode('utf-8'))
-
-        # Wait for the command to start producing output
-        time.sleep(2)
-
-        # Accumulate the content of the log file
-        log_content = ""
-
-        # Compile the regex patterns
-        compiled_patterns = [re.compile(pattern) for pattern in regex_patterns]
-
-        # Read and print the output continuously
-        while True:
-            if ssh_shell.recv_ready():
-                output = ssh_shell.recv(1024).decode('utf-8')
-                sys.stdout.write(output)
-                sys.stdout.flush()
-
-                # Accumulate the content of the log file
-                log_content += output
-
-                # Check if any of the regex patterns match the log content
-                if any(pattern.search(log_content) for pattern in compiled_patterns):
-                    break
-
-    finally:
-        # Close the SSH connection
-        ssh.close()
-
-    # Return the accumulated content of the log file
-    return log_content
+#     # Create an SSH client
+#     ssh = paramiko.SSHClient()
+#
+#     try:
+#         # Connect to the remote server
+#         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+#         ssh.connect(hostname, port, ssh_username, ssh_password)
+#         # ssh.connect(hostname, username=ssh_username, password=ssh_password)
+#
+#         # Start an interactive shell
+#         ssh_shell = ssh.invoke_shell()
+#
+#         # Send the 'tail -f' command to the shell
+#         ssh_shell.send("tail -f {}\n".format(log_file_path).encode('utf-8'))
+#
+#         # Wait for the command to start producing output
+#         time.sleep(2)
+#
+#         # Accumulate the content of the log file
+#         log_content = ""
+#
+#         # Compile the regex patterns
+#         compiled_patterns = [re.compile(pattern) for pattern in regex_patterns]
+#
+#         # Read and print the output continuously
+#         while True:
+#             if ssh_shell.recv_ready():
+#                 output = ssh_shell.recv(1024).decode('utf-8')
+#                 sys.stdout.write(output)
+#                 sys.stdout.flush()
+#
+#                 # Accumulate the content of the log file
+#                 log_content += output
+#
+#                 # Check if any of the regex patterns match the log content
+#                 if any(pattern.search(log_content) for pattern in compiled_patterns):
+#                     break
+#
+#     finally:
+#         # Close the SSH connection
+#         ssh.close()
+#
+#     # Return the accumulated content of the log file
+#     return log_content

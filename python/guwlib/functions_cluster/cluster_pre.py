@@ -1,12 +1,10 @@
 """
-This script recieves:
-    - list of file paths to the .py files
+This script receives:
+    - list of file paths to the model (.PY) files
     - slurm parameters for ABAQUS jobs
-    - slurm parameter for WATCHDOG script
 
-This script can only be run from the GUWlib working directory, otherwise it cannot correctly locate the results folder
-This script is intended to be run on
-
+This script can only be run from the GUWlib working directory, otherwise it cannot correctly locate the results folder.
+This script is intended to be run in a UNIX environment with SLURM installed.
 """
 from slurm import generate_abaqus_job_script
 import os

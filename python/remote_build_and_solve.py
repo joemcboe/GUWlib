@@ -33,7 +33,7 @@ model_files_local = [
 remote_guwlib_path = '/work/y0106916/GUW_Simulation/GUW/python'
 
 # resources to allocate for the ABAQUS/CAE execution (writing *.INP files)
-#   cae_max_time is the total time for to process all model files!
+#   cae_max_time is the total time for to process all model files
 #   acceptable time formats include "minutes", "minutes:seconds", "hours:minutes:seconds", "days-hours",
 #   "days-hours:minutes" and "days-hours:minutes:seconds" (SLURM syntax)
 
@@ -48,7 +48,13 @@ solver_n_tasks_per_node = 20
 solver_partition = 'fat'
 solver_max_time = "1-0:0:0"
 
-# ----------------------------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------#
+#                                                                                                                      #
+#                                                                                                                      #
+#                                     !DO NOT CHANGE THE FOLLOWING SECTIONS!                                           #
+#                                                                                                                      #
+#                                                                                                                      #
+# ---------------------------------------------------------------------------------------------------------------------#
 # copy the model files to the cluster
 for model_file in model_files_local:
     file_name = os.path.basename(model_file)
