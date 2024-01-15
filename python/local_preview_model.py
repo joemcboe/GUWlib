@@ -12,7 +12,7 @@ import subprocess
 import os
 
 # specify your model file path here
-model_file = os.path.join('models/examples', 'my_plate.py')
+model_file = os.path.join('models/testing', 'small.py')
 
 
 # run ABAQUS/CAE on the model.py file ----------------

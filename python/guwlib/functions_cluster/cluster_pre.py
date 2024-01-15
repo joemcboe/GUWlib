@@ -43,17 +43,17 @@ if __name__ == "__main__":
 
     args = sys.argv[1:]
 
-    # Extracting specific arguments based on their positions in the list
+    # extracting specific arguments based on their positions in the list
     model_file_paths_str = args[0]
     solver_n_nodes = int(args[1])
     solver_n_tasks_per_node = int(args[2])
     solver_partition = args[3]
     solver_max_time = args[4]
 
-    # Parsing the string representation of a list into an actual list
+    # parsing the string representation of a list into an actual list
     model_file_paths = ast.literal_eval(model_file_paths_str)
 
-    # Iterate through model_file_paths, run CAE to create *.INP files and generate SLURM jobs for each of them ---------
+    # iterate through model_file_paths, run CAE to create *.INP files and generate SLURM jobs for each of them ---------
     job_files = []
     for model_file_path in model_file_paths:
         # run ABAQUS/CAE on the model.py file to create *.INP files (one for each load case)
@@ -73,7 +73,7 @@ if __name__ == "__main__":
                                                              max_time=solver_max_time)
         job_files.extend(model_job_files)
 
-    # Build sequential submission chain --------------------------------------------------------------------------------
+    # build sequential submission chain --------------------------------------------------------------------------------
     last_job_id = None
     for i, job_file in enumerate(job_files):
         if i == 0:

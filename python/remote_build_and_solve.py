@@ -1,5 +1,6 @@
 """
-This script automates uploading files to the cluster (Phoenix).
+This script automates uploading files to the cluster (Phoenix). This script will trigger the cluster_pre.py script.
+
 """
 
 from guwlib.functions_cluster.ssh import *
@@ -13,7 +14,7 @@ model_files_local = [
     # os.path.join('models', 'alu3a', 'alu3a_central_hole10_top.py'),
     # os.path.join('models', 'alu3a', 'alu3a_pristine_top.py'),
 
-    # stack 2 - started 27th decmeber
+    # stack 2 - started 27th december
     # os.path.join('models', 'alu3a', 'alu3a_pristine_bot.py'),
     # os.path.join('models', 'alu3a', 'alu3a_pristine_symm.py'),
     # os.path.join('models', 'alu3a', 'alu3a_pristine_asymm.py'),
@@ -26,32 +27,22 @@ model_files_local = [
     os.path.join('models', 'alu3a', 'alu3a_farfield_hole10_top.py'),
     os.path.join('models', 'alu3a', 'alu3a_central_2_hole10_top.py'),
     os.path.join('models', 'alu3a', 'alu3a_crack_45_central_top.py'),
-
-    # randbereich 10 mm
-    # 2 löcher 10 mm
-    # riss 45 grad 15 mm
-
-    # stack 4
-
-
 ]
 
 # specify the directory on remote machine where GUWlib is located
 remote_guwlib_path = '/work/y0106916/GUW_Simulation/GUW/python'
 
 # resources to allocate for the ABAQUS/CAE execution (writing *.INP files)
-# acceptable time formats include "minutes", "minutes:seconds", "hours:minutes:seconds", "days-hours",
-# "days-hours:minutes" and "days-hours:minutes:seconds"
+#   cae_max_time is the total time for to process all model files!
+#   acceptable time formats include "minutes", "minutes:seconds", "hours:minutes:seconds", "days-hours",
+#   "days-hours:minutes" and "days-hours:minutes:seconds" (SLURM syntax)
 
-
-# bei 16 x 8 und 1 m Platte -> ca. 12 min für ein INP file
 cae_n_nodes = 1
 cae_n_tasks_per_node = 20
 cae_partition = 'standard'
 cae_max_time = "3-0:0:0"
-# cae_max_time = "0:20:0"
 
-# resources to allocate for each solver run (ABAQUS/Explicit, ABAQUS/Standard)
+# resources to allocate for each individual solver run (ABAQUS/Explicit, ABAQUS/Standard)
 solver_n_nodes = 1
 solver_n_tasks_per_node = 20
 solver_partition = 'fat'

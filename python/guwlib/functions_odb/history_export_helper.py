@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import odbAccess
 from odbAccess import *
 from abaqusConstants import *
@@ -11,26 +13,38 @@ import sys
 import os
 
 """
-This function helps to read in an ODB file written by Abaqus, check all available node sets for history output data
-fields, collects the data along with the node set name, and writes it to a gzip compressed pkl file (binary). Use this
-syntax:
+This script helps to read in an .ODB file written by ABAQUS, check all available node sets for history output data
+fields, collects the displacement data along with the node set name, and writes it to a .NPZ (compressed NumPy) file. 
+Use this syntax:
 
-abaqus cae noGUI=history_export_helper.py -- "odb_path" "output_file_name"
+abaqus cae noGUI=history_export_helper.py -- "odb_path" 
 
-where path_to_output_folder is the full path to a folder containing an *.ODB file, and "output_file_name" specifies
-the name for the *.PKL.GZ-file written by this script. To read in the *.PKL.GZ-file, use
+where path_to_output_folder is the full path to the *.ODB file. The .NPZ files are written to the same path as the ODB
+file. Access the content of the written files like this:
 
-with gzip.open(output_file_name, 'rb') as file:
-    loaded_data = pickle.load(file, encoding='latin1')
-
-where output_file_name again specifies the name of the *.PKL.GZ file.
+    data = numpy.load(my_file)
+    for key in data.keys():
+        print(key)
+    data.close()
+ 
+Each array stored in the NPZ file is structured like this:
+    arr = data[key]
+    arr[0, :]       # time vector
+    arr[1, :]       # U1 displacements
+    arr[2, :]       # U2 displacements
+    arr[3, :]       # U3 displacements   
 """
 
 
-def write_history_data_to_file(odb_path, output_file):
+def write_history_data_to_file(odb_path):
+    """
 
-    # open the ODB file
+    """
+
+    # open the ODB file at the specified path
+    my_print('Attempting to open {}.'.format(odb_path))
     odb = openOdb(path=odb_path)
+    my_print('Odb file successfully opened.')
 
     # access step and assembly with index 0
     assembly = odb.rootAssembly
@@ -50,11 +64,16 @@ def write_history_data_to_file(odb_path, output_file):
             node = instance.nodeSets[node_set].nodes[0]
             point = odbAccess.HistoryPoint(node=node)
             region = step.getHistoryRegion(point=point)
-            for output_var_name in ['U1', 'U2', 'U3']:
-                data = np.array(region.historyOutputs[output_var_name].data)
-                data_name = "{}_{}".format(node_set, output_var_name)
-                output_data[data_name] = data
-                my_print("Extracted {}".format(data_name))
+
+            # np array is structured like this: [time; u1; u2; u3]
+            t = np.array(region.historyOutputs['U1'].data)[:, 0]
+            u1 = np.array(region.historyOutputs['U1'].data)[:, 1]
+            u2 = np.array(region.historyOutputs['U2'].data)[:, 1]
+            u3 = np.array(region.historyOutputs['U3'].data)[:, 1]
+            data = np.vstack([t, u1, u2, u3])
+
+            output_data[node_set] = data
+            my_print("Extracted {}".format(data_name))
 
         except Exception as e:
             error_node_sets.append(node_set)
@@ -62,21 +81,23 @@ def write_history_data_to_file(odb_path, output_file):
     if error_node_sets:
         my_print('Skipped: '+', '.join(error_node_sets))
 
-    output_file_name = '{}.pkl.gz'.format(output_file)
+    # Set the output file name
+    directory, full_filename = os.path.split(odb_path)
+    filename, file_extension = os.path.splitext(full_filename)
+    output_file_name = '{}.npz'.format(os.path.join(directory, filename))
 
     # Save the data to a binary file using pickle
-    my_print("Compressing data ...")
-    with gzip.open(output_file_name, 'wb') as file:
-        pickle.dump(output_data, file)
+    my_print("Compressing and writing data ...")
+    np.savez_compressed(output_file_name,
+                        **output_data)
     my_print("Done! Data written to {}.".format(output_file_name))
 
 
 def my_print(txt):
-    print >> sys.__stdout__, txt
+    print(txt, file=sys.__stdout__)
 
 
-# main ----------------------------------------------------------------------------------------------------------------
-arguments = sys.argv[1:]
-path = arguments[-2]
-output_name = arguments[-1]
-write_history_data_to_file(odb_path=path, output_file=output_name)
+# main -----------------------------------------------------------------------------------------------------------------
+if __name__ == "__main__":
+    arguments = sys.argv[1:]
+    write_history_data_to_file(odb_path=arguments[-1])
