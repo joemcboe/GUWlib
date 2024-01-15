@@ -64,4 +64,3 @@ if npz_files:
     br = '\n'
     print("Done. The processed NPZ files are here:")
     print(br.join(npz_files))
-
