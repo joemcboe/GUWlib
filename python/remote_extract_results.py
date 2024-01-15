@@ -1,5 +1,5 @@
-from guwlib.functions_phoenix.ssh import *
-from guwlib.functions_phoenix.slurm import *
+from guwlib.functions_cluster.ssh import *
+from guwlib.functions_cluster.slurm import *
 import re
 import ast
 

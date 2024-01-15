@@ -2,8 +2,8 @@
 This script automates uploading files to the cluster (Phoenix).
 """
 
-from guwlib.functions_phoenix.ssh import *
-from guwlib.functions_phoenix.slurm import *
+from guwlib.functions_cluster.ssh import *
+from guwlib.functions_cluster.slurm import *
 
 # parameters set by the user -------------------------------------------------------------------------------------------
 
@@ -77,7 +77,7 @@ generate_python_job_script(output_file_path=job_file_name,
                            n_tasks_per_node=cae_n_tasks_per_node,
                            max_time=cae_max_time,
                            slurm_job_name='PREPROC',
-                           python_file='guwlib/functions_phoenix/phoenix_preprocess_submit_handler.py',
+                           python_file='guwlib/functions_cluster/cluster_pre.py',
                            args=args,
                            working_dir=remote_guwlib_path)
 
