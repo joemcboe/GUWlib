@@ -7,3 +7,13 @@ python/results/*
 *.job
 .idea/
 abaqusMacros.py
+python/guwlib/test.py
+python/guwlib/trash/*
+python/guwlib/functions_odb/temp.py
+python/guwlib/functions_odb/test.npz
+python/guwlib/functions_odb/testing.py
+docs/Makefile
+docs/make.bat
+docs/source/code_snippet.py
+docs/source/modified.svg
+docs/source/svgparse.py
