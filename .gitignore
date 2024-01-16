@@ -17,3 +17,4 @@ docs/make.bat
 docs/source/code_snippet.py
 docs/source/modified.svg
 docs/source/svgparse.py
+python/test_signal.py

@@ -156,3 +156,64 @@ def generate_python_job_script(output_file_path, partition, n_nodes, n_tasks_per
 
     with open(output_file_path, 'w', newline='\n') as file:
         file.write(content)
+
+
+def generate_command_job_script(output_file_path, partition, n_nodes, n_tasks_per_node, max_time, slurm_job_name,
+                                command, working_dir, modules_to_load=('software/abaqus/abaqus_2019',)):
+    """
+    Generates a SLURM job script (*.JOB) for running a command script on an HPC cluster (e.g. Phoenix cluster).
+
+    :param str, output_file_path: path to the output SLURM job script file.
+    :param str, partition: name of the SLURM partition to allocate resources from.
+    :param int, n_nodes: number of compute nodes to request for the job.
+    :param int, n_tasks_per_node: number of tasks (CPU cores) to allocate per node.
+    :param int, max_time: maximum time for the job to run.
+    :param str, slurm_job_name: name of the SLURM job file.
+    :param str, command: command to run.
+    :param list[str], modules_to_load: modules that SLURM should load.
+    :param str, working_dir: working directory where the job will be executed.
+
+    :return: None
+
+    The function generates a SLURM job script with the specified parameters. It includes SLURM directives for
+    partition, number of nodes, job name, tasks per node, and maximum time. It loads the ABAQUS_2019 and
+    Python software modules, sets the working directory, and executes the specified Python script with the
+    provided command-line arguments.
+
+    Example:
+    ```
+    generate_python_job_script(
+        output_file_path='python_job_script.sh',
+        partition='standard',
+        n_nodes=4,
+        n_tasks_per_node=8,
+        max_time_in_h="24:0:0",
+        slurm_job_name='python_script_execution',
+        python_file='script.py',
+        args='--arg1 value1 --arg2 value2',
+        working_dir='/path/to/working/directory/'
+    )
+    ```
+    """
+    modules_to_load = "\n".join(["module load " + module for module in modules_to_load])
+    content = textwrap.dedent(f"""\
+        #!/bin/bash -l
+
+        #SBATCH --partition={partition}
+        #SBATCH --nodes={n_nodes}
+        #SBATCH --job-name={slurm_job_name}
+        #SBATCH --ntasks-per-node={n_tasks_per_node}
+        #SBATCH --time={max_time}
+        #SBATCH -o bo-%j.log
+
+        module purge
+        {modules_to_load}
+
+        working_dir={working_dir}
+        cd $working_dir
+        {command}
+
+    """)
+
+    with open(output_file_path, 'w', newline='\n') as file:
+        file.write(content)

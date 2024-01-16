@@ -13,7 +13,7 @@ import os
 # parameters set by the user -------------------------------------------------------------------------------------------
 # specify the model files to build and solve on this machine
 model_files_local = [
-    os.path.join('models', 'testing', 'small.py'),
+    os.path.join('models', 'testing', 'small_a.py'),
 ]
 
 # specify the number of threads to use for the solver run (ABAQUS/EXPLICIT)

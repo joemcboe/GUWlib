@@ -5,6 +5,7 @@ This script receives:
     - a string indicating which slurm partition to use
     - an int specifying how many parallel instances of ABAQUS/CAE should be started at most
     - an int specifying how many tasks should be used for each ABAQUS/CAE instance (RAM)
+    a string specifying how long one extraction should take at most
 
 This script will then scan these directories for any unprocessed .ODB files and then call the history / field export
 helper functions on these files.
@@ -13,16 +14,17 @@ This script can only run a UNIX environment with SLURM job manager installed. !R
 directory!
 
 Example:
-    cluster_post.py "[models/dir1, models/dir2]" "history" "standard" "5" "1"
+    cluster_post.py "[models/dir1, models/dir2]" "history" "standard" "5" "1" "0:30:0"
 
 
 """
-from slurm import generate_python_job_script
+from slurm import generate_command_job_script
 import os
 import sys
 import ast
 import math
 import subprocess
+from datetime import datetime
 
 
 def find_odb_files(root_directory):
@@ -41,6 +43,14 @@ def find_odb_files(root_directory):
     return file_paths
 
 
+def archive_file(file_path):
+    if os.path.exists(file_path):
+        current_date = datetime.now().strftime("%d%m%y")
+        base_name, extension = os.path.splitext(file_path)
+        new_file_name = f"{base_name}_archived_{current_date}{extension}"
+        os.rename(file_path, new_file_name)
+
+
 if __name__ == "__main__":
 
     args = sys.argv[1:]
@@ -51,6 +61,7 @@ if __name__ == "__main__":
     partition = args[2]
     max_cae_instances = int(args[3])
     n_tasks = int(args[4])
+    max_time = args[5]
 
     # parsing the string representation of a list into an actual list
     dirs_to_scan = ast.literal_eval(dirs_to_scan)
@@ -69,15 +80,14 @@ if __name__ == "__main__":
         for odb_path in odb_paths:
             job_file_name = os.path.join(os.path.dirname(odb_path), 'post.job')
             odb_file_name = os.path.basename(odb_path)
-            generate_python_job_script(output_file_path=job_file_name,
-                                       partition=partition,
-                                       n_nodes=1,
-                                       n_tasks_per_node=n_tasks,
-                                       max_time="0:20:0",
-                                       slurm_job_name=odb_file_name,
-                                       working_dir='',
-                                       python_file=helper_script_file,
-                                       args='"'+odb_path+'"')
+            generate_command_job_script(output_file_path=job_file_name,
+                                        partition=partition,
+                                        n_nodes=1,
+                                        n_tasks_per_node=n_tasks,
+                                        max_time=max_time,
+                                        slurm_job_name=odb_file_name,
+                                        working_dir=os.getcwd(),
+                                        command=f"abaqus cae noGUI={helper_script_file} -- {odb_path}")
             job_file_paths.append(os.path.abspath(job_file_name))
 
             npz_file_name = os.path.join(os.path.dirname(odb_path), os.path.splitext(odb_file_name)[0] + '.npz')
@@ -101,6 +111,7 @@ if __name__ == "__main__":
 
     # write out the npz file paths as a text file ----------------------------------------------------------------------
     list_text_file = 'converted_odb_files.txt'
+    archive_file(list_text_file)
     with open(list_text_file, 'w') as text_file:
         for path in npz_file_paths:
             text_file.write(path + '\n')
