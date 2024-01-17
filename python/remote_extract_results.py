@@ -12,14 +12,26 @@ script there as a SLURM job.
 
 # parameters set by the user -------------------------------------------------------------------------------------------
 directories_to_scan = [
-    'results/small_b'
+    # 'results/alu3a_central_2_hole10_top/'
+    'results/alu3a_pristine_top/',
+    'results/alu3a_pristine_bot/',
+    'results/alu3a_pristine_symm/',
+
+    'results/alu3a_central_hole10_top/',
+    'results/alu3a_central_hole10_bot/',
+    'results/alu3a_central_hole10_symm/',
+
+    'results/alu3a_central_hole15_top/',
+    'results/alu3a_farfield_hole10_top/',
+    'results/alu3a_crack_45_central_top/',
+
 ]
 
-remote_guwlib_path = '/work/y0106916/GUW_Testing/python'
+remote_guwlib_path = '/beegfs/work/y0106916/GUW_Simulation/GUW/python'
 output_type = 'history'
-partition = 'standard'
-max_cae_instances = 5
-n_tasks = 1
+partition = 'fat'
+max_cae_instances = 10
+n_tasks = 5
 max_time = "0:5:0"
 
 # ---------------------------------------------------------------------------------------------------------------------#
@@ -31,12 +43,12 @@ max_time = "0:5:0"
 # ---------------------------------------------------------------------------------------------------------------------#
 
 # arguments to pass to the cluster_post.py script
-directories_to_scan_str = ','.join(["'"+directory_to_scan+"'" for directory_to_scan in directories_to_scan])
+directories_to_scan_str = ','.join(["'" + directory_to_scan + "'" for directory_to_scan in directories_to_scan])
 args = f'"[{directories_to_scan_str}]" "{output_type}" "{partition}" "{max_cae_instances}" "{n_tasks}" "{max_time}"'
 working_dir = remote_guwlib_path
 
 # generate a job file
-job_file_name = 'temp.job'
+job_file_name = 'run_postproc.job'
 generate_python_job_script(output_file_path=job_file_name,
                            partition='standard',
                            n_nodes=1,

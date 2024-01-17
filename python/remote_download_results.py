@@ -12,7 +12,7 @@ This script automates the download of ABAQUS results (.ODB files) from a remote 
 # parameters set by the user -------------------------------------------------------------------------------------------
 # specify the working directory here, in which a txt file should be
 
-working_dir = '/work/y0106916/GUW_Testing/python'
+working_dir = '/beegfs/work/y0106916/GUW_Simulation/GUW/python'
 
 # ---------------------------------------------------------------------------------------------------------------------#
 #                                                                                                                      #
@@ -53,7 +53,7 @@ for file_path in file_paths:
                           local_path=local_path,
                           username_env_var='tubs_un',
                           password_env_var='tubs_pw')
-    print(f"Copied {file_name} to {parent_directory}.")
+    print(f"Copied {file_name} to {parent_directory}/.")
 
 
 
