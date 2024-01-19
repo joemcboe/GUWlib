@@ -28,12 +28,11 @@ model_files_local = [
     # os.path.join('models', 'alu3a', 'alu3a_central_2_hole10_top.py'),
     # os.path.join('models', 'alu3a', 'alu3a_crack_45_central_top.py'),
 
-    os.path.join('models', 'testing', 'small_a.py'),
-    os.path.join('models', 'testing', 'small_b.py')
+    os.path.join('models', 'testing', 'pristine_far_piezos.py'),
 ]
 
 # specify the directory on remote machine where GUWlib is located
-remote_guwlib_path = '/work/y0106916/GUW_2024/python'
+remote_guwlib_path = '/beegfs/work/y0106916/GUW2024/'
 
 # resources to allocate for the ABAQUS/CAE execution (writing *.INP files)
 #   cae_max_time is the total time for to process all model files
@@ -41,15 +40,15 @@ remote_guwlib_path = '/work/y0106916/GUW_2024/python'
 #   "days-hours:minutes" and "days-hours:minutes:seconds" (SLURM syntax)
 
 cae_n_nodes = 1
-cae_n_tasks_per_node = 1           # 20
-cae_partition = 'standard'          # 'standard'
-cae_max_time = "0:5:0"            # '3-0:0:0'
+cae_n_tasks_per_node = 20           # 20
+cae_partition = 'fat'          # 'standard'
+cae_max_time = "3:0:0"            # '3-0:0:0'
 
 # resources to allocate for each individual solver run (ABAQUS/Explicit, ABAQUS/Standard)
 solver_n_nodes = 1
-solver_n_tasks_per_node = 1          # 20
-solver_partition = 'standard'
-solver_max_time = "0:10:0"         # '1-0:0:0'
+solver_n_tasks_per_node = 20          # 20
+solver_partition = 'fat'
+solver_max_time = "1-0:0:0"         # '1-0:0:0'
 
 # ---------------------------------------------------------------------------------------------------------------------#
 #                                                                                                                      #
@@ -69,10 +68,10 @@ for model_file in model_files_local:
 model_files_remote = ('"[' + ", ".join(["'models/{}'".format(os.path.basename(model_file))
                                         for model_file in model_files_local]) + ']"')
 args = (f"{model_files_remote} {int(solver_n_nodes)} {int(solver_n_tasks_per_node)} "
-        f"{solver_partition} {solver_max_time} ""False""")
+        f"{solver_partition} {solver_max_time}")
 job_file_name = 'run_preproc.job'
 generate_python_job_script(output_file_path=job_file_name,
-                           partition='standard',
+                           partition=cae_partition,
                            n_nodes=cae_n_nodes,
                            n_tasks_per_node=cae_n_tasks_per_node,
                            max_time=cae_max_time,
