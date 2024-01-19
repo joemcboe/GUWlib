@@ -12,7 +12,7 @@ This script automates the download of ABAQUS results (.ODB files) from a remote 
 # parameters set by the user -------------------------------------------------------------------------------------------
 # specify the working directory here, in which a txt file should be
 
-working_dir = '/beegfs/work/y0106916/GUW_Simulation/GUW/python'
+working_dir = '/beegfs/work/y0106916/GUW_2024/GUW/python'
 
 # ---------------------------------------------------------------------------------------------------------------------#
 #                                                                                                                      #

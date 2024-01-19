@@ -33,7 +33,7 @@ model_files_local = [
 ]
 
 # specify the directory on remote machine where GUWlib is located
-remote_guwlib_path = '/work/y0106916/GUW_Testing/python'
+remote_guwlib_path = '/work/y0106916/GUW_2024/python'
 
 # resources to allocate for the ABAQUS/CAE execution (writing *.INP files)
 #   cae_max_time is the total time for to process all model files
