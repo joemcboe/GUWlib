@@ -13,26 +13,29 @@ script there as a SLURM job.
 # parameters set by the user -------------------------------------------------------------------------------------------
 directories_to_scan = [
     # 'results/alu3a_central_2_hole10_top/'
-    'results/alu3a_pristine_top/',
-    'results/alu3a_pristine_bot/',
-    'results/alu3a_pristine_symm/',
+    # 'results/alu3a_pristine_top/',
+    # 'results/alu3a_pristine_bot/',
+    # 'results/alu3a_pristine_symm/',
+    #
+    # 'results/alu3a_central_hole10_top/',
+    # 'results/alu3a_central_hole10_bot/',
+    # 'results/alu3a_central_hole10_symm/',
+    #
+    # 'results/alu3a_central_hole15_top/',
+    # 'results/alu3a_farfield_hole10_top/',
+    # 'results/alu3a_crack_45_central_top/',
 
-    'results/alu3a_central_hole10_top/',
-    'results/alu3a_central_hole10_bot/',
-    'results/alu3a_central_hole10_symm/',
-
-    'results/alu3a_central_hole15_top/',
-    'results/alu3a_farfield_hole10_top/',
-    'results/alu3a_crack_45_central_top/',
+    #'results/pristine_far_piezos/'
+    'results/alu3a_pristine_asymm/',
 
 ]
 
-remote_guwlib_path = '/beegfs/work/y0106916/GUW_Simulation/GUW/python'
+remote_guwlib_path = '/beegfs/work/y0106916/GUW_Simulation/GUW/python/'  # forward slash at the end!
 output_type = 'history'
-partition = 'fat'
+partition = 'standard'
 max_cae_instances = 10
-n_tasks = 5
-max_time = "0:5:0"
+n_tasks = 10
+max_time = "0:15:0"
 
 # ---------------------------------------------------------------------------------------------------------------------#
 #                                                                                                                      #

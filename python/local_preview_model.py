@@ -12,7 +12,7 @@ import subprocess
 import os
 
 # specify your model file path here
-model_file = os.path.join('models', 'testing', 'pristine_far_piezos.py')
+model_file = os.path.join('models', 'alu3a', 'alu3a_central_hole10_top.py')
 
 
 # run ABAQUS/CAE on the model.py file ----------------

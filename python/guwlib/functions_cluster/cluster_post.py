@@ -30,6 +30,8 @@ from datetime import datetime
 def find_odb_files(root_directory):
     file_paths = []
 
+    print(f"Searching {root_directory} ...")
+
     for root, dirs, files in os.walk(root_directory):
         # convert file names to lowercase for case-insensitive comparison
         lowercase_files = [file.lower() for file in files]

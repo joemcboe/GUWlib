@@ -28,7 +28,7 @@ model_files_local = [
     # os.path.join('models', 'alu3a', 'alu3a_central_2_hole10_top.py'),
     # os.path.join('models', 'alu3a', 'alu3a_crack_45_central_top.py'),
 
-    os.path.join('models', 'testing', 'pristine_far_piezos.py'),
+    os.path.join('models', 'testing', 'pristine_far_piezos_fine.py'),
 ]
 
 # specify the directory on remote machine where GUWlib is located
@@ -42,13 +42,13 @@ remote_guwlib_path = '/beegfs/work/y0106916/GUW2024/'
 cae_n_nodes = 1
 cae_n_tasks_per_node = 20           # 20
 cae_partition = 'fat'          # 'standard'
-cae_max_time = "3:0:0"            # '3-0:0:0'
+cae_max_time = "5:0:0"            # '3-0:0:0'
 
 # resources to allocate for each individual solver run (ABAQUS/Explicit, ABAQUS/Standard)
 solver_n_nodes = 1
 solver_n_tasks_per_node = 20          # 20
 solver_partition = 'fat'
-solver_max_time = "1-0:0:0"         # '1-0:0:0'
+solver_max_time = "3-0:0:0"         # '1-0:0:0'
 
 # ---------------------------------------------------------------------------------------------------------------------#
 #                                                                                                                      #
