@@ -1,3 +1,30 @@
+"""
+This script helps to read in and export an ABAQUS .ODB file. It checks all available node sets for history output data
+fields, collects the displacement data along with the node set name, and writes it to a .NPZ (compressed NumPy) file.
+To call this script, use this syntax:
+
+.. code-block::
+    abaqus cae noGUI=history_export_helper.py -- "odb_path"
+
+where ``path_to_output_folder`` is the full path to the *.ODB file. The .NPZ file is written to the same path as the
+ODB file. Access the content of the written files like this:
+
+.. code-block::
+    data = numpy.load(my_file)
+    for key in data.keys():
+        print(key)
+    data.close()
+
+Each array stored in the NPZ file is structured like this:
+
+.. code-block::
+    arr = data[key]
+    arr[0, :]       # time vector
+    arr[1, :]       # U1 displacements
+    arr[2, :]       # U2 displacements
+    arr[3, :]       # U3 displacements
+"""
+
 from __future__ import print_function
 
 import odbAccess
@@ -11,33 +38,6 @@ import pickle
 import gzip
 import sys
 import os
-
-"""
-This script helps to read in and export an ABAQUS .ODB file. It checks all available node sets for history output data
-fields, collects the displacement data along with the node set name, and writes it to a .NPZ (compressed NumPy) file. 
-To call this script, use this syntax:
-
-.. code-block::
-    abaqus cae noGUI=history_export_helper.py -- "odb_path"
-
-where ``path_to_output_folder`` is the full path to the *.ODB file. The .NPZ file is written to the same path as the 
-ODB file. Access the content of the written files like this:
-
-.. code-block::
-    data = numpy.load(my_file)
-    for key in data.keys():
-        print(key)
-    data.close()
- 
-Each array stored in the NPZ file is structured like this:
-
-.. code-block::
-    arr = data[key]
-    arr[0, :]       # time vector
-    arr[1, :]       # U1 displacements
-    arr[2, :]       # U2 displacements
-    arr[3, :]       # U3 displacements
-"""
 
 
 def write_history_data_to_file(odb_path):
@@ -87,7 +87,7 @@ def write_history_data_to_file(odb_path):
             error_node_sets.append(node_set)
 
     if error_node_sets:
-        my_print('Skipped: '+', '.join(error_node_sets))
+        my_print('Skipped: ' + ', '.join(error_node_sets))
 
     # Set the output file name
     directory, full_filename = os.path.split(odb_path)

@@ -1,22 +1,37 @@
 """
-This script receives:
-    - a list of directories that should be scanned (recursively) for results (ODB files)
-    - string indicating whether to export history or field data
-    - a string indicating which slurm partition to use
-    - an int specifying how many parallel instances of ABAQUS/CAE should be started at most
-    - an int specifying how many tasks should be used for each ABAQUS/CAE instance (RAM)
-    a string specifying how long one extraction should take at most
+This module handles automatic batch postprocessing of .ODB files, i.e. extraction of history or field output to
+NumPy binary files (.NPZ).
 
-This script will then scan these directories for any unprocessed .ODB files and then call the history / field export
-helper functions on these files.
+The script is tailored as the server-side counterpart of ``guwlib.functions_batch.remote.extract_results()`` and is
+intended to be run on a LINUX machine with SLURM workload manager. It scans the user-defined output directories for
+unprocessed .ODB files. For each .ODB file found, a separate SLURM job is created and submitted to execute the
+respective helper functions ``guwlib.functions_odb.field_export_helper`` or
+``guwlib.functions_odb.history_export_helper`` on these files. The SLURM jobs are submitted in a sequential and / or
+parallel manner.
 
-This script can only run a UNIX environment with SLURM job manager installed. !Run this script from the GUWlib root
-directory!
+A summary text file with the paths to all created .NPZ files is written to enable convenient batch download
+of the processed files from the server to a client (``converted_odb_files.txt``).
 
-Example:
-    cluster_post.py "[models/dir1, models/dir2]" "history" "standard" "5" "1" "0:30:0"
+Call this script with arguments specifying the directories to scan, the kind of output to process (history / field),
+and parameters for the SLURM job. Always make sure to run this script from the root directory of guwlib, otherwise
+the helper functions might not be located correctly. The required command line arguments of this script, in their
+order of appearance, are:
 
+    - list[str]: directories that should be scanned (recursively) for results (.ODB files)
+    - str: indicating whether to export history ("history") or field ("field") data
+    - str: indicating which slurm partition to use (SLURM: --ntasks-per-node)
+    - int: specifying how many parallel instances of ABAQUS/CAE should be started at most
+    - int: specifying how many tasks (processes) should be used for each ABAQUS/CAE instance (SLURM: --ntasks-per-node)
+    - str: specifying the maximum duration of the job (SLURM: --time)
 
+Example usage:
+
+    ``cluster_post.py "[results/dir1, results/dir2]" "history" "standard" "5" "10" "0:30:0"``
+
+    Scans the directories ``results/dir1`` and ``results/dir2`` and their subdirectories for unprocessed .ODB files
+    and dispatches the history export helper on all files found. Each extraction is submitted as a SLURM job on
+    partition ``standard`` with 10 allocated processes, a maximum of 5 jobs will be submitted in parallel. Individual
+    jobs will be cancelled due to time-out after 30 minutes.
 """
 from slurm import generate_command_job_script
 import os
@@ -27,7 +42,14 @@ import subprocess
 from datetime import datetime
 
 
-def find_odb_files(root_directory):
+def find_unprocessed_odb_files(root_directory):
+    """
+    Recursively scans the provided directory for folders that contain an .ODB file, but do not contain an .NPZ file.
+
+    :param str root_directory: Path to the directory used as a root for the recursive scan.
+    :return: Paths to the found unprocessed .ODB files.
+    :rtype: list[str]
+    """
     file_paths = []
 
     print(f"Searching {root_directory} ...")
@@ -46,6 +68,11 @@ def find_odb_files(root_directory):
 
 
 def archive_file(file_path):
+    """
+    Checks whether a file already exists and if it does, renames the existing file by appending "_archived_%d%m%y" to
+    its file name.
+    :param str file_path: Path to the file that is to be inspected.
+    """
     if os.path.exists(file_path):
         current_date = datetime.now().strftime("%d%m%y")
         base_name, extension = os.path.splitext(file_path)
@@ -55,9 +82,8 @@ def archive_file(file_path):
 
 if __name__ == "__main__":
 
+    # input argument parsing -------------------------------------------------------------------------------------------
     args = sys.argv[1:]
-
-    # extracting specific arguments based on their positions in the list
     dirs_to_scan = args[0]
     data_to_extract = args[1]
     partition = args[2]
@@ -65,18 +91,19 @@ if __name__ == "__main__":
     n_tasks = int(args[4])
     max_time = args[5]
 
-    # parsing the string representation of a list into an actual list
+    # evaluating the string representation of a list into a python list object
     dirs_to_scan = ast.literal_eval(dirs_to_scan)
 
-    # ------------------------------------------------------------------------------------------------------------------
+    # scan the provided directories for unprocessed .ODB files ---------------------------------------------------------
     odb_paths = []
     for dir_to_scan in dirs_to_scan:
-        odb_paths.extend(find_odb_files(dir_to_scan))
+        odb_paths.extend(find_unprocessed_odb_files(dir_to_scan))
     print(f"Found {len(odb_paths)} ODB files that have not been post processed ...")
 
     job_file_paths = []
     npz_file_paths = []
 
+    # for each unprocessed .ODB file, write a SLURM job file
     if data_to_extract == 'history':
         helper_script_file = os.path.join('guwlib', 'functions_odb', 'history_export_helper.py')
         for odb_path in odb_paths:
@@ -99,7 +126,7 @@ if __name__ == "__main__":
         helper_script_file = os.path.join('guwlib', 'functions_odb', 'field_export_helper.py')
         raise NotImplementedError('Field export helper function not yet implemented.')
 
-    # build sequential submission chain --------------------------------------------------------------------------------
+    # submit the created SLURM jobs sequentially / parallel ------------------------------------------------------------
     n_chains = math.ceil(len(job_file_paths) / max_cae_instances)
     last_job_id = None
 
@@ -111,7 +138,7 @@ if __name__ == "__main__":
         result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
         last_job_id = result.stdout.split()[-1].strip()
 
-    # write out the npz file paths as a text file ----------------------------------------------------------------------
+    # write out the file paths to the created .NPZ files to a text file ------------------------------------------------
     list_text_file = 'converted_odb_files.txt'
     archive_file(list_text_file)
     with open(list_text_file, 'w') as text_file:

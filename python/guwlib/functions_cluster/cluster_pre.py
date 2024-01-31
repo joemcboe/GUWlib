@@ -1,12 +1,32 @@
 """
-This script receives:
-    - list of file paths to the model (.PY) files
-    - slurm parameters for ABAQUS jobs
+This module handles automatic batch preprocessing and solving of guwlib model files (.PY), i.e. writing the .INP files
+with ABAQUS/CAE and submitting them to the solver (ABAQUS/EXPLICIT or ABAQUS/STANDARD).
 
-This script can only be run from the GUWlib working directory, otherwise it cannot correctly locate the results folder.
-This script is intended to be run in a UNIX environment with SLURM installed.
+The script is tailored as the server-side counterpart of ``guwlib.functions_batch.remote.build_and_solve()`` and is
+intended to be run on a LINUX machine with SLURM workload manager. It iterates through the user-defined list of .PY
+files and pipes each file through ABAQUS/CAE to create .INP files. After that, it writes a SLURM job for the ABAQUS
+solver run for each generated .INP file. The SLURM jobs are submitted in a pure sequential manner to ensure that only
+not more than one model is solved at the same time.
+
+Call this script with arguments specifying the file paths to the model files (.PY) and parameters for the SLURM jobs
+of the ABAQUS solver runs. Always make sure to run this script from the root directory of guwlib, otherwise
+the helper functions might not be located correctly. The required command line arguments of this script, in their
+order of appearance, are:
+
+    - list[str]: file paths to the model files (.PY) to be built and solved
+    - int: specifying how many nodes should be used for each ABAQUS solver run (SLURM: --nodes)
+    - int: specifying how many tasks (processes) should be used for each node (SLURM: --ntasks-per-node)
+    - str: indicating which slurm partition to use (SLURM: --partition)
+    - str: specifying the maximum duration of each solver run (SLURM: --time)
+
+Example usage:
+
+    ``cluster_pre.py "[models/model_1.py, models/model_2.py]" "1" "20" "fat" "1-12:00:0"``
+
+    Batch processes two model files. One node with 20 tasks is allocated on the fat partition with a max duration
+    of 1.5 days for each solver run.
 """
-from slurm import generate_abaqus_job_script
+from slurm import generate_abaqus_solver_job_script
 import os
 import sys
 import ast
@@ -14,24 +34,36 @@ import subprocess
 
 
 def find_inp_files_generate_job_script(directory_to_search, partition, n_nodes, n_tasks_per_node, max_time):
-    # iterate through all *.INP-files in the simulation directory and generate *.JOB file
+    """
+    Recursively scans the provided directory for .INP files and generates a SLURM job file for each.
+
+    :param str directory_to_search: Path to the directory used as a root for the recursive scan.
+    :param str partition: SLURM job parameter --partition.
+    :param int n_nodes: SLURM job parameter --nodes.
+    :param int n_tasks_per_node: SLURM job parameter --ntasks-per-node.
+    :param str max_time: SLURM job parameter --partition.
+
+    :return: List of all generated job files.
+    :rtype: list[str]
+    """
+    # iterate through all *.INP-files in the simulation directory and generate a *.JOB file
     job_file_paths = []
     for root, dirs, files in os.walk(directory_to_search):
         for file_name in files:
             if file_name.lower().endswith(".inp"):
                 job_name = os.path.splitext(file_name)[0]
-                job_file_path = os.path.join(root, job_name + '.job')
+                job_file_path = os.path.join(root, job_name + ".job")
 
                 print(f"{job_name} {job_file_path} {root}")
 
-                generate_abaqus_job_script(output_file_path=job_file_path,
-                                           partition=partition,
-                                           n_nodes=n_nodes,
-                                           n_tasks_per_node=n_tasks_per_node,
-                                           max_time=max_time,
-                                           slurm_job_name=job_name,
-                                           working_dir=os.path.abspath(root),
-                                           inp_file=file_name)
+                generate_abaqus_solver_job_script(output_file_path=job_file_path,
+                                                  partition=partition,
+                                                  n_nodes=n_nodes,
+                                                  n_tasks_per_node=n_tasks_per_node,
+                                                  max_time=max_time,
+                                                  slurm_job_name=job_name,
+                                                  working_dir=os.path.abspath(root),
+                                                  inp_file=file_name)
                 job_file_paths.append(os.path.abspath(job_file_path))
 
     return job_file_paths
@@ -39,16 +71,15 @@ def find_inp_files_generate_job_script(directory_to_search, partition, n_nodes, 
 
 if __name__ == "__main__":
 
+    # input argument parsing -------------------------------------------------------------------------------------------
     args = sys.argv[1:]
-
-    # extracting specific arguments based on their positions in the list
     model_file_paths_str = args[0]
     solver_n_nodes = int(args[1])
     solver_n_tasks_per_node = int(args[2])
     solver_partition = args[3]
     solver_max_time = args[4]
 
-    # parsing the string representation of a list into an actual list
+    # evaluating the string representation of a list into a python list object
     model_file_paths = ast.literal_eval(model_file_paths_str)
 
     # iterate through model_file_paths, run CAE to create *.INP files and generate SLURM jobs for each of them ---------
@@ -71,12 +102,13 @@ if __name__ == "__main__":
                                                              max_time=solver_max_time)
         job_files.extend(model_job_files)
 
-    # build sequential submission chain --------------------------------------------------------------------------------
+    # submit all SLURM jobs sequentially -------------------------------------------------------------------------------
     last_job_id = None
     for i, job_file in enumerate(job_files):
         if i == 0:
             command = f"sbatch {job_file}"
         else:
+            # the second job will start only after the first one is terminated, the third after the second, ... etc.
             command = f"sbatch --dependency=afterany:{last_job_id} {job_file}"
         result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
         last_job_id = result.stdout.split()[-1].strip()

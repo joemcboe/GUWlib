@@ -25,6 +25,7 @@ def build_abaqus_model_point_force(model):
     - Trigger .INP file generation, if the script is run in noGUI mode.
 
     :param FEModel model: The FEModel instance to set up in ABAQUS/CAE.
+    :return: None
     """
 
     # TIME AND SPACE DISCRETIZATION ------------------------------------------------------------------------------------
