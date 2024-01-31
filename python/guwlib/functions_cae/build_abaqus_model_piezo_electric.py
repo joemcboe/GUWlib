@@ -1,2 +1,2 @@
 def build_abaqus_model_piezo_electric(model):
-    pass
+    raise NotImplementedError('Piezo-electric modelling approach not implemented.')

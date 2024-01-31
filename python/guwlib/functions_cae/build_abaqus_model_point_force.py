@@ -1,19 +1,30 @@
-import guwlib.fe_model as fe_model
+from guwlib import *
 from guwlib.functions_utility.rectilinear_partitioning import partition_rectangular_plate
-from guwlib.guw_objects.defects import *
-from guwlib.guw_objects.loadcase import *
-from guwlib.guw_objects.material import *
-from guwlib.guw_objects.plate import *
-from guwlib.guw_objects.signal import *
-from guwlib.guw_objects.transducer import *
-from guwlib.functions_cae.helper_functions_point_force import *
 from guwlib.functions_utility.console_output import *
+from guwlib.functions_cae.helper_functions_point_force import *
 
 
 def build_abaqus_model_point_force(model):
     """
-    :param fe_model.FEModel model:
-    :return:
+    Performs the modelling of the FE model in ABAQUS/CAE. Transducers are modelled as point forces (single nodes). The
+    resulting ABAQUS simulation is purely explicit (ABAQUS/EXPLICIT).
+
+    The modelling process is divided into the following steps:
+
+    - Create two identical plates with the desired size as parts. Mesh the 2nd plate directly and use the resulting
+      structured mesh as a reference mesh when creating partitions around defects and transducers in the 1st plate.
+    - Add all defects and transducers to the plate by modifying the plates' geometry. Create rectangular partitions
+      around the defects and store relevant geometry features in ABAQUS sets.
+    - Generate a rectilinear partitioning pattern to subdivide the remaining plate (around defects) into purely
+      rectangular (cuboid) cells to allow structured meshing.
+    - Create and assign the plates' material.
+    - Mesh the plate with the desired elements per wavelength / thickness. Remove the reference plate.
+    - Assemble the model by instantiating the plate part in a new assembly.
+    - Assign seams (node-separation) at the cracks locations in ABAQUS' interaction module.
+    - Create dynamic/explicit steps, amplitudes, concentrated forces and output requests for each defined load case.
+    - Trigger .INP file generation, if the script is run in noGUI mode.
+
+    :param FEModel model: The FEModel instance to set up in ABAQUS/CAE.
     """
 
     # TIME AND SPACE DISCRETIZATION ------------------------------------------------------------------------------------
@@ -30,7 +41,7 @@ def build_abaqus_model_point_force(model):
 
     # PART MODULE ------------------------------------------------------------------------------------------------------
     # create the plate as a part in abaqus
-    create_plate_part(model.plate)
+    create_isotropic_rectangular_plate_part(model.plate)
     log_info("Created plate geometry: {}".format(model.plate.description))
 
     # create a pristine plate w/o defects or piezo-elements, and obtain a structured mesh for better partitioning
@@ -58,8 +69,8 @@ def build_abaqus_model_point_force(model):
     for i, transducer in enumerate(model.transducers):
         if isinstance(transducer, CircularTransducer):
             transducer.set_identifiers(unique_id=i + 1)
-            bounding_box = create_transducer_as_vertex(plate=model.plate, transducer=transducer,
-                                                       element_size=element_size_in_plane)
+            bounding_box = create_transducer_as_vertex_on_plate(plate=model.plate, transducer=transducer,
+                                                                element_size=element_size_in_plane)
             bounding_box_list.append(bounding_box)
         else:
             raise NotImplementedError("Transducer of type {} not implemented.".format(type(transducer)))
@@ -73,7 +84,9 @@ def build_abaqus_model_point_force(model):
     err_count = 0
     for i, cell in enumerate(cells[:-1]):
         left, bottom, right, top = (cell[0], cell[1], cell[2], cell[3])
-        status, warning = add_rectangular_partition_to_plate(model.plate, left, bottom, right, top)
+        status, warning = add_rectangular_cell_partition_to_plate(model.plate,
+                                                                  (left, bottom),
+                                                                  (right, top))
         err_count += status
     if err_count > 0:
         log_warning("{} partitions could not be created. Probably the target region"
@@ -119,18 +132,6 @@ def build_abaqus_model_point_force(model):
                                      max_increment=max_time_increment,
                                      previous_step_name='Initial')
 
-        # create output request for piezo node sets
-        remove_standard_field_output_request()
-        if step.output_request == 'history':
-            add_history_output_request_transducer_signals(transducers=model.transducers,
-                                                          create_step_name=step_name)
-
-        if step.output_request == 'field':
-            add_history_output_request_transducer_signals(transducers=model.transducers,
-                                                          create_step_name=step_name)
-            add_field_output_request_plate_surface(plate=model.plate, create_step_name=step_name,
-                                                   time_interval=max_time_increment * 10)
-
         # create all amplitudes and loads
         for j, transducer_signal in enumerate(step.transducer_signals):
             if transducer_signal is not None:
@@ -139,9 +140,27 @@ def build_abaqus_model_point_force(model):
                                                   signal=transducer_signal,
                                                   max_time_increment=max_time_increment)
 
-        # write input file for this load case
+        # create output request for piezo node sets
+        remove_standard_field_output_request()
+        if step.output_request == 'history':
+            add_history_output_request_transducer_signals(transducers=model.transducers,
+                                                          create_step_name=step_name)
+            log_info("Created load case {} with history output requested.".format(step_name))
+
+        if step.output_request == 'field':
+            add_history_output_request_transducer_signals(transducers=model.transducers,
+                                                          create_step_name=step_name)
+            add_field_output_request_plate_surface(plate=model.plate, create_step_name=step_name,
+                                                   time_interval=max_time_increment * 10)
+            log_info("Created load case {} with history and field output requested.".format(step_name))
+
+        # write ABAQUS input (.INP) file for this load case
         if model.no_gui_mode:
             output_directory = os.path.join(model.output_directory, step_name)
             write_input_file(job_name='{}_{}'.format(model.model_name, step_name), output_directory=output_directory)
-            log_info("Created an ABAQUS job definition (*.INP) file for "
+            log_info("Created an ABAQUS job definition (.INP) file for "
                      "the current load case ({}.inp).".format(step_name))
+        else:
+            log_info("Automatic .INP-file generation is omitted when ABAQUS is run in GUI-mode. You can "
+                     "create a job for the last load case manually using the ABAQUS GUI or rerun this script "
+                     "with noGUI flag.")
