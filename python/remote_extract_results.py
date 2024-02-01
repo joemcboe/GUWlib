@@ -25,7 +25,7 @@ directories_to_scan = [
     # 'results/alu3a_farfield_hole10_top/',
     # 'results/alu3a_crack_45_central_top/',
 
-    #'results/pristine_far_piezos/'
+    # 'results/pristine_far_piezos/'
     'results/alu3a_pristine_asymm/',
 
 ]
@@ -52,15 +52,15 @@ working_dir = remote_guwlib_path
 
 # generate a job file
 job_file_name = 'run_postproc.job'
-generate_python_job_script(output_file_path=job_file_name,
-                           partition='standard',
-                           n_nodes=1,
-                           n_tasks_per_node=1,
-                           max_time='0:5:0',
-                           slurm_job_name='POSTPROC',
-                           python_file='guwlib/functions_cluster/cluster_post.py',
-                           args=args,
-                           working_dir=working_dir)
+generate_slurm_job(output_file_path=job_file_name,
+                   partition='standard',
+                   n_nodes=1,
+                   n_tasks_per_node=1,
+                   max_time='0:5:0',
+                   slurm_job_name='POSTPROC',
+                   command=f"python3.9 guwlib/functions_cluster/cluster_post.py {args}",
+                   modules_to_load=("python/3.9.7",),
+                   working_dir=working_dir)
 
 # call the job file on the cluster
 copy_file_to_remote(job_file_name, f'{working_dir}/{job_file_name}',

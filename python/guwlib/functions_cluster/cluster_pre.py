@@ -5,19 +5,20 @@ with ABAQUS/CAE and submitting them to the solver (ABAQUS/EXPLICIT or ABAQUS/STA
 The script is tailored as the server-side counterpart of ``guwlib.functions_batch.remote.build_and_solve()`` and is
 intended to be run on a LINUX machine with SLURM workload manager. It iterates through the user-defined list of .PY
 files and pipes each file through ABAQUS/CAE to create .INP files. After that, it writes a SLURM job for the ABAQUS
-solver run for each generated .INP file. The SLURM jobs are submitted in a pure sequential manner to ensure that only
-not more than one model is solved at the same time.
+solver run for each generated .INP file. The SLURM jobs are submitted in a pure sequential manner to ensure that not
+more than one model is solved at the same time.
 
 Call this script with arguments specifying the file paths to the model files (.PY) and parameters for the SLURM jobs
-of the ABAQUS solver runs. Always make sure to run this script from the root directory of guwlib, otherwise
-the helper functions might not be located correctly. The required command line arguments of this script, in their
-order of appearance, are:
+of the ABAQUS solver runs. The required command line arguments of this script, in their order of appearance, are:
 
     - list[str]: file paths to the model files (.PY) to be built and solved
-    - int: specifying how many nodes should be used for each ABAQUS solver run (SLURM: --nodes)
-    - int: specifying how many tasks (processes) should be used for each node (SLURM: --ntasks-per-node)
-    - str: indicating which slurm partition to use (SLURM: --partition)
-    - str: specifying the maximum duration of each solver run (SLURM: --time)
+    - int: specifies how many nodes should be used for each ABAQUS solver run (SLURM: --nodes)
+    - int: specifies how many tasks (processes) should be used for each node (SLURM: --ntasks-per-node)
+    - str: indicates which slurm partition to use (SLURM: --partition)
+    - str: specifies the maximum duration of each solver run (SLURM: --time)
+
+Always make sure to run this script from the root directory of guwlib, otherwise the helper functions might not be
+located correctly. ABAQUS 2019 must be available / loaded.
 
 Example usage:
 
@@ -26,7 +27,7 @@ Example usage:
     Batch processes two model files. One node with 20 tasks is allocated on the fat partition with a max duration
     of 1.5 days for each solver run.
 """
-from slurm import generate_abaqus_solver_job_script
+from slurm import generate_slurm_job_for_abaqus_solver
 import os
 import sys
 import ast
@@ -56,14 +57,14 @@ def find_inp_files_generate_job_script(directory_to_search, partition, n_nodes, 
 
                 print(f"{job_name} {job_file_path} {root}")
 
-                generate_abaqus_solver_job_script(output_file_path=job_file_path,
-                                                  partition=partition,
-                                                  n_nodes=n_nodes,
-                                                  n_tasks_per_node=n_tasks_per_node,
-                                                  max_time=max_time,
-                                                  slurm_job_name=job_name,
-                                                  working_dir=os.path.abspath(root),
-                                                  inp_file=file_name)
+                generate_slurm_job_for_abaqus_solver(output_file_path=job_file_path,
+                                                     partition=partition,
+                                                     n_nodes=n_nodes,
+                                                     n_tasks_per_node=n_tasks_per_node,
+                                                     max_time=max_time,
+                                                     slurm_job_name=job_name,
+                                                     working_dir=os.path.abspath(root),
+                                                     inp_file=file_name)
                 job_file_paths.append(os.path.abspath(job_file_path))
 
     return job_file_paths

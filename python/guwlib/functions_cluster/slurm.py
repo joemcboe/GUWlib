@@ -1,23 +1,19 @@
 import textwrap
 
 
-def generate_abaqus_solver_job_script(output_file_path, partition, n_nodes, n_tasks_per_node, max_time, slurm_job_name,
-                                      inp_file, working_dir):
+def generate_slurm_job_for_abaqus_solver(output_file_path, partition, n_nodes, n_tasks_per_node, max_time, slurm_job_name,
+                                         inp_file, working_dir):
     """
     Generates a SLURM job script (*.JOB) for running the ABAQUS 2019 solver on the provided .INP file.
 
-    The function generates a SLURM job script (*.JOB) with the specified parameters. It includes SLURM directives for
-    partition, number of nodes, job name, tasks per node, and maximum time. The SLURM job loads the ABAQUS_2019
-    software module, sets up the ABAQUS environment file, and executes the ABAQUS job.
-
-    :param str output_file_path: path to the output SLURM job script file.
-    :param str partition: name of the SLURM partition to allocate resources from.
-    :param int n_nodes: int, number of compute nodes to request for the job.
-    :param int n_tasks_per_node: number of tasks (CPU cores) to allocate per node.
-    :param int max_time: maximum time for the job to run before being cancelled.
-    :param str slurm_job_name: name of the SLURM job.
-    :param str inp_file: path to the ABAQUS input (.INP) file.
-    :param str working_dir: working directory where the job will be executed.
+    :param str output_file_path: Path to the generated SLURM .JOB script file.
+    :param str partition: Name of the SLURM partition to allocate resources from (e.g. 'standard', 'shortrun_small').
+    :param int n_nodes: Number of compute nodes to request for the job.
+    :param int n_tasks_per_node: Number of tasks (CPU processes) to allocate per node.
+    :param str max_time: Maximum time for the job to run before being cancelled.
+    :param str slurm_job_name: Name of the SLURM job.
+    :param str inp_file: Path to the ABAQUS input (.INP) file.
+    :param str working_dir: Working directory where the job will be executed.
 
     :return: None
     """
@@ -71,27 +67,23 @@ def generate_abaqus_solver_job_script(output_file_path, partition, n_nodes, n_ta
         file.write(content)
 
 
-def generate_command_job_script(output_file_path, partition, n_nodes, n_tasks_per_node, max_time, slurm_job_name,
-                                command, working_dir, modules_to_load=('software/abaqus/abaqus_2019',)):
+def generate_slurm_job(output_file_path, partition, n_nodes, n_tasks_per_node, max_time, slurm_job_name,
+                       command, working_dir, modules_to_load=('software/abaqus/abaqus_2019',)):
     """
-    Generates a SLURM job script (*.JOB) for running a command script on an HPC cluster (e.g. Phoenix cluster).
+    Generates a SLURM job script (*.JOB) that loads the specified modules and executes the provided command.
 
-    :param str, output_file_path: path to the output SLURM job script file.
-    :param str, partition: name of the SLURM partition to allocate resources from.
-    :param int, n_nodes: number of compute nodes to request for the job.
-    :param int, n_tasks_per_node: number of tasks (CPU cores) to allocate per node.
-    :param int, max_time: maximum time for the job to run.
-    :param str, slurm_job_name: name of the SLURM job file.
-    :param str, command: command to run.
-    :param list[str], modules_to_load: modules that SLURM should load.
-    :param str, working_dir: working directory where the job will be executed.
+    :param str output_file_path: Path to the generated SLURM .JOB script file.
+    :param str partition: Name of the SLURM partition to allocate resources from (e.g. 'standard', 'shortrun_small').
+    :param int n_nodes: Number of compute nodes to request for the job.
+    :param int n_tasks_per_node: Number of tasks (CPU processes) to allocate per node.
+    :param str max_time: Maximum time for the job to run before being cancelled.
+    :param str slurm_job_name: Name of the SLURM job.
+    :param str working_dir: Working directory where the job will be executed.
+    :param str command: Command to run.
+    :param tuple[str] modules_to_load: Modules to load from Environment Modules manager.
+    :param str working_dir: Working directory where the job will be executed.
 
     :return: None
-
-    The function generates a SLURM job script with the specified parameters. It includes SLURM directives for
-    partition, number of nodes, job name, tasks per node, and maximum time. It loads the ABAQUS_2019 and
-    Python software modules, sets the working directory, and executes the specified Python script with the
-    provided command-line arguments.
     """
     modules_to_load = "\n".join(["module load " + module for module in modules_to_load])
     content = textwrap.dedent(f"""\
@@ -115,52 +107,3 @@ def generate_command_job_script(output_file_path, partition, n_nodes, n_tasks_pe
 
     with open(output_file_path, 'w', newline='\n') as file:
         file.write(content)
-
-
-# -> remote_build_and_solve
-# -> remote_extract_results
-# def generate_python_job_script(output_file_path, partition, n_nodes, n_tasks_per_node, max_time, slurm_job_name,
-#                                python_file, args, working_dir):
-#     """
-#     Generates a SLURM job script (*.JOB) for running a Python script .
-#
-#     :param str, output_file_path: path to the output SLURM job script file.
-#     :param str, partition: name of the SLURM partition to allocate resources from.
-#     :param int, n_nodes: number of compute nodes to request for the job.
-#     :param int, n_tasks_per_node: number of tasks (CPU cores) to allocate per node.
-#     :param int, max_time: maximum time for the job to run.
-#     :param str, slurm_job_name: name of the SLURM job file.
-#     :param str, python_file: path to the Python script to be executed.
-#     :param str, args: command-line arguments to pass to the Python script.
-#     :param str, working_dir: working directory where the job will be executed.
-#
-#     :return: None
-#
-#     The function generates a SLURM job script with the specified parameters. It includes SLURM directives for
-#     partition, number of nodes, job name, tasks per node, and maximum time. It loads the ABAQUS_2019 and
-#     Python software modules, sets the working directory, and executes the specified Python script with the
-#     provided command-line arguments.
-#     """
-#
-#     content = textwrap.dedent(f"""\
-#         #!/bin/bash -l
-#
-#         #SBATCH --partition={partition}
-#         #SBATCH --nodes={n_nodes}
-#         #SBATCH --job-name={slurm_job_name}
-#         #SBATCH --ntasks-per-node={n_tasks_per_node}
-#         #SBATCH --time={max_time}
-#         #SBATCH -o bo-%j.log
-#
-#         module purge
-#         module load software/abaqus/abaqus_2019
-#         module load python/3.9.7
-#
-#         working_dir={working_dir}
-#         cd $working_dir
-#         python3.9 {python_file} {args}
-#
-#     """)
-#
-#     with open(output_file_path, 'w', newline='\n') as file:
-#         file.write(content)

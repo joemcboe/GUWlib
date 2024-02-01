@@ -40,15 +40,15 @@ remote_guwlib_path = '/beegfs/work/y0106916/GUW2024/'
 #   "days-hours:minutes" and "days-hours:minutes:seconds" (SLURM syntax)
 
 cae_n_nodes = 1
-cae_n_tasks_per_node = 20           # 20
-cae_partition = 'fat'          # 'standard'
-cae_max_time = "5:0:0"            # '3-0:0:0'
+cae_n_tasks_per_node = 20  # 20
+cae_partition = 'fat'  # 'standard'
+cae_max_time = "5:0:0"  # '3-0:0:0'
 
 # resources to allocate for each individual solver run (ABAQUS/Explicit, ABAQUS/Standard)
 solver_n_nodes = 1
-solver_n_tasks_per_node = 20          # 20
+solver_n_tasks_per_node = 20  # 20
 solver_partition = 'fat'
-solver_max_time = "3-0:0:0"         # '1-0:0:0'
+solver_max_time = "3-0:0:0"  # '1-0:0:0'
 
 # ---------------------------------------------------------------------------------------------------------------------#
 #                                                                                                                      #
@@ -70,15 +70,16 @@ model_files_remote = ('"[' + ", ".join(["'models/{}'".format(os.path.basename(mo
 args = (f"{model_files_remote} {int(solver_n_nodes)} {int(solver_n_tasks_per_node)} "
         f"{solver_partition} {solver_max_time}")
 job_file_name = 'run_preproc.job'
-generate_python_job_script(output_file_path=job_file_name,
-                           partition=cae_partition,
-                           n_nodes=cae_n_nodes,
-                           n_tasks_per_node=cae_n_tasks_per_node,
-                           max_time=cae_max_time,
-                           slurm_job_name='PREPROC',
-                           python_file='guwlib/functions_cluster/cluster_pre.py',
-                           args=args,
-                           working_dir=remote_guwlib_path)
+
+generate_slurm_job(output_file_path=job_file_name,
+                   partition=cae_partition,
+                   n_nodes=cae_n_nodes,
+                   n_tasks_per_node=cae_n_tasks_per_node,
+                   max_time=cae_max_time,
+                   slurm_job_name='PREPROC',
+                   working_dir=remote_guwlib_path,
+                   command=f"python3.9 guwlib/functions_cluster/cluster_pre.py {args}",
+                   modules_to_load=("python/3.9.7", "software/abaqus/abaqus_2019"))
 
 # copy the master JOB file to the remote and submit it -----------------------------------------------------------------
 copy_file_to_remote(job_file_name, f'{remote_guwlib_path}/{job_file_name}',

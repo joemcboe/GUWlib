@@ -72,7 +72,7 @@ def create_reference_mesh_plate_part(plate, element_size):
     Creates and meshes a temporary reference plate without any defects or transducers. The reference mesh
     is used to create suitable partitions on the actual plate part for a better mesh quality.
 
-    :param Plate plate: Plate instance for which to create the reference part in ABAQUS.
+    :param IsotropicRectangular plate: Plate instance for which to create the reference part in ABAQUS.
     :param float element_size: Desired element size (in-plane) used for meshing.
     :return: None
     """
@@ -340,7 +340,7 @@ def add_rectangular_cell_partition_to_plate(plate, lower_left_coord, upper_right
     Note that this function is similar to the (internal) function __add_rectangular_cell_partition_to_plate, but is used
     in a different context and has
 
-    :param Plate plate: Plate to which to add the rectangular cell partition.
+    :param IsotropicRectangularPlate plate: Plate to which to add the rectangular cell partition.
     :param tuple[float, float] lower_left_coord: Lower-left coordinate (x, y) of the rectangular cell partition.
     :param tuple[float, float] upper_right_coord: Upper-right coordinate (x, y) of the rectangular cell partition.
     :return: status-flag and exception message
@@ -402,7 +402,7 @@ def __add_rectangular_cell_partition_to_plate(plate, lower_left_coord, upper_rig
     """
     (Helper) Creates a rectangular cell partition around a defect or piezoelectric transducer and adds it to a set.
 
-    :param Plate plate: Plate to which to add the rectangular cell partition.
+    :param IsotropicRectangularPlate plate: Plate to which to add the rectangular cell partition.
     :param tuple[float, float] lower_left_coord: Lower-left coordinate of the rectangular cell partition.
     :param tuple[float, float] upper_right_coord: Upper-right coordinate of the rectangular cell partition.
     :param str cell_set_name: Name of the set which is created for the rectangular cell.
@@ -497,7 +497,7 @@ def mesh_part(element_size_in_plane, element_size_thickness, plate, transducers,
 
     :param float element_size_in_plane: Desired element size (in-plane).
     :param float element_size_thickness: Desired element size (through-thickness).
-    :param Plate plate: Plate to be meshed.
+    :param IsotropicRectangular plate: Plate to be meshed.
     :param list[Transducer] transducers: List of applied transducers.
     :param list[Defect] defects: List of plate defects.
     :return: Number of nodes of the generated mesh.
@@ -669,7 +669,7 @@ def add_field_output_request_plate_surface(plate, create_step_name, time_interva
     This output request causes ABAQUS to write translational nodal displacements of all nodes on the plate surface
     to the .ODB file in fixed time intervals.
 
-    :param Plate plate: Plate instance.
+    :param IsotropicRectangular plate: Plate instance.
     :param str create_step_name: Name of the step in which to create the history output request.
     :param float time_interval: Time interval in which output should be written.
     :return: None
@@ -714,7 +714,7 @@ def add_transducer_concentrated_force(step_name, transducer, signal, max_time_in
     definition.
 
     :param str step_name: Name of the step in which to create the load.
-    :param Transducer transducer: Transducer for which to add the load.
+    :param CircularTransducer transducer: Transducer for which to add the load.
     :param Signal signal: Signal that drives the load amplitude.
     :param float max_time_increment: Maximum time increment of the time integration scheme. Needed to ensure that the
     amplitude data is written with sufficient sampling frequency.

@@ -3,37 +3,49 @@ import os
 import re
 import time
 import sys
+import tkinter as tk
+from tkinter import simpledialog
 
 
-def copy_file_to_remote(local_path, remote_path, username_env_var, password_env_var,
+def prompt_for_credentials():
+    """
+    Prompt the user for SSH credentials using a tkinter GUI dialog.
+
+    :return: Tuple (username, password)
+    """
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+    ssh_username = simpledialog.askstring("SSH Credentials", "Enter SSH username:")
+    ssh_password = simpledialog.askstring("SSH Credentials", "Enter SSH password:", show='*')
+
+    return ssh_username, ssh_password
+
+
+def copy_file_to_remote(local_path, remote_path, username_env_var='tubs_username', password_env_var='tubs_password',
                         hostname='phoenix.hlr.rz.tu-bs.de', port=22):
     """
-    Copy a file from the local machine to a remote machine using SSH.
+    Copy a file from the local machine to a remote machine via Secure Shell (SSH).
 
-    Args:
-    --------------
-        local_path (str): The path of the file on the local machine.
-        remote_path (str): The destination path on the remote machine.
-        username_env_var (str): The environment variable containing the SSH username.
-        password_env_var (str): The environment variable containing the SSH password.
-        hostname (str): The hostname or IP address of the remote machine. Default is 'phoenix.hlr.rz.tu-bs.de'.
-        port (int): The SSH port. Default is 22.
+    :param str local_path: The source path of the file on the local machine.
+    :param str remote_path: The destination path on the remote machine.
+    :param str username_env_var: The environment variable containing the SSH username (optional).
+    :param str password_env_var: The environment variable containing the SSH password (optional).
+    :param str hostname: The hostname or IP address of the remote machine.
+    :param int port: The SSH port to use.
 
-    Returns:
-    ----------------
-        None
+    :return: None
 
-    Raises:
-    ----------------
-        ValueError: If the required environment variables (username and password) are not set.
-        FileNotFoundError: If the local file does not exist.
+    :raise ValueError: If the environment variables (username and password) are not set.
+    :raise FileNotFoundError: If the local file does not exist.
     """
     try:
         ssh_username = os.environ[username_env_var]
         ssh_password = os.environ[password_env_var]
-    except KeyError as e:
-        raise ValueError(f"Error: Missing environment variable {e}. Please set {username_env_var}"
-                         f"and {password_env_var} before running the script.")
+    except KeyError:
+        print(f"Please authorize SSH connection. Credentials are requested with a dialog box. (You can also set the "
+              f"username and password as user environment variables {username_env_var} and {password_env_var} to "
+              f"not get asked again next time.)")
+        ssh_username, ssh_password = prompt_for_credentials()
 
     # Create an SSH client
     ssh_client = paramiko.SSHClient()
@@ -58,28 +70,31 @@ def copy_file_to_remote(local_path, remote_path, username_env_var, password_env_
         ssh_client.close()
 
 
-def copy_file_from_remote(remote_path, local_path, username_env_var, password_env_var,
+def copy_file_from_remote(remote_path, local_path, username_env_var='tubs_username', password_env_var='tubs_password',
                           hostname='phoenix.hlr.rz.tu-bs.de', port=22):
     """
-    Copy a file from a remote machine (UNIX) to the local machine (WINDOWS) using SSH.
+    Copy a file from the remote machine to the local machine via Secure Shell (SSH).
 
-    Args:
-        remote_path (str): The path of the file on the remote machine.
-        local_path (str): The destination path on the local machine.
-        username_env_var (str): The environment variable containing the SSH username.
-        password_env_var (str): The environment variable containing the SSH password.
-        hostname (str): The hostname or IP address of the remote machine. Default is 'phoenix.hlr.rz.tu-bs.de'.
-        port (int): The SSH port. Default is 22.
+    :param str remote_path: The source path of the file on the remote machine.
+    :param str local_path: The destination path on the local machine.
+    :param str username_env_var: The environment variable containing the SSH username (optional).
+    :param str password_env_var: The environment variable containing the SSH password (optional).
+    :param str hostname: The hostname or IP address of the remote machine.
+    :param int port: The SSH port to use.
 
-    Returns:
-        None
+    :return: None
+
+    :raise ValueError: If the environment variables (username and password) are not set.
+    :raise FileNotFoundError: If the local file does not exist.
     """
     try:
         ssh_username = os.environ[username_env_var]
         ssh_password = os.environ[password_env_var]
-    except KeyError as e:
-        raise ValueError(f"Error: Missing environment variable {e}. Please set {username_env_var}"
-                         f"and {password_env_var} before running the script.")
+    except KeyError:
+        print(f"Please authorize SSH connection. Credentials are requested with a dialog box. (You can also set the "
+              f"username and password as user environment variables {username_env_var} and {password_env_var} to "
+              f"not get asked again next time.)")
+        ssh_username, ssh_password = prompt_for_credentials()
 
     # Create an SSH client
     ssh_client = paramiko.SSHClient()
@@ -110,27 +125,30 @@ def copy_file_from_remote(remote_path, local_path, username_env_var, password_en
         ssh_client.close()
 
 
-def run_commands_on_remote(command, username_env_var, password_env_var,
+def run_commands_on_remote(command, username_env_var='tubs_username', password_env_var='tubs_password',
                            hostname='phoenix.hlr.rz.tu-bs.de', port=22):
     """
-    Run a command on a remote machine via SSH.
+    Run a command on a remote machine via Secure Shell (SSH).
 
-    Args:
-        command (str): Command to be executed on the remote machine.
-        username_env_var (str): The environment variable containing the SSH username.
-        password_env_var (str): The environment variable containing the SSH password.
-        hostname (str): The hostname or IP address of the remote machine. Default is 'phoenix.hlr.rz.tu-bs.de'.
-        port (int): The SSH port of the remote machine. Default is 22.
+    :param str command: The command to run on the remote machine.
+    :param str username_env_var: The environment variable containing the SSH username (optional).
+    :param str password_env_var: The environment variable containing the SSH password (optional).
+    :param str hostname: The hostname or IP address of the remote machine.
+    :param int port: The SSH port to use.
 
-    Returns:
-        None
+    :return: The standard output stream of the executed command.
+
+    :raise ValueError: If the environment variables (username and password) are not set.
+    :raise FileNotFoundError: If the local file does not exist.
     """
     try:
         ssh_username = os.environ[username_env_var]
         ssh_password = os.environ[password_env_var]
-    except KeyError as e:
-        raise ValueError(f"Error: Missing environment variable {e}. Please set {username_env_var}"
-                         f" and {password_env_var} before running the script.")
+    except KeyError:
+        print(f"Please authorize SSH connection. Credentials are requested with a dialog box. (You can also set the "
+              f"username and password as user environment variables {username_env_var} and {password_env_var} to "
+              f"not get asked again next time.)")
+        ssh_username, ssh_password = prompt_for_credentials()
 
     # Create an SSH client
     ssh_client = paramiko.SSHClient()
@@ -158,58 +176,3 @@ def run_commands_on_remote(command, username_env_var, password_env_var,
     finally:
         ssh_client.close()
         return output
-
-
-# def tail_log_file_with_regex_trigger(username_env_var, password_env_var, regex_patterns, log_file_path,
-#                                      hostname='phoenix.hlr.rz.tu-bs.de', port=22):
-#     try:
-#         ssh_username = os.environ[username_env_var]
-#         ssh_password = os.environ[password_env_var]
-#     except KeyError as e:
-#         raise ValueError(f"Error: Missing environment variable {e}. "
-#                          f"Please set {username_env_var} and {password_env_var} before running the script.")
-
-#     # Create an SSH client
-#     ssh = paramiko.SSHClient()
-#
-#     try:
-#         # Connect to the remote server
-#         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-#         ssh.connect(hostname, port, ssh_username, ssh_password)
-#         # ssh.connect(hostname, username=ssh_username, password=ssh_password)
-#
-#         # Start an interactive shell
-#         ssh_shell = ssh.invoke_shell()
-#
-#         # Send the 'tail -f' command to the shell
-#         ssh_shell.send("tail -f {}\n".format(log_file_path).encode('utf-8'))
-#
-#         # Wait for the command to start producing output
-#         time.sleep(2)
-#
-#         # Accumulate the content of the log file
-#         log_content = ""
-#
-#         # Compile the regex patterns
-#         compiled_patterns = [re.compile(pattern) for pattern in regex_patterns]
-#
-#         # Read and print the output continuously
-#         while True:
-#             if ssh_shell.recv_ready():
-#                 output = ssh_shell.recv(1024).decode('utf-8')
-#                 sys.stdout.write(output)
-#                 sys.stdout.flush()
-#
-#                 # Accumulate the content of the log file
-#                 log_content += output
-#
-#                 # Check if any of the regex patterns match the log content
-#                 if any(pattern.search(log_content) for pattern in compiled_patterns):
-#                     break
-#
-#     finally:
-#         # Close the SSH connection
-#         ssh.close()
-#
-#     # Return the accumulated content of the log file
-#     return log_content

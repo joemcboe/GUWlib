@@ -9,31 +9,31 @@ respective helper functions ``guwlib.functions_odb.field_export_helper`` or
 ``guwlib.functions_odb.history_export_helper`` on these files. The SLURM jobs are submitted in a sequential and / or
 parallel manner.
 
-A summary text file with the paths to all created .NPZ files is written to enable convenient batch download
-of the processed files from the server to a client (``converted_odb_files.txt``).
-
 Call this script with arguments specifying the directories to scan, the kind of output to process (history / field),
-and parameters for the SLURM job. Always make sure to run this script from the root directory of guwlib, otherwise
-the helper functions might not be located correctly. The required command line arguments of this script, in their
+and parameters for the SLURM job. The required command line arguments of this script, in their
 order of appearance, are:
 
     - list[str]: directories that should be scanned (recursively) for results (.ODB files)
-    - str: indicating whether to export history ("history") or field ("field") data
-    - str: indicating which slurm partition to use (SLURM: --ntasks-per-node)
-    - int: specifying how many parallel instances of ABAQUS/CAE should be started at most
-    - int: specifying how many tasks (processes) should be used for each ABAQUS/CAE instance (SLURM: --ntasks-per-node)
-    - str: specifying the maximum duration of the job (SLURM: --time)
+    - str: indicates whether to export history ("history") or field ("field") data
+    - str: indicates which slurm partition to use (SLURM: --ntasks-per-node)
+    - int: specifies how many parallel instances of ABAQUS/CAE should be started at most
+    - int: specifies how many tasks (processes) should be used for each ABAQUS/CAE instance (SLURM: --ntasks-per-node)
+    - str: specifies the maximum duration of the job (SLURM: --time)
+
+Always make sure to run this script from the root directory of guwlib, otherwise the helper functions might not be
+located correctly. A summary text file with the paths to all created .NPZ files is written to enable convenient batch
+download of the processed files from the server to a client (``converted_odb_files.txt``).
 
 Example usage:
 
     ``cluster_post.py "[results/dir1, results/dir2]" "history" "standard" "5" "10" "0:30:0"``
 
     Scans the directories ``results/dir1`` and ``results/dir2`` and their subdirectories for unprocessed .ODB files
-    and dispatches the history export helper on all files found. Each extraction is submitted as a SLURM job on
+    and executes the history export helper on all files found. Each extraction is submitted as a SLURM job on
     partition ``standard`` with 10 allocated processes, a maximum of 5 jobs will be submitted in parallel. Individual
     jobs will be cancelled due to time-out after 30 minutes.
 """
-from slurm import generate_command_job_script
+from slurm import generate_slurm_job
 import os
 import sys
 import ast
@@ -109,14 +109,14 @@ if __name__ == "__main__":
         for odb_path in odb_paths:
             job_file_name = os.path.join(os.path.dirname(odb_path), 'post.job')
             odb_file_name = os.path.basename(odb_path)
-            generate_command_job_script(output_file_path=job_file_name,
-                                        partition=partition,
-                                        n_nodes=1,
-                                        n_tasks_per_node=n_tasks,
-                                        max_time=max_time,
-                                        slurm_job_name=odb_file_name,
-                                        working_dir=os.getcwd(),
-                                        command=f"abaqus cae noGUI={helper_script_file} -- {odb_path}")
+            generate_slurm_job(output_file_path=job_file_name,
+                               partition=partition,
+                               n_nodes=1,
+                               n_tasks_per_node=n_tasks,
+                               max_time=max_time,
+                               slurm_job_name=odb_file_name,
+                               working_dir=os.getcwd(),
+                               command=f"abaqus cae noGUI={helper_script_file} -- {odb_path}")
             job_file_paths.append(os.path.abspath(job_file_name))
 
             npz_file_name = os.path.join(os.path.dirname(odb_path), os.path.splitext(odb_file_name)[0] + '.npz')

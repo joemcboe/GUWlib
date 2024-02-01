@@ -1,28 +1,18 @@
 """
-This script helps to read in and export an ABAQUS .ODB file. It checks all available node sets for history output data
-fields, collects the displacement data along with the node set name, and writes it to a .NPZ (compressed NumPy) file.
-To call this script, use this syntax:
+This script helps to export history output from an ABAQUS output database (.ODB) file to NumPy binary files (.NPZ).
 
-.. code-block::
-    abaqus cae noGUI=history_export_helper.py -- "odb_path"
+The script opens the .ODB file using ABAQUS/CAE, checks all available node sets for history output data, and exports
+the data. Data from each node set is stored in one individual NumPy array, that is structured like this:
 
-where ``path_to_output_folder`` is the full path to the *.ODB file. The .NPZ file is written to the same path as the
-ODB file. Access the content of the written files like this:
-
-.. code-block::
-    data = numpy.load(my_file)
-    for key in data.keys():
-        print(key)
-    data.close()
-
-Each array stored in the NPZ file is structured like this:
-
-.. code-block::
-    arr = data[key]
     arr[0, :]       # time vector
     arr[1, :]       # U1 displacements
     arr[2, :]       # U2 displacements
     arr[3, :]       # U3 displacements
+
+The .NPZ file is written to the same path as the ODB file. Call this script with one argument specifying
+the path to the .ODB file to be processed:
+
+    ``abaqus cae noGUI=history_export_helper.py -- "odb_path"``
 """
 
 from __future__ import print_function
@@ -42,17 +32,17 @@ import os
 
 def write_history_data_to_file(odb_path):
     """
-    Opens the specified output database (.ODB) file in ABAQUS. It extracts the displacement history output (if
-    available) for all node sets in the first instance of the model. The time, U1, U2 and U3 vectors are concatenated
-    in one NumPy matrix for each node set, and the matrices are then stored in a .NPZ file.
+    Opens the specified output database (.ODB) file in ABAQUS. Extracts the displacement history output (if
+    available) for each node sets of the first instance of the model. The TIME, U1, U2 and U3 vectors are
+    concatenated in one NumPy matrix for each node set, and the matrices are then stored in a .NPZ file.
 
     :param str odb_path: Path to the .ODB file.
     """
 
     # open the ODB file at the specified path
-    my_print('Attempting to open {}.'.format(odb_path))
+    print('Attempting to open {}.'.format(odb_path), file=sys.__stdout__)
     odb = openOdb(path=odb_path)
-    my_print('Odb file successfully opened.')
+    print('Odb file successfully opened.', file=sys.__stdout__)
 
     # access step and assembly with index 0
     assembly = odb.rootAssembly
@@ -73,39 +63,32 @@ def write_history_data_to_file(odb_path):
             point = odbAccess.HistoryPoint(node=node)
             region = step.getHistoryRegion(point=point)
 
-            # np array is structured like this: [time; u1; u2; u3]
+            # np array is structured like this: [time, u1, u2, u3]
             t = np.array(region.historyOutputs['U1'].data)[:, 0]
             u1 = np.array(region.historyOutputs['U1'].data)[:, 1]
             u2 = np.array(region.historyOutputs['U2'].data)[:, 1]
             u3 = np.array(region.historyOutputs['U3'].data)[:, 1]
             data = np.vstack([t, u1, u2, u3])
-
             output_data[node_set] = data
-            my_print("Extracted {}".format(data_name))
 
         except Exception as e:
             error_node_sets.append(node_set)
 
     if error_node_sets:
-        my_print('Skipped: ' + ', '.join(error_node_sets))
+        print('Skipped: ' + ', '.join(error_node_sets), file=sys.__stdout__)
 
-    # Set the output file name
+    # set the output file name
     directory, full_filename = os.path.split(odb_path)
     filename, file_extension = os.path.splitext(full_filename)
     output_file_name = '{}.npz'.format(os.path.join(directory, filename))
 
-    # Save the data to a binary file using pickle
-    my_print("Compressing and writing data ...")
-    np.savez_compressed(output_file_name,
-                        **output_data)
-    my_print("Done! Data written to {}.".format(output_file_name))
+    # save the data to a compressed NumPy .NPZ file
+    print("Compressing and writing data ...", file=sys.__stdout__)
+    np.savez_compressed(output_file_name, **output_data)
+    print("Done! Data written to {}.".format(output_file_name), file=sys.__stdout__)
 
 
-def my_print(txt):
-    print(txt, file=sys.__stdout__)
-
-
-# main -----------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
     arguments = sys.argv[1:]
     write_history_data_to_file(odb_path=arguments[-1])
