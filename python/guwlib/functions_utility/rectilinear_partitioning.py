@@ -1,29 +1,39 @@
+"""
+The functions in this module help to partition a rectangle with rectilinear cut-outs (as depicted in (a) for example)
+into pure rectilinear partitions (figure (c)). This can be useful for meshing in ABAQUS. The implemented algorithm
+starts by creating an array of cells by simply extending all edges of the cut-outs to the border of the rectangle, as
+depicted in (b). These cells can then be iteratively merged into bigger cells.
+
+    ┌────────────────────┐      ┌──┬──────┬──┬───┬───┐		 ┌─────────┬──────┬───┐
+    │         ┌──────┐   │      ├──┼──────┼──┼───┼───┤       │         ├──────┼───┤
+    │         │      │   │      │  │      │  │   │   │       │         │      │   │
+    │         │      │   │      │  │      │  │   │   │       │         │      │   │
+    │         └──────┘   │      ├──┼──────┼──┼───┼───┤       │         ├──┬───┴───┤
+    │  ┌─────────┐       │      ├──┼──────┼──┼───┼───┤       ├──┬──────┴──┤       │
+    │  │         │       │      │  │      │  │   │   │       │  │         │       │
+    │  └─────────┘       │      ├──┼──────┼──┼───┼───┤       │  ├─────────┤       │
+    └────────────────────┘      └──┴──────┴──┴───┴───┘       └──┴─────────┴───────┘
+    (a)                         (b)                          (c)
+"""
 import heapq
 
 
-def partition_rectangle_with_rectilinear_cutouts(rectangle_width, rectangle_length, bounding_box_list):
+def partition_rectangle_with_rectilinear_cutouts(rectangle_width, rectangle_length, cut_outs_list):
     """
-    Partitions a rectangle with cut-out rectangular regions into simple, pure rectangular regions:
-
-    ┌────────────────────┐      ┌─────────┬──────────┐
-    │         ┌──────┐   │      │         ┢━━━━━━┱───┤
-    │         │      │   │      │         ┃      ┃   │
-    │         │      │   │      │         ┃      ┃   │
-    │         └──────┘   │      │         ┡━━┯━━━┹───┤
-    │  ┌─────────┐       │      ├──┲━━━━━━┷━━┪       │
-    │  │         │       │      │  ┃         ┃       │
-    │  └─────────┘       │      │  ┡━━━━━━━━━┩       │
-    └────────────────────┘      └──┴─────────┴───────┘
+    Partitions a rectangle with cut-out rectangular regions into simple, pure rectilinear regions.
 
     This is useful to create partitions in ABAQUS that can be meshed with structured meshes. Note that the
     implementation is rather brute-force and might take a while to compute if >20 cut-outs need to be considered.
 
     :param float rectangle_width: Width (x) of the outer rectangle.
     :param float rectangle_length: Length (y) of the outer rectangle.
-    :param bounding_box_list:
+    :param list[list[float, float, float, float]] cut_outs_list: A list of the cut-outs, defined by their lower-left and
+    upper-right diagonal corners ([left, bottom, right, top]).
+
     :return:
+    :rtype: list[list[float, float, float, float]]
     """
-    cells, n_cells_x, n_cells_y = __generate_cell_array(rectangle_width, rectangle_length, bounding_box_list)
+    cells, n_cells_x, n_cells_y = __generate_cell_array(rectangle_width, rectangle_length, cut_outs_list)
     area_total = rectangle_width * rectangle_length
     number_of_cells = len(cells)
     number_of_steps = 0
@@ -54,16 +64,6 @@ def __generate_cell_array(plate_width, plate_length, bounding_boxes):
     Returns a list of elementary rectangular cells that partition the plate with cut-out rectangles into simple
     rectangular regions, as a first step of the rectilinear partitioning algorithm. The elementary cells can later be
     joined to create a partitioning scheme with less and larger cells.
-
-    ┌────────────────────┐      ┏━━┯━━━━━━┯━━┯━━━┯━━━┓
-    │         ┌──────┐   │      ┠──┼──────┼──╆━━━╅───┨
-    │         │      │   │      ┃  │      │  ┃   ┃   ┃
-    │         │      │   │      ┃  │      │  ┃   ┃   ┃
-    │         └──────┘   │      ┠──┼──────┼──╄━━━╃───┨
-    │  ┌─────────┐       │      ┠──╆━━━━━━╅──┼───┼───┨
-    │  │         │       │      ┃  ┃      ┃  │   │   ┃
-    │  └─────────┘       │      ┠──╄━━━━━━╃──┼───┼───┨
-    └────────────────────┘      ┗━━┷━━━━━━┷━━┷━━━┷━━━┛
 
     :param plate_width:
     :param plate_length:
