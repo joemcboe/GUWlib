@@ -116,11 +116,11 @@ def build_abaqus_model_point_force(model):
 
     # INTERACTION MODULE -----------------------------------------------------------------------------------------------
     seam_count = 0
-    for defect in enumerate(model.defects):
+    for defect in model.defects:
         if isinstance(defect, Crack):
             assign_seam(defect)
             seam_count += 1
-            log_info("Assigned seams to {:d} cracks.".format(seam_count))
+    log_info("Assigned seams to {:d} cracks.".format(seam_count))
 
     # STEP / LOAD / JOB MODULE -----------------------------------------------------------------------------------------
     for i, step in enumerate(model.load_cases):

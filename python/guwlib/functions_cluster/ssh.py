@@ -1,13 +1,36 @@
+"""
+Mainly Paramiko wrappers.
+"""
 import paramiko
 import os
-import re
-import time
-import sys
 import tkinter as tk
 from tkinter import simpledialog
 
 
-def prompt_for_credentials():
+def get_ssh_credentials(hostname):
+    """
+    Retrieve SSH credentials either from user environment variables or by prompting the user
+    with a tkinter GUI dialog.
+
+    :param str hostname: Name of the SSh host.
+    :return: Tuple (username, password)
+    """
+    username_env_var = 'tubs_username'
+    password_env_var = 'tubs_password'
+
+    try:
+        ssh_username = os.environ[username_env_var]
+        ssh_password = os.environ[password_env_var]
+    except KeyError:
+        print(f"Please authorize SSH connection to {hostname}. Credentials are requested with a "
+              f"dialog box.\n(You can also set the username and password as user environment variables "
+              f"{username_env_var} and {password_env_var} to not get asked again next time.)")
+        ssh_username, ssh_password = __prompt_for_ssh_credentials()
+
+    return ssh_username, ssh_password
+
+
+def __prompt_for_ssh_credentials():
     """
     Prompt the user for SSH credentials using a tkinter GUI dialog.
 
@@ -21,31 +44,21 @@ def prompt_for_credentials():
     return ssh_username, ssh_password
 
 
-def copy_file_to_remote(local_path, remote_path, username_env_var='tubs_username', password_env_var='tubs_password',
-                        hostname='phoenix.hlr.rz.tu-bs.de', port=22):
+def copy_file_to_remote(local_path, remote_path, ssh_username, ssh_password, hostname, port):
     """
     Copy a file from the local machine to a remote machine via Secure Shell (SSH).
 
     :param str local_path: The source path of the file on the local machine.
     :param str remote_path: The destination path on the remote machine.
-    :param str username_env_var: The environment variable containing the SSH username (optional).
-    :param str password_env_var: The environment variable containing the SSH password (optional).
+    :param str ssh_username: SSH username.
+    :param str ssh_password: SSH password.
     :param str hostname: The hostname or IP address of the remote machine.
     :param int port: The SSH port to use.
 
     :return: None
-
-    :raise ValueError: If the environment variables (username and password) are not set.
+    :raise Error: If the SSH connection cannot be established.
     :raise FileNotFoundError: If the local file does not exist.
     """
-    try:
-        ssh_username = os.environ[username_env_var]
-        ssh_password = os.environ[password_env_var]
-    except KeyError:
-        print(f"Please authorize SSH connection for file upload to {hostname}. Credentials are requested with a "
-              f"dialog box.\n(You can also set the username and password as user environment variables "
-              f"{username_env_var} and {password_env_var} to not get asked again next time.)")
-        ssh_username, ssh_password = prompt_for_credentials()
 
     # Create an SSH client
     ssh_client = paramiko.SSHClient()
@@ -70,15 +83,14 @@ def copy_file_to_remote(local_path, remote_path, username_env_var='tubs_username
         ssh_client.close()
 
 
-def copy_file_from_remote(remote_path, local_path, username_env_var='tubs_username', password_env_var='tubs_password',
-                          hostname='phoenix.hlr.rz.tu-bs.de', port=22):
+def copy_file_from_remote(remote_path, local_path, ssh_username, ssh_password, hostname, port):
     """
     Copy a file from the remote machine to the local machine via Secure Shell (SSH).
 
     :param str remote_path: The source path of the file on the remote machine.
     :param str local_path: The destination path on the local machine.
-    :param str username_env_var: The environment variable containing the SSH username (optional).
-    :param str password_env_var: The environment variable containing the SSH password (optional).
+    :param str ssh_username: SSH username.
+    :param str ssh_password: SSH password.
     :param str hostname: The hostname or IP address of the remote machine.
     :param int port: The SSH port to use.
 
@@ -87,15 +99,6 @@ def copy_file_from_remote(remote_path, local_path, username_env_var='tubs_userna
     :raise ValueError: If the environment variables (username and password) are not set.
     :raise FileNotFoundError: If the local file does not exist.
     """
-    try:
-        ssh_username = os.environ[username_env_var]
-        ssh_password = os.environ[password_env_var]
-    except KeyError:
-        print(f"Please authorize SSH connection for file download from {hostname}. Credentials are requested with a "
-              f"dialog box.\n(You can also set the username and password as user environment variables "
-              f"{username_env_var} and {password_env_var} to not get asked again next time.)")
-        ssh_username, ssh_password = prompt_for_credentials()
-
     # Create an SSH client
     ssh_client = paramiko.SSHClient()
     try:
@@ -125,14 +128,13 @@ def copy_file_from_remote(remote_path, local_path, username_env_var='tubs_userna
         ssh_client.close()
 
 
-def run_commands_on_remote(command, username_env_var='tubs_username', password_env_var='tubs_password',
-                           hostname='phoenix.hlr.rz.tu-bs.de', port=22):
+def run_commands_on_remote(command, ssh_username, ssh_password, hostname, port):
     """
     Run a command on a remote machine via Secure Shell (SSH).
 
     :param str command: The command to run on the remote machine.
-    :param str username_env_var: The environment variable containing the SSH username (optional).
-    :param str password_env_var: The environment variable containing the SSH password (optional).
+    :param str ssh_username: SSH username.
+    :param str ssh_password: SSH password.
     :param str hostname: The hostname or IP address of the remote machine.
     :param int port: The SSH port to use.
 
@@ -141,15 +143,6 @@ def run_commands_on_remote(command, username_env_var='tubs_username', password_e
     :raise ValueError: If the environment variables (username and password) are not set.
     :raise FileNotFoundError: If the local file does not exist.
     """
-    try:
-        ssh_username = os.environ[username_env_var]
-        ssh_password = os.environ[password_env_var]
-    except KeyError:
-        print(f"Please authorize SSH connection to {hostname} for sending command '{command}'. Credentials are "
-              f"requested with a dialog box.\n(You can also set the username and password as user environment "
-              f"variables {username_env_var} and {password_env_var} to not get asked again next time.)")
-        ssh_username, ssh_password = prompt_for_credentials()
-
     # Create an SSH client
     ssh_client = paramiko.SSHClient()
     output = ''

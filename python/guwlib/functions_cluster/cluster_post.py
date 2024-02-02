@@ -14,8 +14,8 @@ and parameters for the SLURM job. The required command line arguments of this sc
 
     - list[str]: directories that should be scanned (recursively) for results (.ODB files)
     - str: indicates whether to export history ("history") or field ("field") data
-    - str: indicates which slurm partition to use (SLURM: --ntasks-per-node)
-    - int: specifies how many parallel instances of ABAQUS/CAE should be started at most
+    - str: indicates which slurm partition to use (SLURM: --partition)
+    - int: specifies how many parallel instances of ABAQUS/CAE should be started simultaneously at most
     - int: specifies how many tasks (processes) should be used for each ABAQUS/CAE instance (SLURM: --ntasks-per-node)
     - str: specifies the maximum duration of the job (SLURM: --time)
 

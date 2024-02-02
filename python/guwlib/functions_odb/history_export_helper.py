@@ -25,7 +25,6 @@ from odbSection import *
 
 import numpy as np
 import pickle
-import gzip
 import sys
 import os
 
@@ -34,7 +33,8 @@ def write_history_data_to_file(odb_path):
     """
     Opens the specified output database (.ODB) file in ABAQUS. Extracts the displacement history output (if
     available) for each node set of the first instance of the model. The TIME, U1, U2 and U3 vectors are
-    concatenated in one NumPy matrix for each node set, and the matrices are then stored in an .NPZ file.
+    concatenated in one NumPy matrix for each node set, and the matrices are then stored in an .NPZ file. If
+    saving to .NPZ fails, pickle is used as a fallback (.PKL).
 
     :param str odb_path: Path to the .ODB file.
     """
@@ -80,13 +80,20 @@ def write_history_data_to_file(odb_path):
     # set the output file name
     directory, full_filename = os.path.split(odb_path)
     filename, file_extension = os.path.splitext(full_filename)
-    output_file_name = '{}.npz'.format(os.path.join(directory, filename))
 
     # save the data to a compressed NumPy .NPZ file
     print("Compressing and writing data ...", file=sys.__stdout__)
-    np.savez_compressed(output_file_name, **output_data)
-    print("Done! Data written to {}.".format(output_file_name), file=sys.__stdout__)
+    try:
+        output_file_name = '{}.npz'.format(os.path.join(directory, filename))
+        np.savez_compressed(output_file_name, **output_data)
+        print("Done! Data written to {}.".format(output_file_name), file=sys.__stdout__)
+    except Exception as e:
+        print("Error: {}\nTrying again with Pickle fallback ...".format(e), file=sys.__stdout__)
 
+        # Save the dictionary using pickle
+        output_file_name = '{}.pkl'.format(os.path.join(directory, filename))
+        with open(output_file_name, 'wb') as f:
+            pickle.dump(output_data, f)
 
 # ----------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":

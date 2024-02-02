@@ -778,6 +778,6 @@ def assign_seam(crack):
     a = mdb.models[MODEL_NAME].rootAssembly
     i = a.instances[PLATE_PART_NAME]
     a.makeIndependent(instances=(i,))
-    picked_region = i.sets[crack.seam_face_set_name].faces[:]
+    picked_region = i.sets[crack.seam_face_set_name]        #.faces[:]
     mdb.models[MODEL_NAME].rootAssembly.engineeringFeatures.assignSeam(regions=picked_region)
 

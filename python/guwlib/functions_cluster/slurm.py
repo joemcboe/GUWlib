@@ -85,7 +85,7 @@ def generate_slurm_job(output_file_path, partition, n_nodes, n_tasks_per_node, m
 
     :return: None
     """
-    modules_to_load = "\n".join(["module load " + module for module in modules_to_load])
+    modules_to_load = "\n        ".join(["module load " + module for module in modules_to_load])
     content = textwrap.dedent(f"""\
         #!/bin/bash -l
 
@@ -102,7 +102,6 @@ def generate_slurm_job(output_file_path, partition, n_nodes, n_tasks_per_node, m
         working_dir={working_dir}
         cd $working_dir
         {command}
-
     """)
 
     with open(output_file_path, 'w', newline='\n') as file:

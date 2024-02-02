@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 The functions in this module help to partition a rectangle with rectilinear cut-outs (as depicted in (a) for example)
 into pure rectilinear partitions (figure (c)). This can be useful for meshing in ABAQUS. The implemented algorithm
