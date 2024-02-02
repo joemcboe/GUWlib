@@ -15,7 +15,8 @@ def log_info(text):
 def log_warning(text):
     """
     Print nicely formatted warning-text to sys.__stdout__ and ABAQUS redirected output stream.
-    :param str text: Text to print."""
+    :param str text: Text to print.
+    """
     log_helper("Warn", text)
 
 

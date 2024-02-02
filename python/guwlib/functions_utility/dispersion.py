@@ -6,11 +6,11 @@ from guwlib.guw_objects.material import Material
 def read_dispersion_data_from_txt_file(txt_file_path, thickness):
     """
     Helper to read in dispersion data from a text file, formatted as by the DLR Dispersion Calculator. Material
-    thickness is taken into account.
+    thickness is taken into account when returning the data.
 
     :param str txt_file_path: Path to the .TXT file with formatted dispersion data.
     :param float thickness: Material thickness in m.
-    :return: Dispersion data.
+    :return: Dispersion data. Access the data like this: dispersion_data[mode_order][property].
     :rtype: dict
     """
     raw_data = np.loadtxt(txt_file_path, delimiter=',', skiprows=1)

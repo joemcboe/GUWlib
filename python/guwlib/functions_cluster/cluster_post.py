@@ -10,8 +10,7 @@ respective helper functions ``guwlib.functions_odb.field_export_helper`` or
 parallel manner.
 
 Call this script with arguments specifying the directories to scan, the kind of output to process (history / field),
-and parameters for the SLURM job. The required command line arguments of this script, in their
-order of appearance, are:
+and parameters for the SLURM job. The required command line arguments of this script, in their order of appearance, are:
 
     - list[str]: directories that should be scanned (recursively) for results (.ODB files)
     - str: indicates whether to export history ("history") or field ("field") data
