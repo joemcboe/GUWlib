@@ -34,7 +34,7 @@ def write_history_data_to_file(odb_path):
     Opens the specified output database (.ODB) file in ABAQUS. Extracts the displacement history output (if
     available) for each node set of the first instance of the model. The TIME, U1, U2 and U3 vectors are
     concatenated in one NumPy matrix for each node set, and the matrices are then stored in an .NPZ file. If
-    saving to .NPZ fails, pickle is used as a fallback (.PKL).
+    saving to .NPZ fails, pickle is used as a fallback (.PKL format).
 
     :param str odb_path: Path to the .ODB file.
     """

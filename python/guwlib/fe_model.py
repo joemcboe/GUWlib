@@ -100,9 +100,10 @@ class FEModel:
         """
         from guwlib.functions_utility.dispersion import get_minimal_lamb_wavelength_in_frequency_range
         frequency_range = [0, self.max_frequency]
-        min_wavelength, min_wavelength_frequency = get_minimal_lamb_wavelength_in_frequency_range(material=self.plate.material,
-                                                                                                  thickness=self.plate.thickness,
-                                                                                                  frequency_range=frequency_range)
+        min_wavelength, min_wavelength_frequency = \
+            get_minimal_lamb_wavelength_in_frequency_range(material=self.plate.material,
+                                                           thickness=self.plate.thickness,
+                                                           frequency_range=frequency_range)
         element_size_in_plane = min_wavelength / self.elements_per_wavelength
         return element_size_in_plane
 
@@ -141,4 +142,3 @@ class FEModel:
         src = self.model_file_path
         dst = os.path.join(self.output_directory, self.model_name + '.mdl')
         shutil.copy(src, dst)
-

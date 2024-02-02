@@ -7,7 +7,20 @@ from guwlib.functions_cluster.ssh import *
 def build_and_solve(model_files_local, remote_guwlib_path, cae_slurm_settings, solver_slurm_settings,
                     hostname='phoenix.hlr.rz.tu-bs.de', port=22):
     """
+    Wrapper for the process of uploading model files (.PY) to a remote host (e.g. Phoenix Cluster) and initiating
+    the preprocessing and solving pipeline by calling the 'cluster_pre.py' script on the remote machine.
 
+    Data exchange between client and host is established via Secure Shell and respective command line arguments
+    to the 'cluster_pre.py' script. The host (e.g. Phoenix Cluster) is expected to have SLURM resource manager
+    installed, has to be available via SSH, and the guwlib python modules have to be available at remote_guwlib_path.
+
+    :param list[str] model_files_local: List of the model (.PY) files to upload and process on the cluster.
+    :param str remote_guwlib_path: Path to the directory that contains the guwlib module on the remote machine.
+    :param dict cae_slurm_settings: SLURM settings for the generation of ABAQUS .INP files.
+    :param dict solver_slurm_settings: SLURM settings for the ABAQUS solver.
+    :param str hostname: Name of the SSH host.
+    :param int port: Port of the SSH host.
+    :return: None
     """
     # decompose dicts
     solver_n_nodes = solver_slurm_settings["n_nodes"]
@@ -58,7 +71,21 @@ def build_and_solve(model_files_local, remote_guwlib_path, cae_slurm_settings, s
 def extract_results(directories_to_scan, data_to_extract, remote_guwlib_path, cae_slurm_settings,
                     max_parallel_cae_instances, hostname='phoenix.hlr.rz.tu-bs.de', port=22):
     """
+    Wrapper for the process of converting or extracting field / history data from .ODB files to .NPZ files at the
+    specified locations on a remote host by calling the 'cluster_post.py' script on the remote machine.
 
+    Data exchange between client and host is established via Secure Shell and respective command line arguments
+    to the 'cluster_post.py' script. The host (e.g. Phoenix Cluster) is expected to have SLURM resource manager
+    installed, has to be available via SSH, and the guwlib python modules have to be available at remote_guwlib_path.
+
+    :param list[str] directories_to_scan: dirs to scan for unprocessed .ODB files (relative to remote_guwlib_path)
+    :param str data_to_extract: type of data to extract ('field' or 'history')
+    :param int max_parallel_cae_instances: Maximum number of CAE instances to run simultaneously during extraction.
+    :param str remote_guwlib_path: Path to the directory that contains the guwlib module on the remote machine.
+    :param dict cae_slurm_settings: SLURM settings for ABAQUS/CAE which is used to read in .ODB files.
+    :param str hostname: Name of the SSH host.
+    :param int port: Port of the SSH host.
+    :return: None
     """
     # decompose dicts
     cae_n_tasks_per_node = cae_slurm_settings["n_tasks_per_node"]
@@ -96,7 +123,13 @@ def extract_results(directories_to_scan, data_to_extract, remote_guwlib_path, ca
 
 def download_results(remote_guwlib_path, hostname, port):
     """
+    Wrapper for the process of downloading previously extracted results to the local machine. During the extraction
+    process, a .TXT file with filepaths of all generated .NPZ files is placed at the location of remote_guwlib_path.
 
+    :param str remote_guwlib_path: Path to the directory that contains the guwlib module on the remote machine.
+    :param str hostname: Name of the SSH host.
+    :param int port: Port of the SSH host.
+    :return: None
     """
     # retrieve the SSH username and password
     ssh_username, ssh_password = get_ssh_credentials(hostname)
