@@ -4,7 +4,7 @@ into pure rectilinear partitions (figure (c)). This can be useful for meshing in
 starts by creating an array of cells by simply extending all edges of the cut-outs to the border of the rectangle, as
 depicted in (b). These cells can then be iteratively merged into bigger cells.
 
-    ┌────────────────────┐      ┌──┬──────┬──┬───┬───┐		 ┌─────────┬──────┬───┐
+    ┌────────────────────┐      ┌──┬──────┬──┬───┬───┐       ┌─────────┬──────┬───┐
     │         ┌──────┐   │      ├──┼──────┼──┼───┼───┤       │         ├──────┼───┤
     │         │      │   │      │  │      │  │   │   │       │         │      │   │
     │         │      │   │      │  │      │  │   │   │       │         │      │   │
