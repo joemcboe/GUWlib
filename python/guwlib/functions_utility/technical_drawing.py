@@ -1,3 +1,19 @@
+"""
+The functions from this module are not necessary for guwlib, but can be helpful to create technical drawings including
+dimensioning with matplotlib. Minimal example:
+
+    from technical_drawing import *
+    ax, plot_settings = setup_technical_drawing_plot(sketch_width_mm=160,
+                                                     sketch_height_mm=60,
+                                                     approximate_size=10.0,
+                                                     line_width_mm=0.2)
+    ax.add_patch(patches.Rectangle((0, 0), 10, 10, linewidth=1, edgecolor='k', facecolor='gray',
+                                   transform=plot_settings['sketch_transform'] + plt.gca().transData))
+    add_linear_dimensioning(start_coordinate=(0, 0), end_coordinate=(0, 10), plot_settings=plot_settings, )
+    add_linear_dimensioning(start_coordinate=(10, 0), end_coordinate=(0, 0), plot_settings=plot_settings, )
+    plt.show()
+
+"""
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.transforms import Affine2D
@@ -12,17 +28,17 @@ MM_TO_POINTS = 72 / INCHES_TO_MM
 def setup_technical_drawing_plot(sketch_width_mm, sketch_height_mm, approximate_size, line_width_mm,
                                  margins=(10, 10, 10, 10)):
     """
+    Sets up a Matplotlib figure and blank axes with exactly the specified width and height.
 
-    :param sketch_width_mm: The width of the generated matplotlib figure in mm.
-    :param sketch_height_mm: The height of the generated matplotlib figure in mm.
-    :param approximate_size: The approximate size of the object to be sketched (usually the plate), in mm. Used to
+    :param float sketch_width_mm: The width of the generated matplotlib figure in mm.
+    :param float sketch_height_mm: The height of the generated matplotlib figure in mm.
+    :param float approximate_size: The approximate size of the object to be sketched (usually the plate), in mm. Used to
     calculate an appropriate scaling factor.
-    :param line_width_mm: The line width to be used for plotting.
-    :param margins: The left, right, lower, upper margins.
+    :param float line_width_mm: The line width to be used for plotting.
+    :param tuple[float, float, float, float] margins: The left, right, lower, upper margins in mm.
 
-    :return: (matplotlib.axes._axes.Axes) ax: axes for plotting.
-    (dict) plot_settings: plotting settings, i.e. transforms and line width.
-
+    :return: axes for plotting and plotting settings, i.e. transforms and line width
+    :rtype: tuple[matplotlib.axes._axes.Axes, dict]
     """
 
     # setup affine transform to scale sketch object to paper size (based on the approximate size) and to center plot
@@ -48,9 +64,17 @@ def setup_technical_drawing_plot(sketch_width_mm, sketch_height_mm, approximate_
 
 
 def add_linear_dimensioning(start_coordinate, end_coordinate, plot_settings, line_color='silver',
-                            dimensioning_line_offset=5, prefix=''):
+                            dimensioning_line_offset=5, prefix='', unit_conversion=1e3):
     """
-    
+    Plots a linear dimensioning line with given properties to the current axes.
+
+    :param tuple[float, float] start_coordinate: Start coordinate of the dimensioning line.
+    :param tuple[float, float] end_coordinate: End coordinate of the dimensioning line.
+    :param dict plot_settings: Settings to use for plotting (transforms and line width).
+    :param line_color: Color of the dimensioning line.
+    :param float dimensioning_line_offset: Offset in mm of the dimensioning line.
+    :param str prefix: Text to add before the dimensioning  measure.
+    :param float unit_conversion: Factor to multiply the actual length with before printing.
     """
     # decompose plot_settings
     sketch_transform = plot_settings['sketch_transform']
@@ -101,7 +125,8 @@ def add_linear_dimensioning(start_coordinate, end_coordinate, plot_settings, lin
         kwargs = {}
 
     text_transform = Affine2D(matrix=np.vstack([np.hstack([local_transform, np.array([[x1], [y1]])]), [0, 0, 1]]))
-    plt.text(length / 2, y_offset + 2/scaling_factor*np.sign(y_offset), f'\\texttt{{{prefix}{length*1e3:g}}}',
+    plt.text(length / 2, y_offset + 2/scaling_factor*np.sign(y_offset),
+             f'\\texttt{{{prefix}{length*unit_conversion:g}}}',
              transform=text_transform + sketch_transform + plt.gca().transData,
              rotation=angle_deg[0], rotation_mode='anchor', horizontalalignment='center', color=line_color, **kwargs)
 
