@@ -5,16 +5,19 @@ from guwlib.guw_objects.material import Material
 
 def read_dispersion_data_from_txt_file(txt_file_path, thickness):
     """
+    Helper to read in dispersion data from a text file, formatted as by the DLR Dispersion Calculator. Material
+    thickness is taken into account.
 
-    :param txt_file_path:
-    :param thickness:
-    :return:
+    :param str txt_file_path: Path to the .TXT file with formatted dispersion data.
+    :param float thickness: Material thickness in m.
+    :return: Dispersion data.
+    :rtype: dict
     """
     raw_data = np.loadtxt(txt_file_path, delimiter=',', skiprows=1)
     num_columns = np.shape(raw_data)[1]
     dispersion_data = [{} for _ in range(num_columns // 8)]
 
-    # header looks like this:
+    # header of the .TXT file should look like this:
     # A0 f*d (MHz*mm),A0 Phase velocity (m/ms),A0 Energy velocity (m/ms),A0 Propagation time (micsec),
     # A0 Coincidence angle (deg),A0 Wavelength/d (),A0 Wavenumber*d (rad),A0 Attenuation*d (Np/m*mm)
     header = ["frequency", "phase_velocity", "energy_velocity", "propagation_time",
@@ -32,9 +35,12 @@ def read_dispersion_data_from_txt_file(txt_file_path, thickness):
 
 def get_lamb_dispersion_txt_files_path(material_name):
     """
+    Finds the dispersion data text files by material name for symmetric / antisymmetric modes relative to this script.
 
-    :param material_name:
-    :return:
+    :param str material_name: Material name to find the dispersion data text files for.
+    :return: Paths to symmetric / antisymmetric modes dispersion data text files.
+    :rtype: tuple[str, str]
+    :raise: IOError, if the files cannot be located.
     """
     script_path = os.path.abspath(__file__)
     parent_dir = os.path.dirname(os.path.dirname(script_path))
@@ -51,15 +57,19 @@ def get_lamb_dispersion_txt_files_path(material_name):
     return symmetric_path, asymmetric_path
 
 
-def get_minimal_lamb_wavelength(material, thickness, frequency_range):
+def get_minimal_lamb_wavelength_in_frequency_range(material, thickness, frequency_range):
     """
-    Calculate the minimal wavelength within a given frequency range for a given material and thickness.
+    Calculate the minimal wavelength within a given frequency range for a given material and thickness. Checks all
+    modes that may occur in the provided frequency band (A0, S0, A1, S1, ...).
 
-    :param Material material: An object representing the material with a "material_name" attribute.
-    :param float thickness: The thickness of the material.
+    :param Material material: Material for which to get the minimal wavelength.
+    :param float thickness: The thickness of the material in m.
     :param [float, float] frequency_range: A tuple representing the frequency range (min_freq, max_freq).
-    :return: A tuple containing the minimal wavelength and the corresponding frequency within frequency_range.
+    :return: The minimal wavelength and the corresponding frequency within frequency_range.
+    :rtype: tuple[float, float]
     """
+
+    # read in the dispersion data
     symmetric_txt_path, asymmetric_txt_path = get_lamb_dispersion_txt_files_path(material.name)
     symmetric_modes_data = read_dispersion_data_from_txt_file(symmetric_txt_path, thickness)
     asymmetric_modes_data = read_dispersion_data_from_txt_file(asymmetric_txt_path, thickness)
@@ -88,11 +98,15 @@ def get_minimal_lamb_wavelength(material, thickness, frequency_range):
 
 def find_min_between_limits(x, y, limits):
     """
+    Finds the minimum value of y(x) and its argument for limits(0) <= x <= limits(1).
+    If limits[0] or limits[1] are not elements of x, this function tries to find interpolated y-values directly
+    at the boundaries of the interval (only if values outside the interval are available).
 
-    :param np.ndarray x:
-    :param y:
-    :param limits:
-    :return:
+    :param np.ndarray x: x-values
+    :param np.ndarray y: y-values
+    :param (float, float) limits: limits, i.e. (x_lower, x_upper)
+    :return: (y_min, x_min) for y(x_min) = y_min
+    :rtype: float
     """
     below_limit = x < limits[0]
     inside_limits = np.logical_and(x >= limits[0], x <= limits[1])
@@ -114,31 +128,3 @@ def find_min_between_limits(x, y, limits):
     else:
         return float('inf'), None
 
-
-# ----------------------------------------------------------------------------------------------------------------------
-
-# x = np.array([4, 6, 8.0])
-# y = np.array([10,  5.0, 0])
-#
-# limits = [2,7]
-#
-# y_min, x_argmin = find_min_between_limits(x, y, limits)
-# print(y_min, x_argmin)
-
-
-# thickness = 3e-3
-# alu = Material(material_name='AluminumAlloy1100', material_type='isotropic')
-# min_lambda, min_lambda_f = get_minimal_lamb_wavelength(alu, thickness, (20e3, 50e3))
-# print(min_lambda)
-# print(min_lambda_f)
-#
-# symmetric_txt_path, asymmetric_txt_path = get_lamb_dispersion_txt_files_path(alu.material_name)
-# symmetric_modes = read_dispersion_data_from_txt_file(symmetric_txt_path, thickness)
-# asymmetric_modes = read_dispersion_data_from_txt_file(asymmetric_txt_path, thickness)
-# for mode in range(len(symmetric_modes)):
-#     plt.plot(symmetric_modes[mode]['frequency'], symmetric_modes[0]['wavelength'])
-#     plt.plot(asymmetric_modes[mode]['frequency'], asymmetric_modes[0]['wavelength'])
-# plt.plot(min_lambda_f, min_lambda, 'rx')
-# plt.ylim(0, 0.15)
-# plt.xlim(0, 100e3)
-# plt.show()

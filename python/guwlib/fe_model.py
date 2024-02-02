@@ -98,11 +98,11 @@ class FEModel:
 
         :return: (float) Element size used for in-plane discretization of the plate.
         """
-        from guwlib.functions_utility.dispersion import get_minimal_lamb_wavelength
+        from guwlib.functions_utility.dispersion import get_minimal_lamb_wavelength_in_frequency_range
         frequency_range = [0, self.max_frequency]
-        min_wavelength, min_wavelength_frequency = get_minimal_lamb_wavelength(material=self.plate.material,
-                                                                               thickness=self.plate.thickness,
-                                                                               frequency_range=frequency_range)
+        min_wavelength, min_wavelength_frequency = get_minimal_lamb_wavelength_in_frequency_range(material=self.plate.material,
+                                                                                                  thickness=self.plate.thickness,
+                                                                                                  frequency_range=frequency_range)
         element_size_in_plane = min_wavelength / self.elements_per_wavelength
         return element_size_in_plane
 

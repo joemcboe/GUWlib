@@ -1,18 +1,30 @@
 import heapq
 
 
-def partition_rectangular_plate(plate, bounding_box_list):
+def partition_rectangle_with_rectilinear_cutouts(rectangle_width, rectangle_length, bounding_box_list):
     """
-    Partitions a rectangular plate with cut-out rectangular regions (bounding boxes) into simple, rectangular regions
-    that can be meshed with a structured meshing technique in Abaqus. The implemented approach is slow and only works
-    for rectangular plates, and does not necessarily return an optimal solution.
+    Partitions a rectangle with cut-out rectangular regions into simple, pure rectangular regions:
 
-    :param plate:
+    ┌────────────────────┐      ┌─────────┬──────────┐
+    │         ┌──────┐   │      │         ┢━━━━━━┱───┤
+    │         │      │   │      │         ┃      ┃   │
+    │         │      │   │      │         ┃      ┃   │
+    │         └──────┘   │      │         ┡━━┯━━━┹───┤
+    │  ┌─────────┐       │      ├──┲━━━━━━┷━━┪       │
+    │  │         │       │      │  ┃         ┃       │
+    │  └─────────┘       │      │  ┡━━━━━━━━━┩       │
+    └────────────────────┘      └──┴─────────┴───────┘
+
+    This is useful to create partitions in ABAQUS that can be meshed with structured meshes. Note that the
+    implementation is rather brute-force and might take a while to compute if >20 cut-outs need to be considered.
+
+    :param float rectangle_width: Width (x) of the outer rectangle.
+    :param float rectangle_length: Length (y) of the outer rectangle.
     :param bounding_box_list:
     :return:
     """
-    cells, n_cells_x, n_cells_y = __generate_cell_array(plate.width, plate.length, bounding_box_list)
-    area_total = plate.width * plate.length
+    cells, n_cells_x, n_cells_y = __generate_cell_array(rectangle_width, rectangle_length, bounding_box_list)
+    area_total = rectangle_width * rectangle_length
     number_of_cells = len(cells)
     number_of_steps = 0
 
@@ -32,12 +44,27 @@ def partition_rectangular_plate(plate, bounding_box_list):
         __carry_out_step(unique_possible_steps[0], cells, n_cells_x)
         number_of_steps += 1
 
-    return cells[number_of_cells:]
+    cells = [cell[0:4] for cell in cells[number_of_cells:]]
+
+    return cells
 
 
 def __generate_cell_array(plate_width, plate_length, bounding_boxes):
     """
-    Returns a list of elementary rectangular cells that partition the plate with bounding boxes into simple regions.
+    Returns a list of elementary rectangular cells that partition the plate with cut-out rectangles into simple
+    rectangular regions, as a first step of the rectilinear partitioning algorithm. The elementary cells can later be
+    joined to create a partitioning scheme with less and larger cells.
+
+    ┌────────────────────┐      ┏━━┯━━━━━━┯━━┯━━━┯━━━┓
+    │         ┌──────┐   │      ┠──┼──────┼──╆━━━╅───┨
+    │         │      │   │      ┃  │      │  ┃   ┃   ┃
+    │         │      │   │      ┃  │      │  ┃   ┃   ┃
+    │         └──────┘   │      ┠──┼──────┼──╄━━━╃───┨
+    │  ┌─────────┐       │      ┠──╆━━━━━━╅──┼───┼───┨
+    │  │         │       │      ┃  ┃      ┃  │   │   ┃
+    │  └─────────┘       │      ┠──╄━━━━━━╃──┼───┼───┨
+    └────────────────────┘      ┗━━┷━━━━━━┷━━┷━━━┷━━━┛
+
     :param plate_width:
     :param plate_length:
     :param bounding_boxes:

@@ -1,5 +1,5 @@
 from guwlib import *
-from guwlib.functions_utility.rectilinear_partitioning import partition_rectangular_plate
+from guwlib.functions_utility.rectilinear_partitioning import partition_rectangle_with_rectilinear_cutouts
 from guwlib.functions_utility.console_output import *
 from guwlib.functions_cae.helper_functions_point_force import *
 
@@ -80,7 +80,7 @@ def build_abaqus_model_point_force(model):
 
     # partition the plate into partitions that are suitable for structured meshing
     log_info("Generating a rectilinear partitioning strategy for the plate. This might take some time...")
-    cells = partition_rectangular_plate(model.plate, bounding_box_list)
+    cells = partition_rectangle_with_rectilinear_cutouts(model.plate, bounding_box_list)
     log_info("Done. Starting to create {:d} rectangular partitions on the plate part.".format(len(cells)))
     err_count = 0
     for i, cell in enumerate(cells[:-1]):
