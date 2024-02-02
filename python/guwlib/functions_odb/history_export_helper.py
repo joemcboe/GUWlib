@@ -2,7 +2,7 @@
 This script helps to export history output from an ABAQUS output database (.ODB) file to NumPy binary files (.NPZ).
 
 The script opens the .ODB file using ABAQUS/CAE, checks all available node sets for history output data, and exports
-the data. Data from each node set is stored in one individual NumPy array, that is structured like this:
+the data. Data from each node set is stored in one individual NumPy array, which is structured like this:
 
     arr[0, :]       # time vector
     arr[1, :]       # U1 displacements
@@ -33,8 +33,8 @@ import os
 def write_history_data_to_file(odb_path):
     """
     Opens the specified output database (.ODB) file in ABAQUS. Extracts the displacement history output (if
-    available) for each node sets of the first instance of the model. The TIME, U1, U2 and U3 vectors are
-    concatenated in one NumPy matrix for each node set, and the matrices are then stored in a .NPZ file.
+    available) for each node set of the first instance of the model. The TIME, U1, U2 and U3 vectors are
+    concatenated in one NumPy matrix for each node set, and the matrices are then stored in an .NPZ file.
 
     :param str odb_path: Path to the .ODB file.
     """

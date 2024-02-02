@@ -80,7 +80,9 @@ def build_abaqus_model_point_force(model):
 
     # partition the plate into partitions that are suitable for structured meshing
     log_info("Generating a rectilinear partitioning strategy for the plate. This might take some time...")
-    cells = partition_rectangle_with_rectilinear_cutouts(model.plate, bounding_box_list)
+    cells = partition_rectangle_with_rectilinear_cutouts(rectangle_width=model.plate.width,
+                                                         rectangle_length=model.plate.length,
+                                                         cut_outs=bounding_box_list)
     log_info("Done. Starting to create {:d} rectangular partitions on the plate part.".format(len(cells)))
     err_count = 0
     for i, cell in enumerate(cells[:-1]):

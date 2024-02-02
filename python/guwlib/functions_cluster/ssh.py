@@ -42,9 +42,9 @@ def copy_file_to_remote(local_path, remote_path, username_env_var='tubs_username
         ssh_username = os.environ[username_env_var]
         ssh_password = os.environ[password_env_var]
     except KeyError:
-        print(f"Please authorize SSH connection. Credentials are requested with a dialog box. (You can also set the "
-              f"username and password as user environment variables {username_env_var} and {password_env_var} to "
-              f"not get asked again next time.)")
+        print(f"Please authorize SSH connection for file upload to {hostname}. Credentials are requested with a "
+              f"dialog box.\n(You can also set the username and password as user environment variables "
+              f"{username_env_var} and {password_env_var} to not get asked again next time.)")
         ssh_username, ssh_password = prompt_for_credentials()
 
     # Create an SSH client
@@ -91,9 +91,9 @@ def copy_file_from_remote(remote_path, local_path, username_env_var='tubs_userna
         ssh_username = os.environ[username_env_var]
         ssh_password = os.environ[password_env_var]
     except KeyError:
-        print(f"Please authorize SSH connection. Credentials are requested with a dialog box. (You can also set the "
-              f"username and password as user environment variables {username_env_var} and {password_env_var} to "
-              f"not get asked again next time.)")
+        print(f"Please authorize SSH connection for file download from {hostname}. Credentials are requested with a "
+              f"dialog box.\n(You can also set the username and password as user environment variables "
+              f"{username_env_var} and {password_env_var} to not get asked again next time.)")
         ssh_username, ssh_password = prompt_for_credentials()
 
     # Create an SSH client
@@ -145,9 +145,9 @@ def run_commands_on_remote(command, username_env_var='tubs_username', password_e
         ssh_username = os.environ[username_env_var]
         ssh_password = os.environ[password_env_var]
     except KeyError:
-        print(f"Please authorize SSH connection. Credentials are requested with a dialog box. (You can also set the "
-              f"username and password as user environment variables {username_env_var} and {password_env_var} to "
-              f"not get asked again next time.)")
+        print(f"Please authorize SSH connection to {hostname} for sending command '{command}'. Credentials are "
+              f"requested with a dialog box.\n(You can also set the username and password as user environment "
+              f"variables {username_env_var} and {password_env_var} to not get asked again next time.)")
         ssh_username, ssh_password = prompt_for_credentials()
 
     # Create an SSH client
