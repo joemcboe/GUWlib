@@ -17,7 +17,7 @@ Basic external requirements for solving FE models locally:
 - [ ] ABAQUS 2019 (or later)
 - [ ] Python 3 and [NumPy](https://numpy.org/) (for batch processing handlers)
 
-The project includes additional functions for batch processing of FE models on the [Phoenix cluster TU Braunschweig](https://doku.rz.tu-bs.de/doku.php?id=hlr:phoenix). In order to use these, additional dependencies must be satisfied:
+The project includes additional functions for batch processing of FE models on the [TUBS Phoenix cluster](https://doku.rz.tu-bs.de/doku.php?id=hlr:phoenix), which require additional dependencies:
 - [ ] user account for the Phoenix cluster, (VPN) connection to the TU BS network
 - [ ] Python packages: [paramiko](https://www.paramiko.org/) (for SSH connections)
 
