@@ -28,9 +28,8 @@ This project is tested on Windows 10 and CentOS Linux 7.3 with ABAQUS 2019 Acade
 ## Example usage
 <!--- Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README. --->
 
-```
+```python
 from guwlib import *
-
 
 class Model(FEModel):
     def setup_parameters(self):
@@ -42,14 +41,11 @@ class Model(FEModel):
 
         # setup plate
         aluminum = IsotropicMaterial(material_name='AluminumAlloy1100')
-        self.plate = IsotropicRectangularPlate(material=aluminum, thickness=3e-3,
-                                               width=0.2, length=0.2)
+        self.plate = IsotropicRectangularPlate(material=aluminum, thickness=3e-3, width=0.2, length=0.2)
 
         # setup two transducers
-        self.transducers.append(CircularTransducer(position_x=x, position_y=y, position_z='symmetric',
-                                                   diameter=16e-3))
-        self.transducers.append(CircularTransducer(position_x=x, position_y=y, position_z='symmetric',
-                                                   diameter=16e-3))
+        self.transducers.append(CircularTransducer(position_x=x, position_y=y, position_z='symmetric', diameter=16e-3))
+        self.transducers.append(CircularTransducer(position_x=x, position_y=y, position_z='symmetric', diameter=16e-3))
 
         # setup defects
         self.defects = [Crack(position_x=2e-2, position_y=4e-2, length=10e-3, angle_degrees=0),
@@ -58,9 +54,7 @@ class Model(FEModel):
         # set up the time / loading information (burst on 1st transducer)
         burst = Burst(center_frequency=100e3, n_cycles=3)
         transducer_signals = [burst, None]
-        self.load_cases = [LoadCase(name='control_step', duration=0.25e-3,
-                                    transducer_signals=transducer_signals, output_request='field')]
-
+        self.load_cases = [LoadCase(name='control_step', duration=0.25e-3, transducer_signals=transducer_signals, output_request='field')]
 
 if __name__ == "__main__":
     Model().setup_in_abaqus()
