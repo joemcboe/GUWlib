@@ -1,3 +1,6 @@
+from guwlib.guw_objects import Signal
+
+
 class LoadCase:
     """
     Container for loading data / transducer excitation signals.
@@ -9,7 +12,7 @@ class LoadCase:
         """
         :param str name: Name of this load case.
         :param float duration: Total ABAQUS simulation duration for this load case.
-        :param list[Signal, None] transducer_signals: A list, containing the excitation signal for each transducer, in
+        :param list[Signal | None] transducer_signals: A list, containing the excitation signal for each transducer, in
             the same order as the transducers in ``FEModel.transducers``. The length of this list must be equal to the
             number of transducers used in the model, i.e. ``len(LoadCase.transducer_signals)`` !=
             ``len(FEModel.transducers)``. If a transducer is not excited in this load case, set the corresponding list
