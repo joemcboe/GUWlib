@@ -17,7 +17,7 @@ Basic external requirements for solving FE models locally:
 - [ ] ABAQUS 2019 (or later)
 - [ ] Python 3 and [NumPy](https://numpy.org/) (for batch processing handlers)
 
-The project includes additional functions for batch processing of FE models on the [TUBS Phoenix cluster](https://doku.rz.tu-bs.de/doku.php?id=hlr:phoenix), which require additional dependencies:
+The project includes additional functions for batch processing of FE models on the [TUBS Phoenix cluster](https://doku.rz.tu-bs.de/doku.php?id=hlr:phoenix), which requires additional dependencies:
 - [ ] user account for the Phoenix cluster, (VPN) connection to the TU BS network
 - [ ] Python packages: [paramiko](https://www.paramiko.org/) (for SSH connections)
 
@@ -77,7 +77,7 @@ The modular structure should make it easy to add features. A few inspirations fo
     to ``C3D8R``.
 - [ ] Option to implement the excitation as a prescribed nodal displacement (currently, excitation is always realized as a concentrated force).
 - [ ] Options to specify the interval with which field output is written to the output database. Currently, 
-    field output is written at intervals of 10 * maximum theoretical time increment.
+    field output is written at intervals of 10 * max time increment.
 - [ ] More options to request field output for a load case. Currently, users can only request field output for the 
     top surface of the plate, but not for e.g. the whole plate.
 - [ ] Anisotropic material for the plate.
