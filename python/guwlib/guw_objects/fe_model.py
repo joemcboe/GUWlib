@@ -9,8 +9,8 @@ class FEModel:
     """
     Instances of this class act as a container for all simulation parameters.
 
-    An FEModel instance carries general simulation parameters (e.g. discretization level) as well as spatial and
-    time/loading data (e.g. plate, defects, transducers, excitation signals to be used in the simulation).
+    An :class:`FEModel` instance carries general simulation parameters (e.g. discretization level) as well as spatial
+    and time/loading data (e.g. plate, defects, transducers, excitation signals to be used in the simulation).
 
     To create a valid GUWlib model, you have to instantiate an :class:`FEModel` object in your python script.
     Override its :meth:`setup_parameters` method to define your simulation by setting its variables. To set the

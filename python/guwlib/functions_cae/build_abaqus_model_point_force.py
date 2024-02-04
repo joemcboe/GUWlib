@@ -50,7 +50,6 @@ def build_abaqus_model_point_force(model):
 
     # create the defects geometry
     bounding_box_list = []
-    log_txt = ""
     for i, defect in enumerate(model.defects):
         defect.set_identifiers(unique_id=i + 1)
         if isinstance(defect, Hole):
@@ -64,6 +63,7 @@ def build_abaqus_model_point_force(model):
                                                  element_size=element_size_in_plane)
             bounding_box_list.append(bounding_box)
 
+    log_txt = ', '.join([type(defect).__name__ for defect in model.defects])
     log_info("Added {} defect(s):\n{}".format(len(model.defects), log_txt))
 
     # create the transducer geometry
@@ -136,6 +136,12 @@ def build_abaqus_model_point_force(model):
                                      previous_step_name='Initial')
 
         # create all amplitudes and loads
+        if len(step.transducer_signals) != len(model.transducers):
+            log_warning("In loadcase {}, the number of specified transducer "
+                        "signals ({:d}) does not match the number of transducers ({:d}). "
+                        "Aborting.".format(step_name, len(step.transducer_signals), len(model.transducers)))
+            raise ValueError("Wrong size of loadcase transducer signals.")
+
         for j, transducer_signal in enumerate(step.transducer_signals):
             if transducer_signal is not None:
                 add_transducer_concentrated_force(step_name=step_name,

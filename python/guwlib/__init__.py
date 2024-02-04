@@ -1,4 +1,4 @@
-from guwlib.fe_model import FEModel
+from guwlib.guw_objects.fe_model import FEModel
 from guwlib.guw_objects.defects import *
 from guwlib.guw_objects.loadcase import *
 from guwlib.guw_objects.material import *

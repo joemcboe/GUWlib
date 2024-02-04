@@ -21,7 +21,7 @@ class Model(FEModel):
         aluminum = IsotropicMaterial(material_name='AluminumAlloy1100')
 
         phased_array = []
-        phi = np.linspace(0, 2 * np.pi, PHASED_ARRAY_N_ELEMENTS)
+        phi = np.linspace(0, 2 * np.pi, PHASED_ARRAY_N_ELEMENTS + 1)
         pos_x = PLATE_WIDTH / 2 + PHASED_ARRAY_RADIUS * np.cos(phi[0:-1])
         pos_y = PLATE_LENGTH / 2 + PHASED_ARRAY_RADIUS * np.sin(phi[0:-1])
         position_z_values = ['top', 'bottom', 'symmetric', 'asymmetric']
@@ -37,18 +37,22 @@ class Model(FEModel):
                                                width=PLATE_WIDTH,
                                                length=PLATE_LENGTH)
 
-        self.defects = [Crack(position_x=2e-2, position_y=4e-2, length=10e-3, angle_degrees=0),
+        self.defects = [Crack(position_x=2e-2, position_y=4e-2, length=10e-3, angle_degrees=12),
                         Hole(position_x=15e-2, position_y=3e-2, diameter=12e-3)]
         self.transducers = phased_array
 
         # set up the time / loading information ------------------------------------------------------------------------
-        burst = Burst(center_frequency=200e3, n_cycles=3)
-        transducer_signals = [burst, None, None, None]
-        control_step_0 = LoadCase(name='burst_td0',
-                                  duration=0.1e-3,
-                                  transducer_signals=transducer_signals,
-                                  output_request='field')
-        self.load_cases = [control_step_0]
+        burst = Burst(center_frequency=50e3, n_cycles=3)
+        step_0 = LoadCase(name='burst_asymmetric',
+                          duration=0.1e-3,
+                          transducer_signals=[None, None, None, burst],
+                          output_request='field')
+        step_1 = LoadCase(name='burst_symmetric',
+                          duration=0.1e-3,
+                          transducer_signals=[None, None, burst, None],
+                          output_request='field')
+        self.load_cases = [step_0, step_1]
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 

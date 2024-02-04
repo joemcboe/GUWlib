@@ -144,14 +144,15 @@ def download_results(remote_guwlib_path, hostname, port):
 
     except FileNotFoundError:
         print(f"File {remote_guwlib_path}/{list_txt_file} is not available on the remote machine. Make"
-              f"sure that you specified the correct working_dir and that you have already extracted"
-              f"results to .NPZ files. This script is for downloading only.")
+              f"sure that you specified the correct remote path to guwlib and that you have already extracted"
+              f"results to .NPZ files. This function is for downloading only.")
 
     # for each line in the converted_files.txt, extract the remote paths and add them to a list
     file_paths = []
     with open(list_txt_file, 'r') as file:
         for line in file:
             file_paths.append(line.strip())
+    os.remove(list_txt_file)
 
     # for each file in the list, download the file from the file path from src to dst
     for file_path in file_paths:
