@@ -17,7 +17,8 @@ download = False
 # preprocessing and solving -------------------------------------------------------------------------------------------+
 if preprocessing:
     # model files (.PY) to process
-    model_file_paths = ['models/unit_tests/test02.py', ]
+    model_file_paths = ['models/unit_tests/test01.py',
+                        'models/unit_tests/test02.py']
 
     # SLURM parameters for preprocessing, solving, and postprocessing
     # parameters for preprocessing apply to all models, make sure that the total time (max_time) is sufficient
@@ -43,12 +44,12 @@ if preprocessing:
 if postprocessing:
     # parameters apply to the extraction process of one .ODB file each
     slurm_postprocessing = {"n_nodes": 1,
-                            "n_tasks_per_node": 10,
+                            "n_tasks_per_node": 2,
                             "partition": "standard",
-                            "max_time": "0:15:0"}
+                            "max_time": "0:5:0"}
 
     # remote location where to look for .ODB files that are ready for results extraction
-    directories_to_scan = ['results/model_02_one_lc/',]
+    directories_to_scan = ['results/', ]
 
     # call the batch function for automated result export
     extract_results(directories_to_scan=directories_to_scan, data_to_extract='history',

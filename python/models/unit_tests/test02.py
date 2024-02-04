@@ -42,13 +42,13 @@ class Model(FEModel):
         self.transducers = phased_array
 
         # set up the time / loading information ------------------------------------------------------------------------
-        burst = Burst(center_frequency=50e3, n_cycles=3)
+        burst = Burst(center_frequency=150e3, n_cycles=3)
         step_0 = LoadCase(name='burst_asymmetric',
-                          duration=0.1e-3,
+                          duration=0.2e-3,
                           transducer_signals=[None, None, None, burst],
                           output_request='field')
         step_1 = LoadCase(name='burst_symmetric',
-                          duration=0.1e-3,
+                          duration=0.2e-3,
                           transducer_signals=[None, None, burst, None],
                           output_request='field')
         self.load_cases = [step_0, step_1]

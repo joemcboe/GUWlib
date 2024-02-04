@@ -64,9 +64,9 @@ def extract_results(directories_to_scan=('results', ), data_to_extract='history'
             lowercase_files = [file.lower() for file in files]
 
             if any(file.endswith(".odb") for file in lowercase_files) and not \
-                    (any(file.endswith(".npz") for file in lowercase_files) or
-                     any(file.endswith(".pkl") for file in lowercase_files)):
-                # if directory contains *.odb files but no *.pkl.gz files
+                    (any(file.endswith(data_to_extract + ".npz") for file in lowercase_files) or
+                     any(file.endswith(data_to_extract + ".pkl") for file in lowercase_files)):
+                # if directory contains *.odb files but no .pkl or .npz files
                 odb_file_paths = [os.path.abspath(root) for file in files if file.lower().endswith(".odb")]
                 odb_file_names = [file for file in files if file.lower().endswith(".odb")]
                 odb_files.extend([(odb_file_paths[i], odb_file_names[i]) for i, _ in enumerate(odb_file_names)])
@@ -83,18 +83,23 @@ def extract_results(directories_to_scan=('results', ), data_to_extract='history'
         if data_to_extract == 'history':
             print(f"Extracting the history data for {odb_file_name} ...")
             helper_script_name = os.path.abspath('guwlib/functions_odb/history_export_helper.py')
-            command = f'cd {odb_file_path} & abaqus cae noGUI={helper_script_name} -- {odb_file_name}'
-            proc = subprocess.Popen(command, shell=True)
-            proc.wait()
-            npz_file = os.path.join(odb_file_path, os.path.splitext(odb_file_name)[0] + '.npz')
-            pkl_file = os.path.join(odb_file_path, os.path.splitext(odb_file_name)[0] + '.pkl')
-            if os.path.exists(pkl_file):
-                processed_files.append(pkl_file.replace('\\', '\\\\'))
-            elif os.path.exists(npz_file):
-                processed_files.append(npz_file.replace('\\', '\\\\'))
 
-        if data_to_extract == 'field':
-            raise NotImplementedError('Field export helper is not yet implemented.')
+        elif data_to_extract == 'field':
+            print(f"Extracting the history data for {odb_file_name} ...")
+            helper_script_name = os.path.abspath('guwlib/functions_odb/field_export_helper.py')
+
+        else:
+            raise ValueError('Specify which data to extract. Possible values are: "field" or "history".')
+
+        command = f'cd {odb_file_path} & abaqus cae noGUI={helper_script_name} -- {odb_file_name}'
+        proc = subprocess.Popen(command, shell=True)
+        proc.wait()
+        npz_file = os.path.join(odb_file_path, os.path.splitext(odb_file_name)[0] + '_' + data_to_extract + '.npz')
+        pkl_file = os.path.join(odb_file_path, os.path.splitext(odb_file_name)[0] + '_' + data_to_extract + '.pkl')
+        if os.path.exists(pkl_file):
+            processed_files.append(pkl_file.replace('\\', '\\\\'))
+        elif os.path.exists(npz_file):
+            processed_files.append(npz_file.replace('\\', '\\\\'))
 
     if processed_files:
         br = '\n'

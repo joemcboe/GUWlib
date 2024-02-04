@@ -41,11 +41,12 @@ import subprocess
 from datetime import datetime
 
 
-def find_unprocessed_odb_files(root_directory):
+def find_unprocessed_odb_files(root_directory, filename_ending):
     """
     Recursively scans the provided directory for folders that contain an .ODB file, but do not contain an .NPZ file.
 
     :param str root_directory: Path to the directory used as a root for the recursive scan.
+    :param str filename_ending: Filename ending used to decide which files are processed and which are not.
     :return: Paths to the found unprocessed .ODB files.
     :rtype: list[str]
     """
@@ -59,7 +60,7 @@ def find_unprocessed_odb_files(root_directory):
 
         # if directory contains *.ODB file but no *.NPZ file
         if (any(file.endswith(".odb") for file in lowercase_files) and
-                not any(file.endswith(".npz") for file in lowercase_files)):
+                not any(file.endswith("_{}.npz".format(filename_ending)) for file in lowercase_files)):
             odb_file_path = [os.path.join(root, file) for file in files if file.lower().endswith(".odb")]
             file_paths.extend(odb_file_path)
 
@@ -96,7 +97,7 @@ if __name__ == "__main__":
     # scan the provided directories for unprocessed .ODB files ---------------------------------------------------------
     odb_paths = []
     for dir_to_scan in dirs_to_scan:
-        odb_paths.extend(find_unprocessed_odb_files(dir_to_scan))
+        odb_paths.extend(find_unprocessed_odb_files(root_directory=dir_to_scan, filename_ending=data_to_extract))
     print(f"Found {len(odb_paths)} ODB files that have not been post processed ...")
 
     job_file_paths = []
@@ -105,25 +106,29 @@ if __name__ == "__main__":
     # for each unprocessed .ODB file, write a SLURM job file
     if data_to_extract == 'history':
         helper_script_file = os.path.join('guwlib', 'functions_odb', 'history_export_helper.py')
-        for odb_path in odb_paths:
-            job_file_name = os.path.join(os.path.dirname(odb_path), 'post.job')
-            odb_file_name = os.path.basename(odb_path)
-            generate_slurm_job(output_file_path=job_file_name,
-                               partition=partition,
-                               n_nodes=1,
-                               n_tasks_per_node=n_tasks,
-                               max_time=max_time,
-                               slurm_job_name=odb_file_name,
-                               working_dir=os.getcwd(),
-                               command=f"abaqus cae noGUI={helper_script_file} -- {odb_path}")
-            job_file_paths.append(os.path.abspath(job_file_name))
 
-            npz_file_name = os.path.join(os.path.dirname(odb_path), os.path.splitext(odb_file_name)[0] + '.npz')
-            npz_file_paths.append(npz_file_name)
-
-    if data_to_extract == 'field':
+    elif data_to_extract == 'field':
         helper_script_file = os.path.join('guwlib', 'functions_odb', 'field_export_helper.py')
-        raise NotImplementedError('Field export helper function not yet implemented.')
+        
+    else:
+        raise ValueError('Specify which data to extract. Possible values are: "field" or "history".')
+
+    for odb_path in odb_paths:
+        job_file_name = os.path.join(os.path.dirname(odb_path), 'post.job')
+        odb_file_name = os.path.basename(odb_path)
+        generate_slurm_job(output_file_path=job_file_name,
+                           partition=partition,
+                           n_nodes=1,
+                           n_tasks_per_node=n_tasks,
+                           max_time=max_time,
+                           slurm_job_name=odb_file_name,
+                           working_dir=os.getcwd(),
+                           command=f"abaqus cae noGUI={helper_script_file} -- {odb_path}")
+        job_file_paths.append(os.path.abspath(job_file_name))
+
+        npz_file_name = os.path.join(os.path.dirname(odb_path),
+                                     os.path.splitext(odb_file_name)[0] + '_' + data_to_extract + '.npz')
+        npz_file_paths.append(npz_file_name)
 
     # submit the created SLURM jobs sequentially / parallel ------------------------------------------------------------
     n_chains = math.ceil(len(job_file_paths) / max_cae_instances)

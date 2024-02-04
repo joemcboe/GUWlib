@@ -84,7 +84,7 @@ def write_history_data_to_file(odb_path):
     # save the data to a compressed NumPy .NPZ file
     print("Compressing and writing data ...", file=sys.__stdout__)
     try:
-        output_file_name = '{}.npz'.format(os.path.join(directory, filename))
+        output_file_name = '{}_history.npz'.format(os.path.join(directory, filename))
         np.savez_compressed(output_file_name, **output_data)
         print("Done! Data written to {}.".format(output_file_name), file=sys.__stdout__)
     except Exception as e:
@@ -94,6 +94,7 @@ def write_history_data_to_file(odb_path):
         output_file_name = '{}.pkl'.format(os.path.join(directory, filename))
         with open(output_file_name, 'wb') as f:
             pickle.dump(output_data, f)
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
