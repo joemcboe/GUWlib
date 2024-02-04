@@ -9,7 +9,7 @@ local machine using batch helper functions.
 from guwlib.functions_batch.local import *
 
 # define your GUWlib model files (.PY) here ---------------------------------------------------------------------------+
-model_file_paths = ['models/unit_tests/model_02_one_lc.py', ]
+model_file_paths = ['models/unit_tests/test02.py', ]
 
 
 # (preprocessing and submitting) call the batch function for automated building and solving of the models -------------+

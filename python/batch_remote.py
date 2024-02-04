@@ -17,7 +17,7 @@ download = False
 # preprocessing and solving -------------------------------------------------------------------------------------------+
 if preprocessing:
     # model files (.PY) to process
-    model_file_paths = ['models/unit_tests/model_02_one_lc.py', ]
+    model_file_paths = ['models/unit_tests/test02.py', ]
 
     # SLURM parameters for preprocessing, solving, and postprocessing
     # parameters for preprocessing apply to all models, make sure that the total time (max_time) is sufficient

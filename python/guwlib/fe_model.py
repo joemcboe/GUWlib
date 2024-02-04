@@ -23,7 +23,8 @@ class FEModel:
         :ivar list[Transducer] transducers: A list with the transducers applied to the plate.
         :ivar list[Defect] defects: A list with the defects (cracks, holes, ...) of the plate.
         :ivar list[LoadCase] load_cases: A list with load cases (transducer excitation data) for the simulation.
-        :ivar float max_frequency: Specifies the maximum frequency up to which the plate will be excited.
+        :ivar float max_frequency: Specifies the maximum frequency up to which the plate will be excited. Used to
+            determine an appropriate mesh size.
         :ivar int elements_per_wavelength: Number of elements per wavelength to be used for spatial discretization
             (decisive is the smallest wavelength in range [0, max_frequency] that occurs in the plate, according to the
             dispersion data of the material), (default: 16).
