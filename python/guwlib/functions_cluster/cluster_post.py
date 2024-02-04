@@ -109,7 +109,7 @@ if __name__ == "__main__":
 
     elif data_to_extract == 'field':
         helper_script_file = os.path.join('guwlib', 'functions_odb', 'field_export_helper.py')
-        
+
     else:
         raise ValueError('Specify which data to extract. Possible values are: "field" or "history".')
 

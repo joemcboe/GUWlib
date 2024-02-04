@@ -7,12 +7,45 @@ import tkinter as tk
 from tkinter import simpledialog
 
 
+class CredentialsDialog(simpledialog.Dialog):
+    """
+    Class to open a dialog window with two edit fields for username / password.
+    """
+    def __init__(self, parent, title):
+        """
+        :param tkinter.Tk parent: Parent object.
+        :param str title: Title of the dialog.
+        :ivar tkinter.Entry e1: Edit field for username.
+        :ivar tkinter.Entry e2: Edit field for password.
+        :ivar tuple[str, str]: Tuple with (username, password).
+        """
+
+        self.result = None
+        self.e2 = None
+        self.e1 = None
+        super().__init__(parent, title)
+
+    def body(self, master):
+        tk.Label(master, text="Username:").grid(row=0)
+        tk.Label(master, text="Password:").grid(row=1)
+
+        self.e1 = tk.Entry(master)
+        self.e2 = tk.Entry(master, show="*")
+
+        self.e1.grid(row=0, column=1)
+        self.e2.grid(row=1, column=1)
+        return self.e1
+
+    def apply(self):
+        self.result = (self.e1.get(), self.e2.get())
+
+
 def get_ssh_credentials(hostname):
     """
     Retrieve SSH credentials either from user environment variables or by prompting the user
     with a tkinter GUI dialog.
 
-    :param str hostname: Name of the SSh host.
+    :param str hostname: Name of the SSH host.
     :return: Tuple (username, password)
     """
     username_env_var = 'tubs_username'
@@ -25,21 +58,11 @@ def get_ssh_credentials(hostname):
         print(f"Please authorize SSH connection to {hostname}. Credentials are requested with a "
               f"dialog box.\n(You can also set the username and password as user environment variables "
               f"{username_env_var} and {password_env_var} to not get asked again next time.)")
-        ssh_username, ssh_password = __prompt_for_ssh_credentials()
 
-    return ssh_username, ssh_password
-
-
-def __prompt_for_ssh_credentials():
-    """
-    Prompt the user for SSH credentials using a tkinter GUI dialog.
-
-    :return: Tuple (username, password)
-    """
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
-    ssh_username = simpledialog.askstring("SSH Credentials", "Enter SSH username:")
-    ssh_password = simpledialog.askstring("SSH Credentials", "Enter SSH password:", show='*')
+        root = tk.Tk()
+        root.withdraw()
+        dialog = CredentialsDialog(root, 'Enter SSH credentials')
+        ssh_username, ssh_password = dialog.result
 
     return ssh_username, ssh_password
 

@@ -155,6 +155,7 @@ def download_results(remote_guwlib_path, hostname, port):
     os.remove(list_txt_file)
 
     # for each file in the list, download the file from the file path from src to dst
+    print("Starting to download: " + ", ".join(file_paths))
     for file_path in file_paths:
         # when copying the remote files to the local machine, flatten the directory out by one layer
         file_name = os.path.basename(file_path)
