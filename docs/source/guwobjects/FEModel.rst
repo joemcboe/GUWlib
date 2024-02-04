@@ -4,7 +4,7 @@ FEModel
 ``FEModel``
 -----------
 
-.. autoclass:: guwlib.guw_object.FEModel
+.. autoclass:: guwlib.guw_objects.FEModel
 
     **Figures:**
 
