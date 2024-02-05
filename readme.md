@@ -58,8 +58,14 @@ if __name__ == "__main__":
 
 Running this script in ABAQUS will set up the following FE model:
 
-![example fe-model geometry](docs/source/_static/minimal_example_model.png "geometry of the created FE model") ![example fe-model mesh](docs/source/_static/minimal_example_model_mesh.png "mesh of the genereated FE model")
+..
 
+    ![example fe-model geometry](docs/source/_static/minimal_example_model.png "geometry of the created FE model") ![example fe-model mesh](docs/source/_static/minimal_example_model_mesh.png "mesh of the genereated FE model")
+
+<p>
+  <img src="./docs/source/_static/minimal_example_model.png" width="49%" />
+  <img src="./docs/source/_static/minimal_example_model_mesh.png" width="49%" />
+</p>
 
 ## Installation and dependencies
 No installation required. To work with GUWlib, it is only necessary to copy this repository into a local working directory.
