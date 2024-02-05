@@ -12,7 +12,7 @@ import subprocess
 import os
 
 # specify your model file path here
-model_file = 'models/unit_tests/test03.py'
+model_file = 'models/unit_tests/minimal_example.py'
 
 
 # run ABAQUS/CAE on the model.py file ----------------

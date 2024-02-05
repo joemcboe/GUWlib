@@ -26,7 +26,7 @@ from guwlib import *
 class Model(FEModel):
     def setup_parameters(self):
         # basic simulation parameters
-        self.max_frequency = 300e3
+        self.max_frequency = 100e3
         self.elements_per_wavelength = 16
         self.elements_in_thickness_direction = 8
         self.model_approach = 'point_force'
@@ -35,13 +35,17 @@ class Model(FEModel):
         aluminum = IsotropicMaterial(material_name='AluminumAlloy1100')
         self.plate = IsotropicRectangularPlate(material=aluminum, thickness=3e-3, width=0.2, length=0.2)
 
+        # setup plate
+        aluminum = IsotropicMaterial(material_name='AluminumAlloy1100')
+        self.plate = IsotropicRectangularPlate(material=aluminum, thickness=3e-3, width=100e-3, length=100e-3)
+
         # setup two transducers
-        self.transducers.append(CircularTransducer(position_x=x, position_y=y, position_z='symmetric', diameter=16e-3))
-        self.transducers.append(CircularTransducer(position_x=x, position_y=y, position_z='symmetric', diameter=16e-3))
+        self.transducers.append(CircularTransducer(position_x=20e-3, position_y=50e-3, position_z='symmetric', diameter=16e-3))
+        self.transducers.append(CircularTransducer(position_x=80e-3, position_y=50e-3, position_z='symmetric', diameter=16e-3))
 
         # setup defects
-        self.defects = [Crack(position_x=2e-2, position_y=4e-2, length=10e-3, angle_degrees=0),
-                        Hole(position_x=15e-2, position_y=3e-2, diameter=12e-3)]
+        self.defects = [Crack(position_x=50e-3, position_y=75e-3, length=15e-3, angle_degrees=12),
+                        Hole(position_x=60e-3, position_y=30e-3, diameter=8e-3)]
 
         # set up the time / loading information (burst on 1st transducer)
         burst = Burst(center_frequency=100e3, n_cycles=3)
@@ -52,7 +56,9 @@ if __name__ == "__main__":
     Model().setup_in_abaqus()
 ```
 
-Running this script in ABAQUS will setup the following FE model:
+Running this script in ABAQUS will set up the following FE model:
+
+![example fe-model geometry](docs/source/_static/minimal_example_model.png "geometry of the created FE model") ![example fe-model mesh](docs/source/_static/minimal_example_model_mesh.png "mesh of the genereated FE model")
 
 
 ## Installation and dependencies
