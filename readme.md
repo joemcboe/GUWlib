@@ -59,8 +59,8 @@ if __name__ == "__main__":
 Running this script in ABAQUS will set up the following FE model:
 
 <p>
-  <img src="./docs/source/_static/minimal_example_model.png" width="300"  />
-  <img src="./docs/source/_static/minimal_example_model_mesh.png" width="300" />
+  <img src="./docs/source/_static/minimal_example_model.png" width="500"  />
+  <img src="./docs/source/_static/minimal_example_model_mesh.png" width="500" />
 </p>
 
 ## Installation and dependencies
