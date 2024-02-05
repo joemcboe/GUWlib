@@ -25,7 +25,7 @@ autoapi_python_class_content = 'both'
 autodoc_member_order = 'groupwise'
 
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx_togglebutton',
-              'custom_directives', 'autoapi.extension']
+              'custom_directives', 'sphinx.ext.autosectionlabel']    #'autoapi.extension']
 napoleon_use_ivar = True
 autodoc_typehints = "none"
 

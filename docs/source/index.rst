@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 =============================================================================
-GUWlib - A python module for Guided Ultrasonic Wave simulation in thin plates
+GUWlib - Python package for Guided Ultrasonic Wave simulation with ABAQUS
 =============================================================================
 
 
@@ -18,14 +18,9 @@ Simulations can be defined by simple Python scripts, which set the
 geometry and loading parameters. These scripts can then be run in
 ABAQUS/CAE to generate the FE model.
 
-..
-   |pic1| --> |pic2|
+.. image:: _static/overview_index.svg
+   :width: 100%
 
-   .. |pic1| image:: _static/testpic.png
-      :width: 45%
-
-   .. |pic2| image:: _static/testpic.png
-      :width: 45%
 
 The ABAQUS `scripting interface
 <https://classes.engineering.wustl.edu/2009/spring/mase5513/abaqus/docs/v6.6/books/cmd/default.htm?startat=pt02ch04.html>`_
@@ -110,14 +105,6 @@ Content
    :caption: Examples
 
    examples/first
-
-
-
-
-
-
-
-
 
 
 Indices and tables

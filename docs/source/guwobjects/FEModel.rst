@@ -6,8 +6,6 @@ FEModel
 
 .. autoclass:: guwlib.FEModel
 
-    **Figures:**
-
 
     **Methods:**
 

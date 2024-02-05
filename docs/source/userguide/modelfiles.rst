@@ -1,5 +1,5 @@
-Defining models
-================
+Writing a model script
+======================
 
 
 Reviewing model files
