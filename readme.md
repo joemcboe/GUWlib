@@ -55,9 +55,17 @@ if __name__ == "__main__":
 
 Running this script in ABAQUS will set up the following FE model of a 100 x 100 x 3 mm aluminum plate:
 
+<!---
 <p>
   <img src="./docs/source/_static/minimal_example_model.png" width="500"  />
   <img src="./docs/source/_static/minimal_example_model_mesh.png" width="500" />
+</p>
+--->
+
+
+<p>
+  <img src="./docs/source/_static/gitlab_example.png" width="500"  />
+  <img src="./docs/source/_static/gitlab_example_animation.gif" width="500" />
 </p>
 
 Solving in ABAQUS yields the following result (excitation of ≈ 100 kHz symmetric Lamb waves):
