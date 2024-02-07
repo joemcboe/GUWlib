@@ -2,6 +2,9 @@
 *.pyc
 __pycache__/
 python/results/*
+python/preview_model.py
+python/batch_remote.py
+python/batch_local.py
 *.log
 *.rec
 *.job
@@ -9,9 +12,6 @@ python/results/*
 abaqusMacros.py
 python/guwlib/test.py
 python/guwlib/trash/*
-python/guwlib/functions_odb/temp.py
-python/guwlib/functions_odb/test.npz
-python/guwlib/functions_odb/testing.py
 docs/Makefile
 docs/make.bat
 docs/source/code_snippet.py

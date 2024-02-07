@@ -9,7 +9,7 @@ machine (LINUX with SLURM installed, e.g. PHOENIX HPC Cluster).
 from guwlib.functions_batch.remote import *
 
 # path to the remote location of GUWlib
-remote_guwlib_path = '/beegfs/work/<username>/GUW/python'
+remote_guwlib_path = '/beegfs/work/<username>/GUW/pythonpython'
 preprocessing = True
 postprocessing = False
 download = False
