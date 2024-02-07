@@ -20,6 +20,23 @@ Transducer
 
     **Figures:**
 
+    .. svgoverlay:: _static/point_force_sketch.svg
+        :path: ..
+        :width: 100%
+        :font-size: 0.70em
+		
+    *Left: illustration of* ``Circular transducer`` *parameters (* ``point_force`` *), right: example ABAQUS model*
+ 
+ 
+    .. svgoverlay:: _static/point_force_z_positions.svg
+        :path: ..
+        :width: 100%
+        :font-size: 0.70em
+
+    *Illustration of the* ``position_z`` *parameter*
+	
+	
+
 ..
     **Methods:**
 
