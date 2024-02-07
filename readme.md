@@ -64,7 +64,7 @@ Running this script in ABAQUS will set up the following FE model of a 100 x 100 
 
 
 <p>
-  <img src="./docs/source/_static/gitlab_example.png" width="500"  />
+  <img src="./docs/source/_static/gitlab_example_geometry.png" width="500"  />
   <img src="./docs/source/_static/gitlab_example_animation.gif" width="500" />
 </p>
 
