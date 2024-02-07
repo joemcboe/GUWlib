@@ -3,8 +3,8 @@ Setup / Installation
 
 There are two ways to use GUWlib:
 
-- on the local computer, 
-- or, for computationally intensive models, on a cluster. 
+- on the local computer
+- on a cluster (for computationally intensive models). 
 
 Based on the needs, different dependencies need to be fullfilled. The setup process for local solving and additional installation steps for solving models on a cluster are described below.
 
@@ -28,7 +28,7 @@ Setup for use on local PC
 
    .. code-block::
 
-       guwlib\
+       GUW\
        ├───docs\
        │   └───...
        └───python\
@@ -78,17 +78,23 @@ Setup for use on TU BS Phoenix Cluster
    Clone or download the `GitLab repository <https://git.rz.tu-bs.de/j.froboese/GUW>`_ to both a local working directory as well as any working directory on the Phoenix BeeGFS filesystem, i.e. the ``/work/<username>`` directory. The latter can be done as follows, for example:	
 
    - Connect to TU BS network via VPN (if not already connected).
-   - Open a terminal and connect to Phoenix: ::
+   - Open a terminal and connect to Phoenix: 
 
-     $ ssh <username>@phoenix.hlr.rz.tu-bs.de
+     .. code-block:: text
+     
+	    $ ssh <username>@phoenix.hlr.rz.tu-bs.de
 
-   - Navigate to the work directory: ::
+   - Navigate to the work directory:
 
-     [<username>@login01 ~] cd /work/<username>
+     .. code-block:: text
+	 
+        [<username>@login01 ~] cd /work/<username>
 
-   - Clone the GitLab repository: ::
+   - Clone the GitLab repository:
+   
+     .. code-block:: text
 
-     [<username>@login01 /work/<username>] git clone https://git.rz.tu-bs.de/j.froboese/GUW.git
+        [<username>@login01 /work/<username>] git clone https://git.rz.tu-bs.de/j.froboese/GUW.git
 
    The working directory of GUWlib on the Phoenix cluster would now be ``/work/<username>/GUW/python/``.
 

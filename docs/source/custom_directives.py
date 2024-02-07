@@ -1,8 +1,13 @@
 from docutils import nodes
-from docutils.parsers.rst import Directive
+from docutils.parsers.rst import Directive, directives
+from sphinx_togglebutton import Toggle
 import xml.etree.ElementTree as ET
 import re
 import os
+
+"""
+- custom directive to put SVG images with stylized text in the document (similar to PDF_TEX inkscape export)
+"""
 
 
 def get_text_from_svg(svg_file_path):
@@ -184,5 +189,10 @@ class SVGOverlayDirective(Directive):
         return [nodes.raw('', raw_html, format='html')]
 
 
+
+
 def setup(app):
     app.add_directive('svgoverlay', SVGOverlayDirective)
+
+
+

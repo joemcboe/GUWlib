@@ -11,6 +11,10 @@ details.toggle-details summary {
 	border-left: 5px solid rgba(0, 0, 0, 0.1);
 }
 
+div.document div.highlight {
+	font-size: 0.8rem;
+}
+
 .myTextStyle {
   font-family: Arial;
   font-size: 20px;

@@ -48,6 +48,7 @@ class Model(FEModel):
         burst = Burst(center_frequency=100e3, n_cycles=3)
         transducer_signals = [burst, None]
         self.load_cases = [LoadCase(name='control_step', duration=0.25e-3, transducer_signals=transducer_signals, output_request='field')]
+        
 if __name__ == "__main__":
     Model().setup_in_abaqus()
 ```

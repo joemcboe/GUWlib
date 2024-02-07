@@ -21,7 +21,7 @@ and parameters for the SLURM job. The required command line arguments of this sc
 
 Always make sure to run this script from the root directory of guwlib, otherwise the helper functions might not be
 located correctly. A summary text file with the paths to all created .NPZ files is written to enable convenient batch
-download of the processed files from the server to a client (``converted_odb_files.txt``).
+download of the processed files from the server to a client (``processed_odb_files.txt``).
 
 Example usage:
 
@@ -143,7 +143,7 @@ if __name__ == "__main__":
         last_job_id = result.stdout.split()[-1].strip()
 
     # write out the file paths to the created .NPZ files to a text file ------------------------------------------------
-    list_text_file = 'converted_odb_files.txt'
+    list_text_file = 'processed_odb_files.txt'
     archive_file(list_text_file)
     with open(list_text_file, 'w') as text_file:
         for path in npz_file_paths:

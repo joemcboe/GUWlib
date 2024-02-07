@@ -50,7 +50,7 @@ def extract_results(directories_to_scan=('results', ), data_to_extract='history'
     """
     Handles automatic batch postprocessing of .ODB files, i.e. extraction of history or field output to NumPy binary
     files (.NPZ) or Pickle files (.PKL, only fallback). The function scans the specified directories for unprocessed
-    .ODB files and call the field / history export helper in ABAQUS/CAE to process the file.
+    .ODB files and calls the field / history export helper in ABAQUS/CAE to process the file.
 
     :param tuple[str] directories_to_scan: directories (including subdirectories) to browse for unprocessed .ODB files
     :param str data_to_extract: type of data to extract ('field' or 'history')

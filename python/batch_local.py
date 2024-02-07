@@ -9,13 +9,13 @@ local machine using batch helper functions.
 from guwlib.functions_batch.local import *
 
 # define your GUWlib model files (.PY) here ---------------------------------------------------------------------------+
-model_file_paths = ['models/unit_tests/test03.py', ]
-
+model_file_paths = ['models/examples/example_01.py',
+                    'models/examples/example_02.py',
+                    'models/examples/tutorial.py', ]
 
 # (preprocessing and submitting) call the batch function for automated building and solving of the models -------------+
-# build_and_solve(model_file_paths=model_file_paths,
-#                 n_threads=1)
-
+build_and_solve(model_file_paths=model_file_paths,
+                n_threads=10)
 
 # (postprocessing) call the batch function for automated result export ------------------------------------------------+
 extract_results(directories_to_scan=('results',),

@@ -9,7 +9,7 @@ PHASED_ARRAY_N_ELEMENTS = 3
 PHASED_ARRAY_RADIUS = 0.25 * PLATE_WIDTH
 
 
-class SimpleModel(FEModel):
+class Model(FEModel):
     def setup_parameters(self):
         # basic simulation parameters ----------------------------------------------------------------------------------
         self.max_frequency = 300e3
@@ -18,7 +18,7 @@ class SimpleModel(FEModel):
         self.model_approach = 'point_force'
 
         # setup plate, defects and transducers -------------------------------------------------------------------------
-        aluminum = Material(material_type='isotropic', material_name='AluminumAlloy1100')
+        aluminum = IsotropicMaterial(material_name='AluminumAlloy1100')
 
         phased_array = []
         phi = np.linspace(0, 2 * np.pi, PHASED_ARRAY_N_ELEMENTS + 1)
@@ -56,7 +56,8 @@ class SimpleModel(FEModel):
                                     transducer_signals=transducer_signals_2,
                                     output_request='history')]
 
+
 # ----------------------------------------------------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    SimpleModel().setup_in_abaqus()
+    Model().setup_in_abaqus()

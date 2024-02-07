@@ -9,29 +9,30 @@ machine (LINUX with SLURM installed, e.g. PHOENIX HPC Cluster).
 from guwlib.functions_batch.remote import *
 
 # path to the remote location of GUWlib
-remote_guwlib_path = '/beegfs/work/y0106916/GUW_UNIT_TEST/GUW/python'
-preprocessing = False
+remote_guwlib_path = '/beegfs/work/<username>/GUW/python'
+preprocessing = True
 postprocessing = False
-download = True
+download = False
 
 # preprocessing and solving -------------------------------------------------------------------------------------------+
 if preprocessing:
     # model files (.PY) to process
-    model_file_paths = ['models/unit_tests/test03.py', ]
-                        #'models/unit_tests/test02.py']
+    model_file_paths = ['models/examples/example_01.py',
+                        'models/examples/example_02.py',
+                        'models/examples/tutorial.py', ]
 
     # SLURM parameters for preprocessing, solving, and postprocessing
     # parameters for preprocessing apply to all models, make sure that the total time (max_time) is sufficient
     slurm_preprocessing = {"n_nodes": 1,
-                           "n_tasks_per_node": 1,
+                           "n_tasks_per_node": 10,
                            "partition": "standard",
-                           "max_time": "0:5:0"}
+                           "max_time": "0-1:0:0"}
 
     # parameters apply to the solving process of one simulation each
     slurm_solving = {"n_nodes": 1,
-                     "n_tasks_per_node": 1,
+                     "n_tasks_per_node": 20,
                      "partition": "standard",
-                     "max_time": "0:5:0"}
+                     "max_time": "0-12:0:0"}
 
     # call the batch function to upload the model files, initiate automated preprocessing and solving
     build_and_solve(model_files_local=model_file_paths,
@@ -44,15 +45,15 @@ if preprocessing:
 if postprocessing:
     # parameters apply to the extraction process of one .ODB file each
     slurm_postprocessing = {"n_nodes": 1,
-                            "n_tasks_per_node": 1,
+                            "n_tasks_per_node": 10,
                             "partition": "standard",
-                            "max_time": "0:5:0"}
+                            "max_time": "0:10:0"}
 
     # remote location where to look for .ODB files that are ready for results extraction
     directories_to_scan = ['results/', ]
 
     # data to extract (field or history)
-    data_to_extract = 'field'
+    data_to_extract = 'history'
 
     # call the batch function for automated result export
     extract_results(directories_to_scan=directories_to_scan, data_to_extract=data_to_extract,
@@ -61,8 +62,6 @@ if postprocessing:
     print("Make sure to check the status of the current post-processing job and download the results "
           "after the job is completed.")
 
-
 # downloading results -------------------------------------------------------------------------------------------------+
 if download:
     download_results(remote_guwlib_path=remote_guwlib_path, hostname='phoenix.hlr.rz.tu-bs.de', port=22)
-

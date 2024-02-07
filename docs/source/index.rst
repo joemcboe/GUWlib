@@ -77,7 +77,7 @@ Content
 
 .. toctree::
    :maxdepth: 1
-   :caption: Objects
+   :caption: Components
 
    guwobjects/FEModel
    guwobjects/Plate
@@ -100,11 +100,12 @@ Content
       autoapi/guwlib/guw_objects/signal/index
 
 
-.. toctree::
-   :maxdepth: 1
-   :caption: Examples
+..
+	.. toctree::
+	   :maxdepth: 1
+	   :caption: Examples
 
-   examples/first
+	   examples/first
 
 
 Indices and tables

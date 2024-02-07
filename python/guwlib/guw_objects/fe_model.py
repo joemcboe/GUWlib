@@ -76,6 +76,7 @@ class FEModel:
             self.__make_output_directory()
 
         if self.model_approach == 'piezo_electric':
+            # unreachable
             from guwlib.functions_cae.build_abaqus_model_piezo_electric import build_abaqus_model_piezo_electric
             build_abaqus_model_piezo_electric(model=self)
 
@@ -123,6 +124,9 @@ class FEModel:
         """
         if self.courant_number <= 0 or self.courant_number > 1.0:
             self.courant_number = 0.5
+
+        if not self.model_approach == 'point_force':
+            raise NotImplementedError("Only 'point_force' modelling approach is implemented.")
 
     def __make_output_directory(self):
         """

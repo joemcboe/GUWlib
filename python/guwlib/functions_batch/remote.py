@@ -8,11 +8,11 @@ def build_and_solve(model_files_local, remote_guwlib_path, cae_slurm_settings, s
                     hostname='phoenix.hlr.rz.tu-bs.de', port=22):
     """
     Wrapper for the process of uploading model files (.PY) to a remote host (e.g. Phoenix Cluster) and initiating
-    the preprocessing and solving pipeline by calling the 'cluster_pre.py' script on the remote machine.
+    the preprocessing and solving pipeline by calling the ``cluster_pre.py`` script on the remote machine.
 
     Data exchange between client and host is established via Secure Shell and respective command line arguments
-    to the 'cluster_pre.py' script. The host (e.g. Phoenix Cluster) is expected to have SLURM resource manager
-    installed, has to be available via SSH, and the guwlib python modules have to be available at remote_guwlib_path.
+    to the ``cluster_pre.py`` script. The host (e.g. Phoenix Cluster) is expected to have SLURM resource manager
+    installed, has to be available via SSH, and guwlib python modules have to be available at ``remote_guwlib_path``.
 
     :param list[str] model_files_local: List of the model (.PY) files to upload and process on the cluster.
     :param str remote_guwlib_path: Path to the directory that contains the guwlib module on the remote machine.
@@ -48,14 +48,14 @@ def build_and_solve(model_files_local, remote_guwlib_path, cae_slurm_settings, s
                                             for model_file in model_files_local]) + ']"')
     args = (f"{model_files_remote} {int(solver_n_nodes)} {int(solver_n_tasks_per_node)} "
             f"{solver_partition} {solver_max_time}")
-    job_file_name = 'temp_preproc.job'
+    job_file_name = 'preproc.job'
 
     generate_slurm_job(output_file_path=job_file_name,
                        partition=cae_partition,
                        n_nodes=cae_n_nodes,
                        n_tasks_per_node=cae_n_tasks_per_node,
                        max_time=cae_max_time,
-                       slurm_job_name='PREPROC',
+                       slurm_job_name='preproc',
                        working_dir=remote_guwlib_path,
                        command=f"python3.9 guwlib/functions_cluster/cluster_pre.py {args}",
                        modules_to_load=("python/3.9.7", "software/abaqus/abaqus_2019"))
@@ -72,14 +72,14 @@ def extract_results(directories_to_scan, data_to_extract, remote_guwlib_path, ca
                     max_parallel_cae_instances, hostname='phoenix.hlr.rz.tu-bs.de', port=22):
     """
     Wrapper for the process of converting or extracting field / history data from .ODB files to .NPZ files at the
-    specified locations on a remote host by calling the 'cluster_post.py' script on the remote machine.
+    specified locations on a remote host by calling the ``cluster_post.py`` script on the remote machine.
 
     Data exchange between client and host is established via Secure Shell and respective command line arguments
-    to the 'cluster_post.py' script. The host (e.g. Phoenix Cluster) is expected to have SLURM resource manager
-    installed, has to be available via SSH, and the guwlib python modules have to be available at remote_guwlib_path.
+    to the ``cluster_post.py`` script. The host (e.g. Phoenix Cluster) is expected to have SLURM resource manager
+    installed, has to be available via SSH, and guwlib python modules have to be available at ``remote_guwlib_path``.
 
     :param list[str] directories_to_scan: dirs to scan for unprocessed .ODB files (relative to remote_guwlib_path)
-    :param str data_to_extract: type of data to extract ('field' or 'history')
+    :param str data_to_extract: type of data to extract (``'field'`` or ``'history'``)
     :param int max_parallel_cae_instances: Maximum number of CAE instances to run simultaneously during extraction.
     :param str remote_guwlib_path: Path to the directory that contains the guwlib module on the remote machine.
     :param dict cae_slurm_settings: SLURM settings for ABAQUS/CAE which is used to read in .ODB files.
@@ -102,13 +102,13 @@ def extract_results(directories_to_scan, data_to_extract, remote_guwlib_path, ca
     working_dir = remote_guwlib_path
 
     # generate a job file
-    job_file_name = 'temp_postproc.job'
+    job_file_name = 'postproc.job'
     generate_slurm_job(output_file_path=job_file_name,
                        partition='standard',
                        n_nodes=1,
                        n_tasks_per_node=1,
                        max_time='0:5:0',
-                       slurm_job_name='POSTPROC',
+                       slurm_job_name='postproc',
                        command=f"python3.9 guwlib/functions_cluster/cluster_post.py {args}",
                        modules_to_load=("python/3.9.7",),
                        working_dir=working_dir)
@@ -121,10 +121,10 @@ def extract_results(directories_to_scan, data_to_extract, remote_guwlib_path, ca
     os.remove(job_file_name)
 
 
-def download_results(remote_guwlib_path, hostname, port):
+def download_results(remote_guwlib_path, hostname='phoenix.hlr.rz.tu-bs.de', port=22):
     """
     Wrapper for the process of downloading previously extracted results to the local machine. During the extraction
-    process, a .TXT file with filepaths of all generated .NPZ files is placed at the location of remote_guwlib_path.
+    process, a .TXT file with filepaths of all generated .NPZ files is placed at the location of ``remote_guwlib_path``.
 
     :param str remote_guwlib_path: Path to the directory that contains the guwlib module on the remote machine.
     :param str hostname: Name of the SSH host.
