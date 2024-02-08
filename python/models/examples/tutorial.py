@@ -1,3 +1,8 @@
+"""
+Model script from the tutorial in the documentation ("Writing a model script").
+"""
+
+
 from guwlib import *
 import numpy as np
 

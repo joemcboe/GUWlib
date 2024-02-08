@@ -18,7 +18,7 @@ class MyModel(FEModel):
         self.model_approach = 'point_force'
 
         # setup plate, defects and transducers -------------------------------------------------------------------------
-        aluminum = Material(material_type='isotropic', material_name='AluminumAlloy1100')
+        aluminum = IsotropicMaterial(material_name='AluminumAlloy1100')
 
         self.plate = IsotropicRectangularPlate(material=aluminum,
                                                thickness=3e-3,

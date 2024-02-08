@@ -53,7 +53,7 @@ if __name__ == "__main__":
     Model().setup_in_abaqus()
 ```
 
-Running this script in ABAQUS will set up the following FE model of a 100 x 100 x 3 mm aluminum plate:
+Running this script in ABAQUS will set up a FE model of a 200 x 200 x 3 mm aluminum plate with a through-hole, a crack as well as two transducers. The first transducer excites ≈ 180 kHz antisymmetric Lamb waves.
 
 <!---
 <p>
@@ -68,7 +68,6 @@ Running this script in ABAQUS will set up the following FE model of a 100 x 100 
   <img src="./docs/source/_static/gitlab_example_animation.gif" width="500" />
 </p>
 
-Solving in ABAQUS yields the following result (excitation of ≈ 100 kHz symmetric Lamb waves):
 
 
 ## Installation and dependencies
