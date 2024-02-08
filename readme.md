@@ -53,7 +53,7 @@ if __name__ == "__main__":
     Model().setup_in_abaqus()
 ```
 
-Running this script in ABAQUS will set up a FE model of a 200 x 200 x 3 mm aluminum plate with a through-hole, a crack as well as two transducers. The first transducer excites ≈ 180 kHz antisymmetric Lamb waves.
+Running this script in ABAQUS will set up a FE model of a 200 x 200 x 3 mm aluminum plate with a through-hole, a crack as well as two transducers. The first transducer excites ≈ 180 kHz antisymmetric Lamb waves. Field output is requested for the top surface of the plate. The created ABAQUS part and the time displacement history animation are displayed below:
 
 <!---
 <p>
