@@ -18,8 +18,9 @@ Simulations can be defined by simple Python scripts, which set the
 geometry and loading parameters. These scripts can then be run in
 ABAQUS/CAE to generate the FE model.
 
-.. image:: _static/overview_index.svg
-   :width: 100%
+..
+    .. image:: _static/overview_index.svg
+       :width: 100%
 
 
 The ABAQUS `scripting interface
