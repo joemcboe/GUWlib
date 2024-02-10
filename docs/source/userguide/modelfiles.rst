@@ -9,7 +9,7 @@ Objective and data
 
 The aim is to create a script that generates a :math:`400 \cdot 400 \cdot 3\;\mathrm{mm}` aluminum plate FE model with a :math:`\varnothing 20\;\mathrm{mm}` through hole in the upper right quarter of the plate and a :math:`40\;\mathrm{mm}` crack in the lower right quarter of the plate. A circular phased array with 9 transducers and a phased array radius of :math:`55\;\mathrm{mm}` is applied to the plates surfaces, as illustrated below.
 
-.. image:: ../_static/tutorial_plate_hmtl.svg
+.. image:: ../_static/tutorial_plate_html.svg
     :width: 100%
 
 The material data for 1100 aluminum alloy is as follows: the density (:math:`\rho`) is :math:`2710.0\;\mathrm{kg/m^3}`, the Young's modulus (:math:`E`) is :math:`69.0\;\mathrm{GPa}`, and the Poisson's ratio (:math:`\nu`) is :math:`0.33`. 
