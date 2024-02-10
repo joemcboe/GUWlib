@@ -3,7 +3,7 @@ Batch processing (cluster)
 
 For models that are computationally intensive, it is suitable to outsource the model generation and solving to the `Phoenix cluster <https://doku.rz.tu-bs.de/doku.php?id=hlr:phoenix>`_. Similar to the local workflow, this process can also be automated. The basic idea is to only transfer the (very small in size) model scripts from the local PC to the HPC cluster, and only download the extracted result files back to the local PC to minimize data traffic and workload on the local machine. 
 
-.. image:: ../_static/batch_remote_workflow.svg
+.. image:: ../_static/batch_remote_workflow_html.svg
     :width: 100%
 
 A simple batch processing script on the local computer is used to initiate and control the pipeline on the cluster.
@@ -128,7 +128,7 @@ The batch process of building and solving is visualized below.
 .. raw:: html
 
    <div style="text-align: center;">
-       <img src="../_static/batch_remote_pipe_2.svg" width="420px" />
+       <img src="../_static/batch_remote_pipe_2_html.svg" width="420px" />
    </div>
 
 - The :func:`~guwlib.functions_batch.remote.build_and_solve()` function uploads the specified model files (.PY) as well as an initial .JOB (``preproc.job``) file to the cluster via SSH.
@@ -147,7 +147,7 @@ The process of extracting results is also visualized below.
 .. raw:: html
 
    <div style="text-align: center;">
-       <img src="../_static/batch_remote_pipe_extract.svg" width="420px" />
+       <img src="../_static/batch_remote_pipe_extract_html.svg" width="420px" />
    </div>
    
 - The :func:`~guwlib.functions_batch.remote.extract_results()` function uploads a job script (``postproc.job``) to the the cluster via SSH, calling the ``cluster_post.py`` script on the cluster and specifying a list of directories to check for unprocessed results.
