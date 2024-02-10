@@ -1,6 +1,6 @@
 """
-Example script on how to batch-process multiple model files (.PY), i.e. building, solving and exporting data on the
-local machine using batch helper functions.
+Example script on how to batch-process multiple model files (.PY), i.e. building, solving and
+exporting data on the local machine using batch helper functions.
 
 :Usage:
     1. Specify the paths to the GUWlib model files (.PY) in the 'model_file_paths' list.
@@ -8,15 +8,16 @@ local machine using batch helper functions.
 """
 from guwlib.functions_batch.local import *
 
-# define your GUWlib model files (.PY) here ---------------------------------------------------------------------------+
+# define your GUWlib model files (.PY) here -------------------------------------------------+
 model_file_paths = ['models/examples/example_01.py',
                     'models/examples/example_02.py',
                     'models/examples/tutorial.py', ]
 
-# (preprocessing and submitting) call the batch function for automated building and solving of the models -------------+
+# (preprocessing and submitting) call the batch function for automated building and solving -+
+# of the models
 build_and_solve(model_file_paths=model_file_paths,
                 n_threads=10)
 
-# (postprocessing) call the batch function for automated result export ------------------------------------------------+
+# (postprocessing) call the batch function for automated result export ----------------------+
 extract_results(directories_to_scan=('results',),
                 data_to_extract='history')

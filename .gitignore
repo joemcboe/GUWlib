@@ -3,8 +3,6 @@
 __pycache__/
 python/results/*
 python/preview_model.py
-python/batch_remote.py
-python/batch_local.py
 *.log
 *.rec
 *.job

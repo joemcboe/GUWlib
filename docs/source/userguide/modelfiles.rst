@@ -53,7 +53,7 @@ We also add one line of top-level code that will be executed when we run the scr
         # self.plate = ...
         # self.defects = ...
         # self.transducers = ...
-        # self.loadcases = ...			
+        # self.loadcases = ...
     
     if __name__ == "__main__":
         Model().setup_in_abaqus()
@@ -70,7 +70,7 @@ We want our model to be discretized with 16 elements per wavelength and 8 elemen
     
     class Model(FEModel):
         def setup_parameters(self):
-            # basic simulation parameters ----------------------------------------------------------------------------------
+            # basic simulation parameters ---------------------------------------------------------
             self.max_frequency = 100e3
             self.elements_per_wavelength = 16
             self.elements_in_thickness_direction = 8
@@ -105,18 +105,19 @@ Next, we define the aluminum plate, the defects and the transducer array by sett
 
     class Model(FEModel):
         def setup_parameters(self):
-            # basic simulation parameters ----------------------------------------------------------------------------------
+            # basic simulation parameters ---------------------------------------------------------
             # ...
             # ... 
             # ...
 
-            # setup plate, defects and transducers -------------------------------------------------------------------------
+            # setup plate, defects and transducers ------------------------------------------------
             aluminum = IsotropicMaterial(material_name='AluminumAlloy1100')
-            self.plate = IsotropicRectangularPlate(material=aluminum, thickness=PLATE_THICKNESS, width=PLATE_WIDTH,
-                                                   length=PLATE_LENGTH)
-												   
-            self.defects = [Crack(position_x=300e-3, position_y=60e-3, length=40e-3, angle_degrees=95),
-                            Hole(position_x=250e-3, position_y=320e-3, diameter=20e-3)]
+            self.plate = IsotropicRectangularPlate(width=PLATE_WIDTH, length=PLATE_LENGTH,
+                                                   thickness=PLATE_THICKNESS, material=aluminum)
+
+            self.defects = [Hole(position_x=250e-3, position_y=320e-3, diameter=20e-3),
+                            Crack(position_x=300e-3, position_y=60e-3, length=40e-3,
+                                  angle_degrees=95)]
             
             phi = np.linspace(0, 2 * np.pi, PHASED_ARRAY_N_ELEMENTS + 1)
             pos_x = PLATE_WIDTH / 2 + PHASED_ARRAY_RADIUS * np.cos(phi[0:-1])
@@ -124,7 +125,7 @@ Next, we define the aluminum plate, the defects and the transducer array by sett
             
             phased_array = []
             for _, (x, y) in enumerate(zip(pos_x, pos_y)):
-            	phased_array.append(CircularTransducer(position_x=x, position_y=y,
+                phased_array.append(CircularTransducer(position_x=x, position_y=y,
                                                        position_z='asymmetric', diameter=16e-3))
             
             self.transducers = phased_array
@@ -153,18 +154,18 @@ If we wanted to study multiple load cases, we would repeat this step and simply 
 
     class Model(FEModel):
         def setup_parameters(self):
-            # basic simulation parameters ----------------------------------------------------------------------------------
+            # basic simulation parameters ---------------------------------------------------------
             self.max_frequency = 100e3
             self.elements_per_wavelength = 16
             self.elements_in_thickness_direction = 8
             self.model_approach = 'point_force'
 
-            # setup plate, defects and transducers -------------------------------------------------------------------------
+            # setup plate, defects and transducers ------------------------------------------------
             # ...
             # ... 
             # ...
 
-            # setup the time / loading information ------------------------------------------------------------------------
+            # setup the time / loading information ------------------------------------------------
             burst = Burst(center_frequency=50e3, n_cycles=3, window='hanning')
             transducer_signals = [burst, None, None, None, None, None, None, None, None]
             load_case = LoadCase(name='burst_load_case', duration=0.25e-3,
@@ -228,11 +229,13 @@ Running the tutorial.py script in ABAQUS/CAE creates the following output and ge
     
     [Info]  Added 9 nodes, representing the piezoelectric transducers.
     
-    [Info]  Generating a rectilinear partitioning strategy for the plate. This might take some time...
+    [Info]  Generating a rectilinear partitioning strategy for the plate. This might take
+            some time...
     
     [Info]  Done. Starting to create 31 rectangular partitions on the plate part.
     
-    [Warn]  13 partitions could not be created. Probably the target region was already rectangular.
+    [Warn]  13 partitions could not be created. Probably the target region was already
+            rectangular.
     
   Global seeds have been assigned.
   1382688 elements have been generated on part: plate
@@ -245,8 +248,9 @@ Running the tutorial.py script in ABAQUS/CAE creates the following output and ge
     
     [Info]  Created load case lc_0_burst_load_case with history and field output requested.
     
-    [Info]  Automatic .INP-file generation is omitted when ABAQUS is run in GUI-mode. You can create a
-            job for the last load case manually using the ABAQUS GUI or rerun this script with noGUI flag.
+    [Info]  Automatic .INP-file generation is omitted when ABAQUS is run in GUI-mode. You can
+            create a job for the last load case manually using the ABAQUS GUI or rerun this script
+            with noGUI flag.
 
 ABAQUS/CAE displays the generated model. Note that the plate, transducer and defects were created in a single part. To create an optimal hexahedral mesh, the plate is partitioned into cuboid cells. Individual transducers and defects are assigned to geometry sets as shown below. 
 

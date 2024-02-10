@@ -14,7 +14,7 @@ preprocessing = True
 postprocessing = False
 download = False
 
-# preprocessing and solving -------------------------------------------------------------------------------------------+
+# preprocessing and solving -----------------------------------------------------------------+
 if preprocessing:
     # model files (.PY) to process
     model_file_paths = ['models/examples/example_01.py',
@@ -22,7 +22,8 @@ if preprocessing:
                         'models/examples/tutorial.py', ]
 
     # SLURM parameters for preprocessing, solving, and postprocessing
-    # parameters for preprocessing apply to all models, make sure that the total time (max_time) is sufficient
+    # parameters for preprocessing apply to all models, make sure that the total time
+    # (max_time) is sufficient
     slurm_preprocessing = {"n_nodes": 1,
                            "n_tasks_per_node": 10,
                            "partition": "standard",
@@ -34,14 +35,15 @@ if preprocessing:
                      "partition": "standard",
                      "max_time": "0-12:0:0"}
 
-    # call the batch function to upload the model files, initiate automated preprocessing and solving
+    # call the batch function to upload the model files, initiate automated preprocessing
+    # and solving
     build_and_solve(model_files_local=model_file_paths,
                     remote_guwlib_path=remote_guwlib_path,
                     cae_slurm_settings=slurm_preprocessing,
                     solver_slurm_settings=slurm_solving,
                     hostname='phoenix.hlr.rz.tu-bs.de', port=22)
 
-# postprocessing ------------------------------------------------------------------------------------------------------+
+# postprocessing ----------------------------------------------------------------------------+
 if postprocessing:
     # parameters apply to the extraction process of one .ODB file each
     slurm_postprocessing = {"n_nodes": 1,
@@ -57,11 +59,13 @@ if postprocessing:
 
     # call the batch function for automated result export
     extract_results(directories_to_scan=directories_to_scan, data_to_extract=data_to_extract,
-                    remote_guwlib_path=remote_guwlib_path, cae_slurm_settings=slurm_postprocessing,
-                    max_parallel_cae_instances=5, hostname='phoenix.hlr.rz.tu-bs.de', port=22)
-    print("Make sure to check the status of the current post-processing job and download the results "
-          "after the job is completed.")
+                    remote_guwlib_path=remote_guwlib_path,
+                    cae_slurm_settings=slurm_postprocessing, max_parallel_cae_instances=5,
+                    hostname='phoenix.hlr.rz.tu-bs.de', port=22)
+    print("Make sure to check the status of the current post-processing job and download the "
+          "results after the job is completed.")
 
-# downloading results -------------------------------------------------------------------------------------------------+
+# downloading results -----------------------------------------------------------------------+
 if download:
-    download_results(remote_guwlib_path=remote_guwlib_path, hostname='phoenix.hlr.rz.tu-bs.de', port=22)
+    download_results(remote_guwlib_path=remote_guwlib_path,
+                     hostname='phoenix.hlr.rz.tu-bs.de', port=22)
