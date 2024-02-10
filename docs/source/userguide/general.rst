@@ -3,7 +3,7 @@ General workflow
 
 The general workflow when working with the Finite Element (FE) program ABAQUS (and the GUWlib package) can be broken down into the following steps:
 
-.. image:: ../_static/workflow_general_html.svg
+.. image:: ../_static/workflow_general.svg
     :width: 100%
 
 - **Preprocessing:**
