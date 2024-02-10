@@ -33,7 +33,7 @@ In the following example, the ``...GUW\python\batch_remote.py`` script is set up
 
 .. literalinclude:: ../../../python/batch_remote.py
    :language: python
-   :lines: 9-42
+   :lines: 9-44
    
 - For the stage of postprocessing (.ODB files >> ABAQUS/CAE >> .NPZ files), 10 min of computing time on the *standard* partition with 10 CPUs is allocated **for each** of the .ODB files. A maximum of 5 parallel executions of ABAQUS/CAE is specified (ABAQUS/CAE only blocks 1 token per instance).
 
@@ -43,7 +43,7 @@ In the following example, the ``...GUW\python\batch_remote.py`` script is set up
 
 .. literalinclude:: ../../../python/batch_remote.py
    :language: python
-   :lines: 44-67
+   :lines: 46-67
 
 ----------------------------------------------------------------------------------------------------------------------
   
